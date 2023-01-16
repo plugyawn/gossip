@@ -1,2 +1,2 @@
-# vajascript
-Not Java. 
+# Gossip
+Ssshh
