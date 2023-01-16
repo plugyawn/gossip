@@ -7,12 +7,19 @@
 <a href = "github.com/plugyawn/gossip"><img width="417px" height="250px" src= "https://user-images.githubusercontent.com/76529011/212722586-7861a029-53d6-4e8c-af40-5fa92dc7ddf0.png"></a>
 </div>
 
+
 -----------------------------------------
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)![Compatibility](https://img.shields.io/badge/compatible%20with-python3.6.x-blue.svg)
 
-```Gossip-lang``` is a python-compiled way for writing neat, whimsical code for your little projects. 
+```Gossip-lang``` is a python-compiled way for writing neat, whimsical code for your little projects.
+
+Requirements
+-----------------------------------------
+```Gossip-lang``` requires ```python 3.10.0``` and upwards to run; a detailed list of requirements can be found in ```requirements.txt```. We recommend creating a separate environment with a package management system like ```conda``` or (preferably) ```mamba```, although ```pipenv``` would work just fine.
 
 
+Contributors
+-----------------------------------------
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
