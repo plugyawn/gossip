@@ -15,6 +15,11 @@ class BinOp:
     right: 'AST'
 
 @dataclass
+class UnOp:
+    operator: str
+    right: 'AST'
+
+@dataclass
 class Variable:
     name: str
 
@@ -34,7 +39,7 @@ class If:
 class BoolLiteral:
     value: bool
 
-AST = NumLiteral | BinOp | Variable | Let | BoolLiteral | If
+AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If
 
 Value = Fraction
 
@@ -89,6 +94,9 @@ def eval(program: AST, environment: Mapping[str, Value] = None) -> Value:
         case BinOp("||", left, right):
             assert type(eval(left, environment) == type(eval(right, environment)) == bool)
             return eval(left, environment) or eval(right, environment)
+        
+        case UnOp("-", right):
+            return 0 - eval(right, environment)
 
         case If(cond, e1, e2):
             assert type(eval(cond, environment)) == bool
@@ -108,6 +116,9 @@ def test_eval():
     e6 = BinOp("/", e5, e4)
     e7 = BinOp("*", e1, e6)
     assert eval(e7) == Fraction(32, 5)
+
+    e8 = UnOp("-", e7)
+    assert eval(e8) == Fraction(-32, 5)
 
 def test_let_eval():
     a  = Variable("a")
