@@ -75,7 +75,7 @@ class RuntimeEnvironment():
                 left = self.eval(left, environment)
                 right = self.eval(right, environment)
                 assert type(left) == type(right) == Fraction
-                return self.eval(left) - self.eval(right)
+                return left - right
             case BinOp("*", left, right):
                 left = self.eval(left, environment)
                 right = self.eval(right, environment)
@@ -102,7 +102,6 @@ class RuntimeEnvironment():
             case BinOp(">=", left, right):
                 assert type(self.eval(left)) == type(self.eval(right))
                 return self.eval(left) >= self.eval(right)
-
             case BinOp("&&", left, right):
                 assert type(self.eval(left) == type(self.eval(right)) == bool)
                 return self.eval(left) and self.eval(right)
@@ -119,10 +118,7 @@ class RuntimeEnvironment():
                     return self.eval(e1)
                 else:
                     return self.eval(e2)
-        try: 
-            return program
-        except:
-            raise InvalidProgram(f"Invalid program: {type(program)}")
+        raise InvalidProgram(f"Runtime environment does not support program: {program}.")
 
 def test_eval():
     runtime = RuntimeEnvironment()
