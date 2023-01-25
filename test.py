@@ -54,7 +54,29 @@ def test_bool_eval():
     assert runtime.eval(e) == False
 
     e = If(BinOp("==", a, BinOp("-", b, c)), NumLiteral(1), NumLiteral(2))
+
     assert runtime.eval(e) == Fraction(1)
+
+def test_sequence_eval():
+    runtime = RuntimeEnvironment()
+    a = NumLiteral(5)
+    b = NumLiteral(6)
+    c = NumLiteral(1)
+
+    v = Variable("v")
+    w = Let(v, a, a)
+    x = Let(v, BinOp("+", v, v), a)
+
+    p = Let(v, b, b)
+    q = Let(v, BinOp("-", v, v), b) 
+
+
+    f = ASTSequence([w, x, v])
+    g = ASTSequence([p, q, v])
+
+
+    g = If(BinOp("==", a, BinOp("-", b, c)), f, g)
+
 
 
 # main
@@ -62,3 +84,4 @@ if __name__ == "__main__":
     test_eval()
     test_let_eval()
     test_bool_eval()
+    test_sequence_eval()
