@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp, ASTSequence
 
 
 class RuntimeEnvironment():
@@ -13,9 +13,9 @@ class RuntimeEnvironment():
     def __init__(self):
         self.environment = {}
 
-    def eval(self, program: AST, environment = None) -> Value:
+    def eval(self, program: AST or ASTSequence, environment = None) -> Value:
         """
-        Recursively evaluates an AST, returning a Value.
+        Recursively evaluates an AST or ASTSequence, returning a Value.
         By default, retains the environment from the runtime environment.
         However, you can pass in an environment to override this.
         """
@@ -23,16 +23,26 @@ class RuntimeEnvironment():
             self.environment = environment
         if not self.environment:
             self.environment = {}
+        
         match program:
-
 
             case NumLiteral(value):
                 return value
+
             case Variable(name):
                 if name in self.environment:
                     return self.environment[name]
                 raise InvalidProgram()
 
+            case ASTSequence(seq):
+                """
+                Special case. Evaluates all but the last element in a loop, 
+                then returns the evaluation of the last element.
+                """
+                for ast in seq[:-1]:
+                    self.eval(ast)
+
+                return self.eval(seq[-1])
 
             case Let(Variable(name), e1, e2):
                 """
