@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp, ASTSequence
-
+from utils.errors import DefinitionError
 
 class RuntimeEnvironment():
     """
@@ -32,7 +32,8 @@ class RuntimeEnvironment():
             case Variable(name):
                 if name in self.environment:
                     return self.environment[name]
-                raise InvalidProgram()
+
+                raise DefinitionError(name)
 
             case ASTSequence(seq):
                 """
