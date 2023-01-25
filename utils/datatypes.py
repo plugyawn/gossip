@@ -39,7 +39,11 @@ class If:
 class BoolLiteral:
     value: bool
 
-AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If
+@dataclass
+class ASTSequence:
+    seq: list['AST'] | list
+
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | list['AST']
 
 Value = Fraction
 
