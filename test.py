@@ -1,4 +1,14 @@
+from dataclasses import dataclass
+from fractions import Fraction
+from typing import Union, Mapping
+from core import RuntimeEnvironment
+from utils.datatypes import *
+
+
 def test_eval():
+    """
+    Tests the eval method of the runtime environment.
+    """
     runtime = RuntimeEnvironment()
     e1 = NumLiteral(2)
     e2 = NumLiteral(7)
@@ -13,6 +23,9 @@ def test_eval():
     assert runtime.eval(e8) == Fraction(-32, 5)
 
 def test_let_eval():
+    """
+    Tests the eval method of the runtime environment with the Let paradigm.
+    """
     runtime = RuntimeEnvironment()
     a  = Variable("a")
     e1 = NumLiteral(5)
@@ -25,6 +38,11 @@ def test_let_eval():
     e  = BinOp("+", Let(a, e1, e2), Let(a, e3, e2))
     assert runtime.eval(e) == 22
 
+def test_bool_eval():
+    """
+    Tests the eval method of the runtime environment with boolean expressions.
+    """
+    runtime = RuntimeEnvironment()
     a = NumLiteral(5)
     b = NumLiteral(6)
     c = NumLiteral(1)
@@ -43,3 +61,4 @@ def test_let_eval():
 if __name__ == "__main__":
     test_eval()
     test_let_eval()
+    test_bool_eval()
