@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp, ForLoop
 
 
 class RuntimeEnvironment():
@@ -115,4 +115,14 @@ class RuntimeEnvironment():
                     return self.eval(e1)
                 else:
                     return self.eval(e2)
+            
+            case ForLoop(Variable(name), val_list, stat):
+                for x in val_list:
+                    v1 = self.eval(x)
+                    for e in stat:
+                        self.eval(e, self.environment | { name: v1 })
+
+
+
+
         raise InvalidProgram(f"Runtime environment does not support program: {program}.")
