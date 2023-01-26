@@ -39,7 +39,14 @@ class If:
 class BoolLiteral:
     value: bool
 
-AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If
+@dataclass
+class ForLoop:
+    var: 'AST'
+    val_list: list['AST']
+    stat: list['AST']
+
+
+AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop 
 
 Value = Fraction
 
