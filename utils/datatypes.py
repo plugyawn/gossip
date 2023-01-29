@@ -16,6 +16,8 @@ SimType = NumType | BoolType
 class NumLiteral:
     value: Fraction
     type: SimType = NumType()
+    def __init__(self, *args):
+        self.value = Fraction(*args)
 
 @dataclass
 class BoolLiteral:
