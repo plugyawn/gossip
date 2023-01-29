@@ -33,10 +33,12 @@ class BinOp:
 class UnOp:
     operator: str
     right: 'AST'
+    type: SimType = NumType()
 
 @dataclass
 class Variable:
     name: str
+    type: Optional[SimType] = None
 
 @dataclass
 class Let:
@@ -54,7 +56,8 @@ class If:
 @dataclass
 class ASTSequence:
     seq: list['AST'] | list
+    type: Optional[SimType] = None
 
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | list['AST']
 
-Value = Fraction
+Value = Fraction | bool
