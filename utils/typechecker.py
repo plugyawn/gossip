@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from utils.datatypes import *
+from utils.errors import TypeCheckError
 
 class StaticTypeChecker:
     def __init__(self):
@@ -14,30 +15,30 @@ class StaticTypeChecker:
                 left = self.check(left)
                 right = self.check(right)
                 if left.type != NumType() or right.type != NumType():
-                    raise TypeError(NumType())
+                    raise TypeCheckError(oprtype=NumType())
                 return BinOp(op, left, right, NumType())
             
             case BinOp(op, left, right) if op in ["==", "!="]:
                 left = self.check(left)
                 right = self.check(right)
                 if (left.type != right.type):
-                    raise TypeError(message="The operands do not have the same type.")
-                elif(left.type != NumType()) or (left.type != BoolType()):
-                    raise TypeError(message="The operands should be either NumType or BoolType.")
+                    raise TypeCheckError(message="The operands do not have the same type.")
+                elif(left.type == NumType()) or (left.type == BoolType()):
+                    return BinOp(op, left, right, BoolType())                    
                 else:
-                    return BinOp(op, left, right, BoolType())
+                    raise TypeCheckError(message="The operands should be either NumType or BoolType.")
             
             case BinOp(op, left, right) if op in ["&&", "||"]:
                 left = self.check(left)
                 right = self.check(right)
                 if left.type != BoolType() or right.type != BoolType():
-                    raise TypeError(BoolType())
+                    raise TypeCheckError(oprtype=BoolType())
                 return BinOp(op, left, right, BoolType())
 
             case UnOp(op, right) if op in ["-"]:
                 right = self.check(right)
                 if right.type != NumType():
-                    raise TypeError(NumType())
+                    raise TypeCheckError(oprtype=NumType())
                 return UnOp(op, right, NumType())
             
             case If(cond, e1, e2):
@@ -45,9 +46,9 @@ class StaticTypeChecker:
                 e1 = self.check(e1)
                 e2 = self.check(e2)
                 if cond.type != BoolType():
-                    raise TypeError(BoolType())
+                    raise TypeCheckError(oprtype=BoolType())
                 if e1.type != e2.type:
-                    raise TypeError(message="The two branches do not have the same type.")
+                    raise TypeCheckError(message="The two branches do not have the same type.")
                 return If(cond, e1, e2, e1.type)
             
             case ASTSequence(seq):
