@@ -10,4 +10,12 @@ class DefinitionError(Exception):
     def __init__(self, name):
         self.name = name
         print(f"DefinitionError: {name} is not defined.")
-        
+
+class InvalidProgramError(Exception):
+    """
+    Raised when a program is invalid.
+    """
+
+    def __init__(self, program):
+        self.program = program
+        print(f"InvalidProgramError: Runtime environment does not support program: {program}.")

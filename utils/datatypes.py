@@ -46,6 +46,3 @@ class ASTSequence:
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | list['AST']
 
 Value = Fraction
-
-class InvalidProgram(Exception):
-    pass
