@@ -28,6 +28,6 @@ class TypeError(Exception):
     def __init__(self, oprtype, message = None):
         self.oprtype = str(oprtype)
         if not message:
-            print(f"TypeError: Operands should have the type: {oprtype}.")
+            print(f"TypeError: Operand(s) should have the type: {oprtype}.")
         else:
             print(f"TypeError: {message}")
