@@ -3,7 +3,7 @@ from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
 from utils.datatypes import *
-from utils.typechecker import TypeChecker
+from utils.typechecker import StaticTypeChecker as TypeChecker
 
 
 def test_eval():
@@ -16,14 +16,14 @@ def test_eval():
     e2 = NumLiteral(7)
     e3 = NumLiteral(9)
     e4 = NumLiteral(5)
-    e5 = BinOp("+", e2, e3)
-    e6 = BinOp("/", e5, e4)
-    e7 = BinOp("*", e1, e6)
-    assert checker.check(e7) == NumType()
+    e5 = BinOp("+", e2, e3) # 16
+    e6 = BinOp("/", e5, e4) # 3.2
+    e7 = BinOp("*", e1, e6) # 6.4
+    assert checker.check(e7).type == NumType()
     assert runtime.eval(e7) == Fraction(32, 5)
 
     e8 = UnOp("-", e7)
-    assert checker.check(e8) == NumType()
+    assert checker.check(e8).type == NumType()
     assert runtime.eval(e8) == Fraction(-32, 5)
 
 def test_let_eval():
@@ -57,7 +57,7 @@ def test_bool_eval():
     assert runtime.eval(e) == True
 
     e = BinOp("!=", a, BinOp("-", b, c))
-    assert checker.check(e) == BoolType()
+    assert checker.check(e).type == BoolType()
     assert runtime.eval(e) == False
 
     e = If(BinOp("==", a, BinOp("-", b, c)), NumLiteral(1), NumLiteral(2))
