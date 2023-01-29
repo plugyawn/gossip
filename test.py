@@ -3,12 +3,14 @@ from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
 from utils.datatypes import *
+from utils.typechecker import TypeChecker
 
 
 def test_eval():
     """
     Tests the eval method of the runtime environment.
     """
+    checker = TypeChecker()
     runtime = RuntimeEnvironment()
     e1 = NumLiteral(2)
     e2 = NumLiteral(7)
@@ -17,15 +19,18 @@ def test_eval():
     e5 = BinOp("+", e2, e3)
     e6 = BinOp("/", e5, e4)
     e7 = BinOp("*", e1, e6)
+    assert checker.check(e7) == NumType()
     assert runtime.eval(e7) == Fraction(32, 5)
 
     e8 = UnOp("-", e7)
+    assert checker.check(e8) == NumType()
     assert runtime.eval(e8) == Fraction(-32, 5)
 
 def test_let_eval():
     """
     Tests the eval method of the runtime environment with the Let paradigm.
     """
+    checker = TypeChecker()
     runtime = RuntimeEnvironment()
     a  = Variable("a")
     e1 = NumLiteral(5)
@@ -42,6 +47,7 @@ def test_bool_eval():
     """
     Tests the eval method of the runtime environment with boolean expressions.
     """
+    checker = TypeChecker()
     runtime = RuntimeEnvironment()
     a = NumLiteral(5)
     b = NumLiteral(6)
@@ -51,6 +57,7 @@ def test_bool_eval():
     assert runtime.eval(e) == True
 
     e = BinOp("!=", a, BinOp("-", b, c))
+    assert checker.check(e) == BoolType()
     assert runtime.eval(e) == False
 
     e = If(BinOp("==", a, BinOp("-", b, c)), NumLiteral(1), NumLiteral(2))
