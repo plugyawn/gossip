@@ -20,12 +20,12 @@ class InvalidProgramError(Exception):
         self.program = program
         print(f"InvalidProgramError: Runtime environment does not support program: {program}.")
 
-class TypeError(Exception):
+class TypeCheckError(Exception):
     """
     Raised when the type of the operands in the operation are not of valid type
     """
 
-    def __init__(self, oprtype, message = None):
+    def __init__(self, oprtype = None, message:str = None):
         self.oprtype = str(oprtype)
         if not message:
             print(f"TypeError: Operand(s) should have the type: {oprtype}.")
