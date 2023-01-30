@@ -126,4 +126,12 @@ class RuntimeEnvironment():
                     return self.eval(e1)
                 else:
                     return self.eval(e2)
+            # for For_Loops
+            case ForLoop(Variable(name), val_list, stat):
+                h = len(val_list)
+                for x in range(h):
+                    v1 = self.eval(val_list[x])
+                    m = self.eval(stat, self.environment | { name: v1 })
+                    if(x==(h-1)):
+                        return(m)
         raise InvalidProgram(f"Runtime environment does not support program: {program}.")
