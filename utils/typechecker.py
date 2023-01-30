@@ -8,8 +8,8 @@ class StaticTypeChecker:
     
     def check(self, program: AST) -> AST:
         match program:
-            case NumLiteral() | BoolLiteral() as e:
-                return e
+            case NumLiteral() | BoolLiteral():
+                return program
 
             case BinOp(op, left, right) if op in ["+", "-", "*", "/", "<", ">", "<=", ">="]:
                 left = self.check(left)
@@ -39,7 +39,7 @@ class StaticTypeChecker:
                 right = self.check(right)
                 if right.type != NumType():
                     raise TypeCheckError(oprtype=NumType())
-                return UnOp(op, right, NumType())
+                return UnOp(op, right)
             
             case If(cond, e1, e2):
                 cond = self.check(cond)

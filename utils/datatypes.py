@@ -15,14 +15,14 @@ SimType = NumType | BoolType
 @dataclass
 class NumLiteral:
     value: Fraction
-    type: SimType = NumType()
+    type = NumType()
     def __init__(self, *args):
         self.value = Fraction(*args)
 
 @dataclass
 class BoolLiteral:
     value: bool
-    type: SimType = BoolType()
+    type = BoolType()
 
 @dataclass
 class BinOp:
@@ -35,7 +35,7 @@ class BinOp:
 class UnOp:
     operator: str
     right: 'AST'
-    type: SimType = NumType()
+    type = NumType()
 
 @dataclass
 class Variable:
