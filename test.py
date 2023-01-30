@@ -20,9 +20,14 @@ def test_eval():
     e6 = BinOp("/", e5, e4) # 3.2
     e7 = BinOp("*", e1, e6) # 6.4
     assert checker.check(e7).type == NumType()
+    e5 = BinOp("+", e2, e3) # 16
+    e6 = BinOp("/", e5, e4) # 3.2
+    e7 = BinOp("*", e1, e6) # 6.4
+    assert checker.check(e7).type == NumType()
     assert runtime.eval(e7) == Fraction(32, 5)
 
     e8 = UnOp("-", e7)
+    assert checker.check(e8).type == NumType()
     assert checker.check(e8).type == NumType()
     assert runtime.eval(e8) == Fraction(-32, 5)
 
@@ -57,6 +62,7 @@ def test_bool_eval():
     assert runtime.eval(e) == True
 
     e = BinOp("!=", a, BinOp("-", b, c))
+    assert checker.check(e).type == BoolType()
     assert checker.check(e).type == BoolType()
     assert runtime.eval(e) == False
 
