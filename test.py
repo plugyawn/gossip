@@ -2,15 +2,15 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import *
-from utils.typechecker import StaticTypeChecker as TypeChecker
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp, ASTSequence
+from utils.typechecker import StaticTypeChecker
 
 
 def test_eval():
     """
     Tests the eval method of the runtime environment.
     """
-    checker = TypeChecker()
+    checker = StaticTypeChecker()
     runtime = RuntimeEnvironment()
     e1 = NumLiteral(2)
     e2 = NumLiteral(7)
@@ -30,7 +30,7 @@ def test_let_eval():
     """
     Tests the eval method of the runtime environment with the Let paradigm.
     """
-    checker = TypeChecker()
+    checker = StaticTypeChecker()
     runtime = RuntimeEnvironment()
     a  = Variable("a")
     e1 = NumLiteral(5)
@@ -47,7 +47,7 @@ def test_bool_eval():
     """
     Tests the eval method of the runtime environment with boolean expressions.
     """
-    checker = TypeChecker()
+    checker = StaticTypeChecker()
     runtime = RuntimeEnvironment()
     a = NumLiteral(5)
     b = NumLiteral(6)
