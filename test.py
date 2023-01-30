@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import *
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence
+from stream import Stream, Lexer, Parser
 
 
 def test_eval():
@@ -77,7 +78,19 @@ def test_sequence_eval():
 
     g = If(BinOp("==", a, BinOp("-", b, c)), f, g)
 
+def test_stream_eval():
+    runtime = RuntimeEnvironment()
 
+    string = """
+    let b = 6 end
+    let a = 5 end
+    if a == b then a+2 else a+1 end
+    """
+    L = Lexer.from_stream(Stream.from_string(string))
+    runtime = RuntimeEnvironment()
+    S = Parser.from_lexer(L)
+    for s in S:
+        runtime.eval(s)
 
 # main
 if __name__ == "__main__":
@@ -85,3 +98,4 @@ if __name__ == "__main__":
     test_let_eval()
     test_bool_eval()
     test_sequence_eval()
+    test_stream_eval()
