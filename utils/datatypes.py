@@ -40,13 +40,17 @@ class BoolLiteral:
     value: bool
 
 @dataclass
+class ASTSequence:
+    seq: list['AST'] | list
+
+@dataclass
 class ForLoop:
     var: 'AST'
     val_list: list['AST']
-    stat: list['AST']
+    stat: 'AST'
 
 
-AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop 
+AST = NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | ASTSequence | list['AST']
 
 Value = Fraction
 
