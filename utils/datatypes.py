@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 
+"""
+The following are used in the evaluation step.
+"""
 @dataclass
 class NumLiteral:
     value: Fraction
@@ -27,7 +30,7 @@ class Variable:
 class Let:
     var: 'AST'
     e1: 'AST'
-    e2: 'AST'
+    e2: 'AST' = None
 
 @dataclass
 class If:
@@ -47,5 +50,30 @@ AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | I
 
 Value = Fraction
 
-class InvalidProgram(Exception):
-    pass
+"""
+The following are used in the lexer.
+"""
+@dataclass
+class Num:
+    n: int | float
+    floating: bool = False
+
+@dataclass
+class Bool:
+    b: bool
+
+@dataclass
+class Keyword:
+    word: str
+
+@dataclass
+class Identifier:
+    word: str
+
+@dataclass
+class Operator:
+    op: str
+
+@dataclass
+class Buffer:
+    buf: str
