@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, InvalidProgram, If, BoolLiteral, UnOp, ASTSequence
-from utils.errors import DefinitionError
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence
+from utils.errors import DefinitionError, InvalidProgramError
 
 class RuntimeEnvironment():
     """
@@ -51,7 +51,11 @@ class RuntimeEnvironment():
                 to the environment, then evaluates e2 with the new environment.
                 """
                 v1 = self.eval(e1)
-                return self.eval(e2, self.environment | { name: v1 })
+                if e2:
+                    return self.eval(e2, self.environment | { name: v1 })
+                else:
+                    self.environment = self.environment | { name: v1 }
+                    return v1
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
@@ -126,4 +130,5 @@ class RuntimeEnvironment():
                     return self.eval(e1)
                 else:
                     return self.eval(e2)
-        raise InvalidProgram(f"Runtime environment does not support program: {program}.")
+                    
+        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
