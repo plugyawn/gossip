@@ -12,6 +12,9 @@ class BoolType:
 
 SimType = NumType | BoolType
 
+"""
+The following are used in the evaluation step.
+"""
 @dataclass
 class NumLiteral:
     value: Fraction
@@ -46,7 +49,12 @@ class Variable:
 class Let:
     var: 'AST'
     e1: 'AST'
-    e2: 'AST'
+    e2: 'AST' = None
+
+@dataclass
+class Assign:
+    var: Variable
+    e1: 'AST'
 
 @dataclass
 class If:
@@ -62,4 +70,32 @@ class ASTSequence:
 
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | list['AST']
 
-Value = Fraction | bool
+Value = Fraction
+
+"""
+The following are used in the lexer.
+"""
+@dataclass
+class Num:
+    n: int | float
+    floating: bool = False
+
+@dataclass
+class Bool:
+    b: bool
+
+@dataclass
+class Keyword:
+    word: str
+
+@dataclass
+class Identifier:
+    word: str
+
+@dataclass
+class Operator:
+    op: str
+
+@dataclass
+class Buffer:
+    buf: str

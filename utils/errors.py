@@ -15,10 +15,27 @@ class InvalidProgramError(Exception):
     """
     Raised when a program is invalid.
     """
+    def __init__(self, message, verbose = True):
+        self.message = message
+        print(f"InvalidProgramError: {message}")
+class EndOfStream(Exception):
+    """
+    Raised when the end of a stream is reached.
+    """
+    pass
 
-    def __init__(self, program):
-        self.program = program
-        print(f"InvalidProgramError: Runtime environment does not support program: {program}.")
+class EndOfTokens(Exception):
+    """
+    Raised when the end of a stream of tokens is reached.
+    """
+    pass
+
+class TokenError(Exception):
+    """
+    Raised when the end of a stream of tokens is reached.
+    """
+    pass
+
 
 class TypeCheckError(Exception):
     """
