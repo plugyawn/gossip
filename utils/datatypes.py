@@ -33,6 +33,11 @@ class Let:
     e2: 'AST' = None
 
 @dataclass
+class Assign:
+    var: Variable
+    e1: 'AST'
+
+@dataclass
 class If:
     cond: 'AST'
     e1: 'AST'
