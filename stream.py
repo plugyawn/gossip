@@ -2,9 +2,10 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer
+from core import RuntimeEnvironment
 
-keywords = "let if then else in end".split()
+keywords = "let assign if then else in end".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
@@ -173,6 +174,8 @@ class Parser:
                 return self.parse_while()
             case Keyword("let"):
                 return self.parse_let()
+            case Keyword("assign"):
+                return self.parse_assign()
             case Keyword("end"):
                 return self.lexer.__next__()
             case _:
@@ -255,13 +258,9 @@ class Parser:
         self.lexer.match(Keyword("let"))
         var = self.parse_atomic_expression()
         self.lexer.match(Operator("="))
-        a = self.parse_atomic_expression()
-        try:
-            self.lexer.match(Keyword("in"))
-            b = self.parse_atomic_expression()
-        except TokenError:
-            self.lexer.match(Keyword("end"))
-            return Let(var, a)
+        a = self.parse_expression()
+        self.lexer.match(Keyword("in"))
+        b = self.parse_expression()
         self.lexer.match(Keyword("end"))
         return Let(var, a, b)
 
@@ -276,8 +275,19 @@ class Parser:
         e1 = self.parse_expression()
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
-        self.lexer.match(Keyword("end"))
         return If(cond, e1, e2)
+
+    def parse_assign(self):
+        """
+        Parse an assignment.
+        Examples: | a = 6 |, to assign 6 to a.
+        """
+        self.lexer.match(Keyword("assign"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Operator("="))
+        a = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return Assign(var, a)
     
     def __iter__(self):
         return self
