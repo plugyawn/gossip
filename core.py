@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, BoolLiteral, UnOp, ASTSequence, ForLoop
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign
 from utils.errors import DefinitionError, InvalidProgramError
 
 class RuntimeEnvironment():
@@ -11,29 +11,32 @@ class RuntimeEnvironment():
     recursively.
     """
     def __init__(self):
-        self.environment = []
-        self.environment.append({})
-        self.scope = 0 
+        self.environments = []
+        self.environments.append({})
+        self.environment = self.environments[0]
+        self.scope = 0
 
-    def eval(self, program: AST or ASTSequence) -> Value:
+    def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
         """
         Recursively evaluates an AST or ASTSequence, returning a Value.
         By default, retains the environment from the runtime environment.
         However, you can pass in an environment to override this.
         """
-        match program:
+        if environment:
+            self.environment = environment
+        if not self.environment:
+            self.environment = {}
 
+        match program:
             case NumLiteral(value):
                 return value
 
             case Variable(name):
-                scope_1 = self.scope
-                while ( len(self.environment) < (scope_1+1)):
-                    scope_1 = scope_1 - 1
-                while(scope_1>=0):
-                        if name in self.environment[scope_1]:
-                            return self.environment[scope_1][name]
-                        scope_1 = scope_1 - 1
+                max_depth = self.scope
+                while max_depth >= 0:
+                    if name in self.environments[max_depth]:
+                        return self.environments[max_depth][name]
+                    max_depth -= 1
 
                 raise DefinitionError(name)
 
@@ -47,19 +50,27 @@ class RuntimeEnvironment():
 
                 return self.eval(seq[-1])
 
+            case Assign(Variable(name), e1):
+                """
+                Special case. Assigns a value to a variable.
+                """
+
+                v1 = self.eval(e1)
+                self.environments[0] = self.environments[0] | { name: v1 }
+                return v1
+
             case Let(Variable(name), e1, e2):
                 """
                 Let is a special case. It evaluates e1, then adds the result
                 to the environment, then evaluates e2 with the new environment.
                 """
-                v1 = self.eval(e1)
-                self.scope = self.scope + 1
-                dict = {name : v1}
-                self.environment.append(dict)
-                val = self.eval(e2)
-                self.environment.pop()
-                self.scope = self.scope - 1
-                return(val)
+                value = self.eval(e1)
+                self.scope += 1
+                self.environments.append({ name: value })
+                expression = self.eval(e2)
+                self.environments.pop()
+                self.scope -= 1
+                return expression
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
@@ -118,26 +129,26 @@ class RuntimeEnvironment():
             # Again, If is different, so we define it separately.
             case If(cond, e1, e2):
                 if self.eval(cond) == True:
-                    self.scope = self.scope + 1
-                    val = self.eval(e1)
-                    self.scope = self.scope - 1
-                    return val
+                    self.scope += 1
+                    to_return = self.eval(e1)
+                    self.scope -= 1
                 else:
-                    self.scope = self.scope + 1
-                    val =  self.eval(e2)
-                    self.scope = self.scope - 1
-                    return val
-                        # for For_Loops
+                    self.scope += 1
+                    to_return = self.eval(e2)
+                    self.scope -= 1
+                
+                return to_return
+            
             case ForLoop(Variable(name), val_list, stat):
                 h = len(val_list)
                 for x in range(h): 
                     v1 = self.eval(val_list[x])
-                    self.scope = self.scope + 1
-                    dict = {name : v1}
-                    self.environment.append(dict)
+                    self.scope += 1
+                    self.environment.append({ name : v1 })
                     m = self.eval(stat)
                     self.scope = self.scope - 1
                     self.environment.pop()
                     if(x==(h-1)):
                         return(m)
-        raise InvalidProgramError(program)
+                        
+        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
