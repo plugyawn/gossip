@@ -11,27 +11,29 @@ class RuntimeEnvironment():
     recursively.
     """
     def __init__(self):
-        self.environment = {}
+        self.environment = []
+        self.environment.append({})
+        self.scope = 0 
 
-    def eval(self, program: AST or ASTSequence, environment = None) -> Value:
+    def eval(self, program: AST or ASTSequence) -> Value:
         """
         Recursively evaluates an AST or ASTSequence, returning a Value.
         By default, retains the environment from the runtime environment.
         However, you can pass in an environment to override this.
         """
-        if environment:
-            self.environment = environment
-        if not self.environment:
-            self.environment = {}
-        
         match program:
 
             case NumLiteral(value):
                 return value
 
             case Variable(name):
-                if name in self.environment:
-                    return self.environment[name]
+                if name in self.environment[self.scope]:
+                    return self.environment[self.scope][name]
+                scope_1 = self.scope
+                while(scope_1>=0):
+                        if name in self.environment[scope_1]:
+                            return self.environment[scope_1][name]
+                        scope_1 = scope_1 - 1
 
                 raise DefinitionError(name)
 
@@ -51,25 +53,30 @@ class RuntimeEnvironment():
                 to the environment, then evaluates e2 with the new environment.
                 """
                 v1 = self.eval(e1)
-                return self.eval(e2, self.environment | { name: v1 })
+                self.scope = self.scope + 1
+                dict = {name : v1}
+                self.environment.append(dict)
+                val = self.eval(e2)
+                self.environment.pop()
+                self.scope = self.scope - 1
+                return(val)
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
-                environment = self.environment
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
+                left = self.eval(left)
+                right = self.eval(right)
                 return left + right
             case BinOp("-", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
+                left = self.eval(left)
+                right = self.eval(right)
                 return left - right
             case BinOp("*", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
+                left = self.eval(left)
+                right = self.eval(right)
                 return left * right
             case BinOp("/", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
+                left = self.eval(left)
+                right = self.eval(right)
                 return left / right
             case BinOp("==", left, right):
                 left = self.eval(left)
@@ -86,15 +93,15 @@ class RuntimeEnvironment():
             case BinOp(">", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return self.eval(left) > self.eval(right)
+                return left > right
             case BinOp("<=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return self.eval(left) <= self.eval(right)
+                return left <= right
             case BinOp(">=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return self.eval(left) >= self.eval(right)
+                return left >= right
             case BinOp("&&", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
@@ -111,7 +118,13 @@ class RuntimeEnvironment():
             # Again, If is different, so we define it separately.
             case If(cond, e1, e2):
                 if self.eval(cond) == True:
-                    return self.eval(e1)
+                    self.scope = self.scope + 1
+                    val = self.eval(e1)
+                    self.scope = self.scope - 1
+                    return val
                 else:
-                    return self.eval(e2)
+                    self.scope = self.scope + 1
+                    val =  self.eval(e2)
+                    self.scope = self.scope - 1
+                    return val
         raise InvalidProgramError(program)
