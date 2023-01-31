@@ -37,7 +37,7 @@ def test_let_eval():
     a  = Variable("a")
     e1 = NumLiteral(5)
     e4 = NumLiteral(10)
-    e7 = NumLiteral(7)
+    e7 = NumLiteral(4)
     e2 = BinOp("+", a, a)
     e  = Let(a, e1, BinOp("+", a, Let(a, e2, e2)))
     assert runtime.eval(e) == 25
