@@ -15,7 +15,6 @@ class InvalidProgramError(Exception):
     """
     Raised when a program is invalid.
     """
-
     def __init__(self, message, verbose = True):
         self.message = message
         print(f"InvalidProgramError: {message}")
@@ -38,3 +37,14 @@ class TokenError(Exception):
     pass
 
 
+class TypeCheckError(Exception):
+    """
+    Raised when the type of the operands in the operation are not of valid type
+    """
+
+    def __init__(self, oprtype = None, message:str = None):
+        self.oprtype = str(oprtype)
+        if not message:
+            print(f"TypeError: Operand(s) should have the type: {oprtype}.")
+        else:
+            print(f"TypeError: {message}")

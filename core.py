@@ -76,29 +76,24 @@ class RuntimeEnvironment():
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
-                assert type(left) == type(right) == Fraction
+                left = self.eval(left)
+                right = self.eval(right)
                 return left + right
             case BinOp("-", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
-                assert type(left) == type(right) == Fraction
+                left = self.eval(left)
+                right = self.eval(right)
                 return left - right
             case BinOp("*", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right) == Fraction
                 return left * right
             case BinOp("/", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
-                assert type(left) == type(right) == Fraction
+                left = self.eval(left)
+                right = self.eval(right)
                 return left / right
             case BinOp("==", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right)
                 return left == right
             case BinOp("!=", left, right):
                 left = self.eval(left)
@@ -106,38 +101,27 @@ class RuntimeEnvironment():
                 return left != right
             case BinOp("<", left, right):
                 left = self.eval(left)
-                print(right)
                 right = self.eval(right)
-                print(right)
-                print(left)
-                assert type(left) == type(right)
                 return left < right
             case BinOp(">", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                print(left, " is left")
-                print(right, " is right")
-                assert type(left) == type(right)
                 return left > right
             case BinOp("<=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right)
                 return left <= right
             case BinOp(">=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right)
                 return left >= right
             case BinOp("&&", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right) == bool
                 return left and right
             case BinOp("||", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                assert type(left) == type(right) == bool
                 return left or right
             
             # Unary operation is the same, except for the operator.
@@ -146,7 +130,6 @@ class RuntimeEnvironment():
 
             # Again, If is different, so we define it separately.
             case If(cond, e1, e2):
-                assert type(self.eval(cond)) == bool
                 if self.eval(cond) == True:
                     self.scope += 1
                     to_return = self.eval(e1)
