@@ -32,13 +32,12 @@ def test_eval():
     assert runtime.eval(e8) == Fraction(-32, 5)
 
 def test_let_eval():
-    """
-    Tests the eval method of the runtime environment with the Let paradigm.
-    """
-    checker = StaticTypeChecker()
+    
     runtime = RuntimeEnvironment()
     a  = Variable("a")
     e1 = NumLiteral(5)
+    e4 = NumLiteral(10)
+    e7 = NumLiteral(7)
     e2 = BinOp("+", a, a)
     e  = Let(a, e1, BinOp("+", a, Let(a, e2, e2)))
     assert runtime.eval(e) == 25
@@ -47,6 +46,12 @@ def test_let_eval():
     e3 = NumLiteral(6)
     e  = BinOp("+", Let(a, e1, e2), Let(a, e3, e2))
     assert runtime.eval(e) == 22
+    e10 = Let(a,e4,e2)
+    e8 = BinOp("*",a,e7)
+    e9 = BinOp("==",e10,e8)
+    e = Let(a, e1, e9)
+    assert runtime.eval(e) == True
+    
 
 def test_bool_eval():
     """
