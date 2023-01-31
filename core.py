@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign
 from utils.errors import DefinitionError, InvalidProgramError
 
 class RuntimeEnvironment():
@@ -11,9 +11,13 @@ class RuntimeEnvironment():
     recursively.
     """
     def __init__(self):
-        self.environment = {}
 
-    def eval(self, program: AST or ASTSequence, environment = None) -> Value:
+        self.environments = []
+        self.environments.append({})
+        self.environment = self.environments[0]
+        self.scope = 0
+
+    def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
         """
         Recursively evaluates an AST or ASTSequence, returning a Value.
         By default, retains the environment from the runtime environment.
@@ -23,15 +27,17 @@ class RuntimeEnvironment():
             self.environment = environment
         if not self.environment:
             self.environment = {}
-        
-        match program:
 
+        match program:
             case NumLiteral(value):
                 return value
 
             case Variable(name):
-                if name in self.environment:
-                    return self.environment[name]
+                max_depth = self.scope
+                while max_depth >= 0:
+                    if name in self.environments[max_depth]:
+                        return self.environments[max_depth][name]
+                    max_depth -= 1
 
                 raise DefinitionError(name)
 
@@ -45,21 +51,31 @@ class RuntimeEnvironment():
 
                 return self.eval(seq[-1])
 
+            case Assign(Variable(name), e1):
+                """
+                Special case. Assigns a value to a variable.
+                """
+
+                v1 = self.eval(e1)
+                self.environments[0] = self.environments[0] | { name: v1 }
+                return v1
+
             case Let(Variable(name), e1, e2):
                 """
                 Let is a special case. It evaluates e1, then adds the result
                 to the environment, then evaluates e2 with the new environment.
                 """
-                v1 = self.eval(e1)
-                if e2:
-                    return self.eval(e2, self.environment | { name: v1 })
-                else:
-                    self.environment = self.environment | { name: v1 }
-                    return v1
+                
+                value = self.eval(e1)
+                self.scope += 1
+                self.environments.append({ name: value })
+                expression = self.eval(e2)
+                self.environments.pop()
+                self.scope -= 1
+                return expression
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
-                environment = self.environment
                 left = self.eval(left, environment)
                 right = self.eval(right, environment)
                 assert type(left) == type(right) == Fraction
@@ -70,8 +86,8 @@ class RuntimeEnvironment():
                 assert type(left) == type(right) == Fraction
                 return left - right
             case BinOp("*", left, right):
-                left = self.eval(left, environment)
-                right = self.eval(right, environment)
+                left = self.eval(left)
+                right = self.eval(right)
                 assert type(left) == type(right) == Fraction
                 return left * right
             case BinOp("/", left, right):
@@ -90,24 +106,29 @@ class RuntimeEnvironment():
                 return left != right
             case BinOp("<", left, right):
                 left = self.eval(left)
+                print(right)
                 right = self.eval(right)
+                print(right)
+                print(left)
                 assert type(left) == type(right)
                 return left < right
             case BinOp(">", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
+                print(left, " is left")
+                print(right, " is right")
                 assert type(left) == type(right)
-                return self.eval(left) > self.eval(right)
+                return left > right
             case BinOp("<=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
                 assert type(left) == type(right)
-                return self.eval(left) <= self.eval(right)
+                return left <= right
             case BinOp(">=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
                 assert type(left) == type(right)
-                return self.eval(left) >= self.eval(right)
+                return left >= right
             case BinOp("&&", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
@@ -127,8 +148,14 @@ class RuntimeEnvironment():
             case If(cond, e1, e2):
                 assert type(self.eval(cond)) == bool
                 if self.eval(cond) == True:
-                    return self.eval(e1)
+                    self.scope += 1
+                    to_return = self.eval(e1)
+                    self.scope -= 1
                 else:
-                    return self.eval(e2)
+                    self.scope += 1
+                    to_return = self.eval(e2)
+                    self.scope -= 1
+                
+                return to_return
                     
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
