@@ -308,11 +308,11 @@ def test_nested_assignment_scope_loops():
     #     int j = 0
 
     #     while(j<10):
-    #         int i=0
+    #         int i=5
 
-    #         while(i<5):
+    #         while(i>0):
     #             c=c+1
-    #             i=i+1
+    #             i=i-1
             
     #         j=j+1
         
@@ -335,9 +335,9 @@ def test_nested_assignment_scope_loops():
     declare_c = Declare(c,start)
     declare_i = Declare(i,start)
 
-    innermost_loop_cond = BinOp("<",i,five)
+    innermost_loop_cond = BinOp(">",i,start)
     stmt_innermost_1 = Assign(c,BinOp("+",c,increment))
-    stmt_innermost_2 = Assign(i,BinOp("+",i,increment))
+    stmt_innermost_2 = Assign(i,BinOp("-",i,increment))
 
     innermost_loop = While(innermost_loop_cond,ASTSequence([stmt_innermost_1,stmt_innermost_2]))
     
@@ -348,7 +348,7 @@ def test_nested_assignment_scope_loops():
 
     second_loop_cond = BinOp("<",j,end)
 
-    second_loop_stmt1 = Declare(i,start)
+    second_loop_stmt1 = Declare(i,five)
     second_loop_stmt2 = innermost_loop
     second_loop_stmt3 = Assign(j,BinOp("+",j,increment))
 
