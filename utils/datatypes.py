@@ -143,4 +143,3 @@ class Operator:
 @dataclass
 class Buffer:
     buf: str
-
