@@ -18,6 +18,19 @@ Requirements
 ```Gossip-lang``` requires ```python 3.10.0``` and upwards to run; a detailed list of requirements can be found in ```requirements.txt```. We recommend creating a separate environment with a package management system like ```conda``` or (preferably) ```mamba```, although ```pipenv``` would work just fine.
 
 
+Features
+-----------------------------------------
+
+Gossip-lang currently features assignment, if-else constructs, loops and conditionals, with a static typechecker, as well as custom errors. Use the built-in command-line interface with: 
+```bash
+python main.py --interpret
+```
+
+<div align = center>
+<img width="924" alt="image" src="https://user-images.githubusercontent.com/76529011/215916636-a4337bff-d6a5-4dcf-b6ab-dfa9fecaf195.png">
+
+</div>
+
 Contributors
 -----------------------------------------
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
