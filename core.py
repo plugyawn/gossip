@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Declare, Assign, While, DoWhile
-from utils.errors import DefinitionError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
+from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
 
 class RuntimeEnvironment():
     """
@@ -35,7 +35,7 @@ class RuntimeEnvironment():
                 #can add one more part about variables declared without a value 
                 #referring to outer scope variables with the same name
                 scope_1 = self.scope
-                while ( len(self.environment) < (scope_1+1)):
+                while ( len(self.environments) < (scope_1+1)):
                     scope_1 = scope_1 - 1
                 
                 #adding the not None helps me to assign an inner-scope "x" which was declared None
@@ -52,11 +52,12 @@ class RuntimeEnvironment():
                 # initially-None variable in terms of itself.
 
                 while(scope_1>=0):
-                        if name in self.environment[scope_1]:
+                        if name in self.environments[scope_1]:
+                            return self.environments[scope_1][name]
 
-                            if(self.environment[scope_1][name]==None):
-                                raise AssignmentUsingNone(name)
-                            return self.environment[scope_1][name]
+                        #   if(self.environment[scope_1][name]==None):
+                        #         raise AssignmentUsingNone(name)
+                            
                         scope_1 = scope_1 - 1
 
                 raise DeclarationError(name)
@@ -67,10 +68,10 @@ class RuntimeEnvironment():
                 value_to_be_declared = self.eval(value)
                 curent_scope = self.scope
 
-                if(name in self.environment[curent_scope]):
+                if(name in self.environments[curent_scope]):
                     raise VariableRedeclaration(name)
                 else:
-                    self.environment[curent_scope][name] = value_to_be_declared
+                    self.environments[curent_scope][name] = value_to_be_declared
 
                 return value_to_be_declared
             
@@ -80,21 +81,21 @@ class RuntimeEnvironment():
                 scp = self.scope
                 val = self.eval(expression)
 
-                if(name in self.environment[scp]):
+                if(name in self.environments[scp]):
                     #variable has been declared in the current scope already
                     #so, update it's assignment
-                    self.environment[scp][name]=val
+                    self.environments[scp][name]=val
                 else:
                     flag = False
                     scope_x = scp-1
 
                     while(scope_x>=0):
-                        if(name in self.environment[scope_x]):
+                        if(name in self.environments[scope_x]):
                             #variable found declared in some outer scope
                             #so, apply the assignment in that outer scope
 
                             flag = True
-                            self.environment[scope_x][name]=val
+                            self.environments[scope_x][name]=val
                             break
                         else:
                             scope_x=scope_x-1
@@ -240,11 +241,11 @@ class RuntimeEnvironment():
                     scp = self.scope
                     
                     current_scope_mappings={}
-                    self.environment.append(current_scope_mappings)
+                    self.environments.append(current_scope_mappings)
                     final_value = self.eval(seq)
                     
                     truth_value= self.eval(cond)
-                    self.environment.pop()
+                    self.environments.pop()
                     self.scope = self.scope -1
                 
                 return final_value
@@ -259,10 +260,10 @@ class RuntimeEnvironment():
                 scp = self.scope
                     
                 current_scope_mappings={}
-                self.environment.append(current_scope_mappings)
+                self.environments.append(current_scope_mappings)
                 final_value = self.eval(seq)
 
-                self.environment.pop()
+                self.environments.pop()
                 self.scope = self.scope -1
 
                 #regular while loop
@@ -277,11 +278,11 @@ class RuntimeEnvironment():
                     scp = self.scope
                     
                     current_scope_mappings={}
-                    self.environment.append(current_scope_mappings)
+                    self.environments.append(current_scope_mappings)
                     final_value = self.eval(seq)
                     
                     truth_value= self.eval(cond)
-                    self.environment.pop()
+                    self.environments.pop()
                     self.scope = self.scope -1
                 
                 return final_value
