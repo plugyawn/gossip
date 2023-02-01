@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range
 from utils.errors import DefinitionError, InvalidProgramError
 
 class RuntimeEnvironment():
@@ -11,7 +11,6 @@ class RuntimeEnvironment():
     recursively.
     """
     def __init__(self):
-
         self.environments = []
         self.environments.append({})
         self.environment = self.environments[0]
@@ -65,7 +64,6 @@ class RuntimeEnvironment():
                 Let is a special case. It evaluates e1, then adds the result
                 to the environment, then evaluates e2 with the new environment.
                 """
-                
                 value = self.eval(e1)
                 self.scope += 1
                 self.environments.append({ name: value })
@@ -73,6 +71,15 @@ class RuntimeEnvironment():
                 self.environments.pop()
                 self.scope -= 1
                 return expression
+
+            case Range(left, right):
+                """
+                Evaluates and returns range from left to return, as an ASTSequence.
+                """
+                AST_sequence = []
+                for i in range(int(left.value), int(right.value)+1):
+                    AST_sequence.append(NumLiteral(i))
+                return ASTSequence(AST_sequence)
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
@@ -123,7 +130,12 @@ class RuntimeEnvironment():
                 left = self.eval(left)
                 right = self.eval(right)
                 return left or right
-            
+
+            case BinOp("=", Variable(name), right):
+                right = self.eval(right)
+                self.environments[0] = self.environments[0] | { name: right }
+                return right
+
             # Unary operation is the same, except for the operator.
             case UnOp("-", right):
                 return 0 - self.eval(right)
@@ -140,5 +152,19 @@ class RuntimeEnvironment():
                     self.scope -= 1
                 
                 return to_return
-                    
+            
+            case ForLoop(Variable(name), sequence, stat):
+                if not isinstance(sequence, ASTSequence):
+                    sequence = self.eval(sequence)
+                length = sequence.length
+                value_list = sequence.seq
+                for expression in value_list: 
+                    v1 = self.eval(expression)
+                    self.scope += 1
+                    self.environments.append({ name : v1 })
+                    result = self.eval(stat)
+                    self.scope -= 1
+                    self.environments.pop()
+                return(result)
+                        
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")

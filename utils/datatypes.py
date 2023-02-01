@@ -12,6 +12,16 @@ class BoolType:
 
 SimType = NumType | BoolType
 
+@dataclass
+class NumType:
+    pass
+
+@dataclass
+class BoolType:
+    pass
+
+SimType = NumType | BoolType
+
 """
 The following are used in the evaluation step.
 """
@@ -64,14 +74,26 @@ class If:
     type: Optional[SimType] = None
 
 @dataclass
+class Range:
+    start: 'AST'
+    end: 'AST'
+    type: Optional[SimType] = None
+@dataclass
 class ASTSequence:
     seq: list['AST'] | list
     type: Optional[SimType] = None
+    length = lambda self: len(self.seq)
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | list['AST']
+@dataclass
+class ForLoop:
+    var: 'AST'
+    val_list: list['AST']
+    stat: 'AST' 
 
-Value = Fraction
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop
 
+
+Value = Fraction | bool
 """
 The following are used in the lexer.
 """
@@ -99,3 +121,4 @@ class Operator:
 @dataclass
 class Buffer:
     buf: str
+
