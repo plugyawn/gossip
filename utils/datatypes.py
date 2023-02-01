@@ -74,9 +74,15 @@ class If:
     type: Optional[SimType] = None
 
 @dataclass
+class Range:
+    start: 'AST'
+    end: 'AST'
+    type: Optional[SimType] = None
+@dataclass
 class ASTSequence:
     seq: list['AST'] | list
     type: Optional[SimType] = None
+    length = lambda self: len(self.seq)
 
 @dataclass
 class ForLoop:
