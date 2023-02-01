@@ -76,4 +76,3 @@ class AssignmentUsingNone(Exception):
     def __init__(self,var):
         self.var = var
         print(f"Trying to assign using {var} which has no assigned value itself.")
-        
