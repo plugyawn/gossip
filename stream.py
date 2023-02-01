@@ -2,10 +2,10 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range
 from core import RuntimeEnvironment
 
-keywords = "let assign if then else in end".split()
+keywords = "let assign for range do to if then else in end".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
@@ -176,6 +176,10 @@ class Parser:
                 return self.parse_let()
             case Keyword("assign"):
                 return self.parse_assign()
+            case Keyword("for"):
+                return self.parse_for()
+            case Keyword("range"):
+                return self.parse_range()
             case Keyword("end"):
                 return self.lexer.__next__()
             case _:
@@ -288,7 +292,33 @@ class Parser:
         a = self.parse_expression()
         self.lexer.match(Keyword("end"))
         return Assign(var, a)
-    
+
+    def parse_for(self):
+        """
+        Parse a for loop.
+        Examples: | for a = 1 in 10 do a + 1 end |, to define a and use it in an expression.
+        """
+        self.lexer.match(Keyword("for"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Keyword("in"))
+        iter = self.parse_expression()
+        self.lexer.match(Keyword("do"))
+        task = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return ForLoop(var, iter, task)
+
+    def parse_range(self):
+        """
+        Parse a range.
+        Examples: | range 1 to 10 |, to define a range from 1 to 10.
+        """
+        self.lexer.match(Keyword("range"))
+        left = self.parse_atomic_expression()
+        self.lexer.match(Keyword("to"))
+        right = self.parse_atomic_expression()
+        self.lexer.match(Keyword("end"))
+        return Range(left, right)
+
     def __iter__(self):
         return self
     
