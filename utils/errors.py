@@ -2,14 +2,14 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 
-class DefinitionError(Exception):
+class DeclarationError(Exception):
     """
     Raised when a variable is called but has not been defined before.
     """
 
     def __init__(self, name):
         self.name = name
-        print(f"DefinitionError: {name} is not defined.")
+        print(f"DeclarationError: {name} is not declared.")
 
 class InvalidProgramError(Exception):
     """
@@ -48,3 +48,32 @@ class TypeCheckError(Exception):
             print(f"TypeError: Operand(s) should have the type: {oprtype}.")
         else:
             print(f"TypeError: {message}")
+
+            
+            
+class InvalidCondition(Exception):
+
+    """
+    raised when an invalid condition is passed to a while loop
+    """
+
+    def __init__(self,cond):
+        self.error = cond
+        print(f"Invalid Condition: {cond} is not a valid condition.")   
+
+        
+        
+class VariableRedeclaration(Exception):
+
+    def __init__(self,var):
+        self.var = var
+        print(f"Redeclaration Error: {var} has already been declared in the current scope.")
+     
+    
+    
+class AssignmentUsingNone(Exception):
+
+    def __init__(self,var):
+        self.var = var
+        print(f"Trying to assign using {var} which has no assigned value itself.")
+        
