@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range
 from utils.errors import DefinitionError, InvalidProgramError
 
 class RuntimeEnvironment():
@@ -72,6 +72,15 @@ class RuntimeEnvironment():
                 self.scope -= 1
                 return expression
 
+            case Range(left, right):
+                """
+                Evaluates and returns range from left to return, as an ASTSequence.
+                """
+                AST_sequence = []
+                for i in range(int(left.value), int(right.value)+1):
+                    AST_sequence.append(NumLiteral(i))
+                return ASTSequence(AST_sequence)
+
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
                 left = self.eval(left)
@@ -121,7 +130,12 @@ class RuntimeEnvironment():
                 left = self.eval(left)
                 right = self.eval(right)
                 return left or right
-            
+
+            case BinOp("=", Variable(name), right):
+                right = self.eval(right)
+                self.environments[0] = self.environments[0] | { name: right }
+                return right
+
             # Unary operation is the same, except for the operator.
             case UnOp("-", right):
                 return 0 - self.eval(right)
@@ -139,16 +153,18 @@ class RuntimeEnvironment():
                 
                 return to_return
             
-            case ForLoop(Variable(name), val_list, stat):
-                h = len(val_list)
-                for x in range(h): 
-                    v1 = self.eval(val_list[x])
+            case ForLoop(Variable(name), sequence, stat):
+                if not isinstance(sequence, ASTSequence):
+                    sequence = self.eval(sequence)
+                length = sequence.length
+                value_list = sequence.seq
+                for expression in value_list: 
+                    v1 = self.eval(expression)
                     self.scope += 1
-                    self.environment.append({ name : v1 })
-                    m = self.eval(stat)
-                    self.scope = self.scope - 1
-                    self.environment.pop()
-                    if(x==(h-1)):
-                        return(m)
+                    self.environments.append({ name : v1 })
+                    result = self.eval(stat)
+                    self.scope -= 1
+                    self.environments.pop()
+                return(result)
                         
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
