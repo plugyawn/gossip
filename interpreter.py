@@ -63,5 +63,6 @@ def interpret():
         L = Lexer.from_stream(Stream.from_string(line))
         S = Parser.from_lexer(L)
         for s in S:
-            print(f"{RED}{runtime.eval(s)}")
+            f"{RED}{runtime.eval(s)}"
+            # runtime.eval(s)
 
