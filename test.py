@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Print, Assign
 from utils.typechecker import StaticTypeChecker
 
 
@@ -130,9 +130,12 @@ def test_stream_eval():
 
 # main
 if __name__ == "__main__":
-    test_eval()
-    test_let_eval()
-    test_bool_eval()
-    test_sequence_eval()
-    test_for_loop()
-    test_stream_eval()
+    # test_eval()
+    # test_let_eval()
+    # test_bool_eval()
+    # test_sequence_eval()
+    # test_for_loop()
+    # test_stream_eval()
+    runtime = RuntimeEnvironment()
+    runtime.eval(Assign(Variable("a"), NumLiteral(5)))
+    runtime.eval(Print(Variable("a")))
