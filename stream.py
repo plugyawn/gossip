@@ -2,10 +2,10 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Print
 from core import RuntimeEnvironment
 
-keywords = "let assign for range do to if then else in end".split()
+keywords = "let assign for range print do to if then else in end".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
@@ -180,6 +180,8 @@ class Parser:
                 return self.parse_for()
             case Keyword("range"):
                 return self.parse_range()
+            case Keyword("print"):
+                return self.parse_print()
             case Keyword("end"):
                 return self.lexer.__next__()
             case _:
@@ -318,6 +320,16 @@ class Parser:
         right = self.parse_atomic_expression()
         self.lexer.match(Keyword("end"))
         return Range(left, right)
+
+    def parse_print(self):
+        """
+        Parse a print statement.
+        Examples: | print a |, to print the value of a.
+        """
+        self.lexer.match(Keyword("print"))
+        expression = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return Print(expression)
 
     def __iter__(self):
         return self
