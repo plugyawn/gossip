@@ -90,6 +90,10 @@ class ForLoop:
     val_list: list['AST']
     stat: 'AST' 
 
+@dataclass
+class Print:
+    value: 'AST'
+
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop
 
 
