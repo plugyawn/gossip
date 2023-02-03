@@ -264,7 +264,6 @@ class RuntimeEnvironment():
                 
                 return final_value
             
-            
             case DoWhile(sequence, cond):
 
                 final_value = None

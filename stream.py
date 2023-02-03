@@ -2,7 +2,7 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
 from core import RuntimeEnvironment
 
 keywords = "let assign for while repeat print declare range do to if then else in end".split()
