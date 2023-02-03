@@ -227,63 +227,61 @@ class RuntimeEnvironment():
                     self.environments.pop()
                 return(result)
             
-            case While(cond,seq):
+            case While(cond, sequence):
 
                 truth_value = self.eval(cond)
 
-                if type(truth_value)!=bool:
+                if type(truth_value) != bool:
                     raise InvalidCondition(cond)
                 
                 final_value = None
 
                 while(truth_value):
-                    self.scope = self.scope+1
+
+                    self.scope += 1
                     scp = self.scope
                     
                     current_scope_mappings={}
                     self.environments.append(current_scope_mappings)
-                    final_value = self.eval(seq)
+                    final_value = self.eval(sequence)
                     
                     truth_value= self.eval(cond)
                     self.environments.pop()
-                    self.scope = self.scope -1
+                    self.scope -= 1
                 
                 return final_value
             
             
-            case DoWhile(seq,cond):
-                #executed "do" one time, then check for condition
+            case DoWhile(sequence, cond):
 
                 final_value = None
-                ##
-                self.scope = self.scope+1
+                self.scope += 1
                 scp = self.scope
                     
                 current_scope_mappings={}
                 self.environments.append(current_scope_mappings)
-                final_value = self.eval(seq)
+                final_value = self.eval(sequence)
 
                 self.environments.pop()
-                self.scope = self.scope -1
-
-                #regular while loop
+                self.scope -= 1
 
                 truth_value = self.eval(cond)
 
-                if type(truth_value)!=bool:
+                if type(truth_value) != bool:
                     raise InvalidCondition
                 
                 while(truth_value):
-                    self.scope = self.scope+1
+
+                    self.scope += 1
                     scp = self.scope
                     
                     current_scope_mappings={}
                     self.environments.append(current_scope_mappings)
-                    final_value = self.eval(seq)
+                    final_value = self.eval(sequence)
                     
                     truth_value= self.eval(cond)
                     self.environments.pop()
-                    self.scope = self.scope -1
+                    self.scope -= 1
                 
                 return final_value
             
