@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Declare, Assign, While, DoWhile
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile
 from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
 
 class RuntimeEnvironment():
@@ -141,6 +141,19 @@ class RuntimeEnvironment():
                     AST_sequence.append(NumLiteral(i))
                 return ASTSequence(AST_sequence)
 
+            case Print(expression):
+                if isinstance(expression, ASTSequence):
+                    expression_list = expression.seq
+                    for expression in expression_list[:-1]:
+                        print(expression.value) # TODO replace with something like: extract_value(exp)
+                                                # TODO so it works both for strings and numbers.
+                    print(expression_list[-1].value, end="")
+                    return expression_list[-1].value
+                else:
+                    to_return = self.eval(expression)
+                    print(to_return)
+                    return to_return
+
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
                 left = self.eval(left)
@@ -250,7 +263,6 @@ class RuntimeEnvironment():
                     self.scope -= 1
                 
                 return final_value
-            
             
             case DoWhile(sequence, cond):
 

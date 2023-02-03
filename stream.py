@@ -2,10 +2,10 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
 from core import RuntimeEnvironment
 
-keywords = "let assign for while repeat declare range do to if then else in end".split()
+keywords = "let assign for while repeat print declare range do to if then else in end".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
@@ -180,6 +180,8 @@ class Parser:
                 return self.parse_for()
             case Keyword("range"):
                 return self.parse_range()
+            case Keyword("print"):
+                return self.parse_print()
             case Keyword("declare"):
                 return self.parse_declare()
             case Keyword("while"):
@@ -324,6 +326,16 @@ class Parser:
         right = self.parse_atomic_expression()
         self.lexer.match(Keyword("end"))
         return Range(left, right)
+
+    def parse_print(self):
+        """
+        Parse a print statement.
+        Examples: | print a |, to print the value of a.
+        """
+        self.lexer.match(Keyword("print"))
+        expression = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return Print(expression)
 
     def parse_while(self):
         """

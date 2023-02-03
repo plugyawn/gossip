@@ -90,6 +90,9 @@ class ForLoop:
     val_list: list['AST']
     stat: 'AST' 
 
+@dataclass
+class Print:
+    value: 'AST'
         
 @dataclass
 class Declare:

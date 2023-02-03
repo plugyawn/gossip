@@ -169,6 +169,7 @@ class GossipArgumentParser(argparse.ArgumentParser):
         addarg("-f", "--from-file", type = str, help="path to input .gos file containing gossip.")
         addarg("-u", "--update", action="store_true", help="update the tool to the latest version, if available.")
         addarg("-i", "--interpret", action="store_true", help= "start a prompt where you can write pretty gossip.")
+        addarg("-s", "--show-feedback", action="store_true", help="show feedback whenever a command is written.")
 
         # Make sure data is properly formatted.
 
@@ -215,7 +216,10 @@ d"     YD                                     888                               
             sys.exit(0)
 
         if opts.interpret:
-            interpret()
+            if opts.show_feedback:
+                interpret(feedback = True)
+            else:
+                interpret()
             sys.exit(0)
 
         

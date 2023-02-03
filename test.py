@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare
 from utils.typechecker import StaticTypeChecker
 
 
@@ -340,10 +340,7 @@ def test_nested_assignment_scope_loops():
     stmt_innermost_2 = Assign(i,BinOp("-",i,increment))
 
     innermost_loop = While(innermost_loop_cond,ASTSequence([stmt_innermost_1,stmt_innermost_2]))
-    
 
-
-    #################
 
 
     second_loop_cond = BinOp("<",j,end)
@@ -354,8 +351,6 @@ def test_nested_assignment_scope_loops():
 
     second_loop = While(second_loop_cond,ASTSequence([second_loop_stmt1,second_loop_stmt2,second_loop_stmt3]))
 
-
-    ###############
 
     outermost_loop_cond = BinOp("<",i,end)
 
@@ -374,13 +369,9 @@ def test_nested_assignment_scope_loops():
 # main
 if __name__ == "__main__":
     test_eval()
-    #test_let_eval()
     test_bool_eval()
     test_sequence_eval()
-    #test_for_loop()
-    #test_stream_eval()
     
-    #added loop tests and sequence tests
     test_greater_than()
     test_sequence_and_assign()
     test_while()
