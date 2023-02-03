@@ -93,8 +93,29 @@ class ForLoop:
 @dataclass
 class Print:
     value: 'AST'
+        
+@dataclass
+class Declare:
+    var:'AST'
+    value: 'AST'
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop
+@dataclass
+class Assign:
+    var: 'AST'
+    expression: 'AST'
+
+@dataclass
+class While:
+    cond: 'AST'
+    seq: 'AST'
+    
+
+@dataclass
+class DoWhile:
+    seq: 'AST'
+    cond: 'AST'
+
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile
 
 
 Value = Fraction | bool
@@ -125,4 +146,3 @@ class Operator:
 @dataclass
 class Buffer:
     buf: str
-

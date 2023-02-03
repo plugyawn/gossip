@@ -2,10 +2,10 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Print
+from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile
 from core import RuntimeEnvironment
 
-keywords = "let assign for range print do to if then else in end".split()
+keywords = "let assign for while repeat print declare range do to if then else in end".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
@@ -182,6 +182,12 @@ class Parser:
                 return self.parse_range()
             case Keyword("print"):
                 return self.parse_print()
+            case Keyword("declare"):
+                return self.parse_declare()
+            case Keyword("while"):
+                return self.parse_while()
+            case Keyword("repeat"):
+                return self.parse_repeat()
             case Keyword("end"):
                 return self.lexer.__next__()
             case _:
@@ -331,6 +337,40 @@ class Parser:
         self.lexer.match(Keyword("end"))
         return Print(expression)
 
+    def parse_while(self):
+        """
+        Parse a while loop.
+        Examples: | while a == b do a + 1 end |, to define a and use it in an expression.
+        """
+        self.lexer.match(Keyword("while"))
+        cond = self.parse_expression()
+        self.lexer.match(Keyword("do"))
+        task = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return While(cond, task)
+
+    def parse_repeat(self):
+        """
+        Parse a repeat loop.
+        Examples: | repeat a + 1 until a == b |, to define a and use it in an expression.
+        """
+        self.lexer.match(Keyword("repeat"))
+        task = self.parse_expression()
+        self.lexer.match(Keyword("while"))
+        cond = self.parse_expression()
+        return DoWhile(task, cond)
+
+    def parse_declare(self):
+        """
+        Parse a declaration.
+        Examples: | declare a = 10 |, to declare a."""
+        self.lexer.match(Keyword("declare"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Operator("="))
+        a = self.parse_expression()
+        self.lexer.match(Keyword("end"))
+        return Declare(var, a)
+    
     def __iter__(self):
         return self
     

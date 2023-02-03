@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print
-from utils.errors import DefinitionError, InvalidProgramError
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile
+from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
 
 class RuntimeEnvironment():
     """
@@ -32,13 +32,80 @@ class RuntimeEnvironment():
                 return value
 
             case Variable(name):
-                max_depth = self.scope
-                while max_depth >= 0:
-                    if name in self.environments[max_depth]:
-                        return self.environments[max_depth][name]
-                    max_depth -= 1
+                #can add one more part about variables declared without a value 
+                #referring to outer scope variables with the same name
+                scope_1 = self.scope
+                while ( len(self.environments) < (scope_1+1)):
+                    scope_1 = scope_1 - 1
+                
+                #adding the not None helps me to assign an inner-scope "x" which was declared None
+                #with an outer-scope x
 
-                raise DefinitionError(name)
+                #this bypasses the rule of referring to the innermost declaration of "x" because "x" when
+                #declared None can create problems in Assign(x,(x+1))
+                #Only in such cases where I want to assign the new None "x" using the value of an
+                #outer "x"
+
+                ## OR
+
+                #We stay in the current scope, and raise an error that we are assigning a 
+                # initially-None variable in terms of itself.
+
+                while(scope_1>=0):
+                        if name in self.environments[scope_1]:
+                            return self.environments[scope_1][name]
+
+                        #   if(self.environment[scope_1][name]==None):
+                        #         raise AssignmentUsingNone(name)
+                            
+                        scope_1 = scope_1 - 1
+
+                raise DeclarationError(name)
+            
+            
+            #a declaration returns the value to be declared
+            case Declare(Variable(name), value):
+                value_to_be_declared = self.eval(value)
+                curent_scope = self.scope
+
+                if(name in self.environments[curent_scope]):
+                    raise VariableRedeclaration(name)
+                else:
+                    self.environments[curent_scope][name] = value_to_be_declared
+
+                return value_to_be_declared
+            
+            
+            case Assign(Variable(name) ,expression):
+
+                scp = self.scope
+                val = self.eval(expression)
+
+                if(name in self.environments[scp]):
+                    #variable has been declared in the current scope already
+                    #so, update it's assignment
+                    self.environments[scp][name]=val
+                else:
+                    flag = False
+                    scope_x = scp-1
+
+                    while(scope_x>=0):
+                        if(name in self.environments[scope_x]):
+                            #variable found declared in some outer scope
+                            #so, apply the assignment in that outer scope
+
+                            flag = True
+                            self.environments[scope_x][name]=val
+                            break
+                        else:
+                            scope_x=scope_x-1
+                    
+                    #trying to assign to an undeclared variable
+                    if(flag==False):
+                        raise DeclarationError(name)    
+                
+                return val
+            
 
             case ASTSequence(seq):
                 """
@@ -46,18 +113,11 @@ class RuntimeEnvironment():
                 then returns the evaluation of the last element.
                 """
                 for ast in seq[:-1]:
-                    self.eval(ast)
+                    x = self.eval(ast)
+                    #print(x)
 
                 return self.eval(seq[-1])
-
-            case Assign(Variable(name), e1):
-                """
-                Special case. Assigns a value to a variable.
-                """
-
-                v1 = self.eval(e1)
-                self.environments[0] = self.environments[0] | { name: v1 }
-                return v1
+            
 
             case Let(Variable(name), e1, e2):
                 """
@@ -179,5 +239,64 @@ class RuntimeEnvironment():
                     self.scope -= 1
                     self.environments.pop()
                 return(result)
-                        
+            
+            case While(cond, sequence):
+
+                truth_value = self.eval(cond)
+
+                if type(truth_value) != bool:
+                    raise InvalidCondition(cond)
+                
+                final_value = None
+
+                while(truth_value):
+
+                    self.scope += 1
+                    scp = self.scope
+                    
+                    current_scope_mappings={}
+                    self.environments.append(current_scope_mappings)
+                    final_value = self.eval(sequence)
+                    
+                    truth_value= self.eval(cond)
+                    self.environments.pop()
+                    self.scope -= 1
+                
+                return final_value
+            
+            
+            case DoWhile(sequence, cond):
+
+                final_value = None
+                self.scope += 1
+                scp = self.scope
+                    
+                current_scope_mappings={}
+                self.environments.append(current_scope_mappings)
+                final_value = self.eval(sequence)
+
+                self.environments.pop()
+                self.scope -= 1
+
+                truth_value = self.eval(cond)
+
+                if type(truth_value) != bool:
+                    raise InvalidCondition
+                
+                while(truth_value):
+
+                    self.scope += 1
+                    scp = self.scope
+                    
+                    current_scope_mappings={}
+                    self.environments.append(current_scope_mappings)
+                    final_value = self.eval(sequence)
+                    
+                    truth_value= self.eval(cond)
+                    self.environments.pop()
+                    self.scope -= 1
+                
+                return final_value
+            
+                
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
