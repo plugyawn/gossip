@@ -297,5 +297,32 @@ class RuntimeEnvironment():
                 
                 return final_value
             
+
+            case funct_def(name, arg_list, body, ret_val):
+                func = [arg_list, body, ret_val]
+                self.func_defs[name] = func
+
+            #dynamic scoping on function calls 
+            case funct_call(name, arg_val):
+                if name in self.func_defs:
+                    self.scope = self.scope + 1
+                    dict = {}
+                    arg_name = self.func_defs[0]
+                    if(len(arg_name)!=len(arg_val)):
+                        raise Exception("Not enough arguements")
+                    for x in range(len(arg_name)):
+                        v1 = self.eval(arg_val[x])
+                        dict[arg_name] = v1
+                    self.environment.append(dict)
+                    m = self.eval(self.func_defs[1])
+                    m1 = self.eval(self.func_defs[2])
+                    self.environment.pop()
+                    self.scope -= 1 
+                    return(m1)
+                else:
+                    raise Exception("Function is not defined")           
+            
+            
+            
                 
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
