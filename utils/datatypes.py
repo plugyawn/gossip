@@ -115,7 +115,18 @@ class DoWhile:
     seq: 'AST'
     cond: 'AST'
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile
+@dataclass
+class funct_def:
+    f_name: str
+    var_list : list[str]
+    body : 'AST'
+    ret_val : 'AST'
+
+class funct_call:
+    f_name: str
+    var_val: list['AST']
+
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile | funct_def | funct_call
 
 
 Value = Fraction | bool
