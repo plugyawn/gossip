@@ -15,6 +15,7 @@ class RuntimeEnvironment():
         self.environments.append({})
         self.environment = self.environments[0]
         self.scope = 0
+        self.func_defs = {}
 
     def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
         """
@@ -22,6 +23,7 @@ class RuntimeEnvironment():
         By default, retains the environment from the runtime environment.
         However, you can pass in an environment to override this.
         """
+        
         if environment:
             self.environment = environment
         if not self.environment:
@@ -301,22 +303,23 @@ class RuntimeEnvironment():
             case funct_def(name, arg_list, body, ret_val):
                 func = [arg_list, body, ret_val]
                 self.func_defs[name] = func
+                return(NumLiteral(0))
 
             #dynamic scoping on function calls 
             case funct_call(name, arg_val):
                 if name in self.func_defs:
                     self.scope = self.scope + 1
                     dict = {}
-                    arg_name = self.func_defs[0]
+                    arg_name = self.func_defs[name][0]
                     if(len(arg_name)!=len(arg_val)):
                         raise Exception("Not enough arguements")
                     for x in range(len(arg_name)):
                         v1 = self.eval(arg_val[x])
-                        dict[arg_name] = v1
-                    self.environment.append(dict)
-                    m = self.eval(self.func_defs[1])
-                    m1 = self.eval(self.func_defs[2])
-                    self.environment.pop()
+                        dict[arg_name[x].name] = v1
+                    self.environments.append(dict)
+                    m = self.eval(self.func_defs[name][1])
+                    m1 = self.eval(self.func_defs[name][2])
+                    self.environments.pop()
                     self.scope -= 1 
                     return(m1)
                 else:
