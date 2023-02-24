@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Declare
+from utils.visualizer import ASTViz
 from stream import Stream, Lexer, Parser
 
 color_codes = {
@@ -53,19 +54,22 @@ INVERSE = COLORMAP["inverse"]
 BRIGHT_INVERSE = COLORMAP["bright_inverse"]
 
 
-def interpret(feedback = False):
+def interpret(feedback = False, visualize = False):
     runtime = RuntimeEnvironment()
     while True:
         line = input(f"{GREEN}{BOLD}gossip{RESET} >>> ")
         if line == "exit":
             break
-        
+
         L = Lexer.from_stream(Stream.from_string(line))
         S = Parser.from_lexer(L)
+
         for s in S:
+            if visualize:
+                vis = ASTViz(depth = 0, code = line)
+                vis.treebuilder(s)
             if feedback:
                 print(f"{RED}{runtime.eval(s)}{RESET}")
             else:
                 runtime.eval(s)
             # runtime.eval(s)
-
