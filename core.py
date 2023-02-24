@@ -4,6 +4,7 @@ from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile
 from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
 
+
 class RuntimeEnvironment():
     """
     The runtime environment. Instantiate to start a new environment.
@@ -32,38 +33,18 @@ class RuntimeEnvironment():
                 return value
 
             case Variable(name):
-                #can add one more part about variables declared without a value 
-                #referring to outer scope variables with the same name
-                scope_1 = self.scope
-                while ( len(self.environments) < (scope_1+1)):
-                    scope_1 = scope_1 - 1
-                
-                #adding the not None helps me to assign an inner-scope "x" which was declared None
-                #with an outer-scope x
+                scope = self.scope
+                while len(self.environments) < (scope + 1):
+                    scope -= 1
 
-                #this bypasses the rule of referring to the innermost declaration of "x" because "x" when
-                #declared None can create problems in Assign(x,(x+1))
-                #Only in such cases where I want to assign the new None "x" using the value of an
-                #outer "x"
-
-                ## OR
-
-                #We stay in the current scope, and raise an error that we are assigning a 
-                # initially-None variable in terms of itself.
-
-                while(scope_1>=0):
-                        if name in self.environments[scope_1]:
-                            return self.environments[scope_1][name]
-
-                        #   if(self.environment[scope_1][name]==None):
-                        #         raise AssignmentUsingNone(name)
-                            
-                        scope_1 = scope_1 - 1
+                while scope >= 0:
+                        if name in self.environments[scope]:
+                            return self.environments[scope][name]
+                        scope -= 1
 
                 raise DeclarationError(name)
             
             
-            #a declaration returns the value to be declared
             case Declare(Variable(name), value):
                 value_to_be_declared = self.eval(value)
                 curent_scope = self.scope
@@ -76,32 +57,23 @@ class RuntimeEnvironment():
                 return value_to_be_declared
             
             
-            case Assign(Variable(name) ,expression):
-
-                scp = self.scope
+            case Assign(Variable(name), expression):
                 val = self.eval(expression)
 
-                if(name in self.environments[scp]):
-                    #variable has been declared in the current scope already
-                    #so, update it's assignment
-                    self.environments[scp][name]=val
+                if name in self.environments[self.scope]:
+                    self.environments[self.scope][name] = val
                 else:
                     flag = False
-                    scope_x = scp-1
-
-                    while(scope_x>=0):
-                        if(name in self.environments[scope_x]):
-                            #variable found declared in some outer scope
-                            #so, apply the assignment in that outer scope
-
+                    scope = self.scope - 1
+                    while scope >= 0:
+                        if name in self.environments[scope]:
                             flag = True
-                            self.environments[scope_x][name]=val
+                            self.environments[scope][name] = val
                             break
                         else:
-                            scope_x=scope_x-1
+                            scope -= 1
                     
-                    #trying to assign to an undeclared variable
-                    if(flag==False):
+                    if not flag:
                         raise DeclarationError(name)    
                 
                 return val
@@ -114,7 +86,6 @@ class RuntimeEnvironment():
                 """
                 for ast in seq[:-1]:
                     x = self.eval(ast)
-                    #print(x)
 
                 return self.eval(seq[-1])
             
