@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare, funct_def, funct_call, funct_ret
 from utils.typechecker import StaticTypeChecker
 
 
@@ -366,16 +366,26 @@ def test_nested_assignment_scope_loops():
     assert(r.eval(prgrm)==10)
 
 
+# testing for function
+
+def test_for_func():
+    r = RuntimeEnvironment()
+    a = NumLiteral(9)
+    t  = Variable("a")
+    li = [t]
+    li_ = [a]
+    f = Print(t)
+    f_2 = funct_ret(a)
+    f_3 = ASTSequence([f,f_2])
+    go = funct_def("hi", li, f_3)
+    go_ = funct_call("hi", li_)
+    r.eval(go)
+    print(r.eval(go_))
+
+
 # main
 if __name__ == "__main__":
-    test_eval()
-    test_bool_eval()
-    test_sequence_eval()
-    
-    test_greater_than()
-    test_sequence_and_assign()
-    test_while()
-    test_while_initial_cond_false()
-    test_do_while_initial_cond_true()
-    test_do_while_initial_cond_false()
+    test_for_func()
     test_nested_assignment_scope_loops()
+    
+    
