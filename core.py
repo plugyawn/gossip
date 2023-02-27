@@ -1,331 +1,391 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, funct_call, funct_def
-from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
+from core import RuntimeEnvironment
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare, funct_def, funct_call, funct_ret
+from utils.typechecker import StaticTypeChecker
 
-class RuntimeEnvironment():
-    """
-    The runtime environment. Instantiate to start a new environment.
-    Includes, most importantly, the eval method, which evaluates an AST
-    recursively.
-    """
-    def __init__(self):
-        self.environments = []
-        self.environments.append({})
-        self.environment = self.environments[0]
-        self.scope = 0
-        self.func_defs = {}
 
-    def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
-        """
-        Recursively evaluates an AST or ASTSequence, returning a Value.
-        By default, retains the environment from the runtime environment.
-        However, you can pass in an environment to override this.
-        """
+def test_eval():
+    """
+    Tests the eval method of the runtime environment.
+    """
+    checker = StaticTypeChecker()
+    runtime = RuntimeEnvironment()
+    e1 = NumLiteral(2)
+    e2 = NumLiteral(7)
+    e3 = NumLiteral(9)
+    e4 = NumLiteral(5)
+    e5 = BinOp("+", e2, e3) # 16
+    e6 = BinOp("/", e5, e4) # 3.2
+    e7 = BinOp("*", e1, e6) # 6.4
+    assert checker.check(e7).type == NumType()
+    e5 = BinOp("+", e2, e3) # 16
+    e6 = BinOp("/", e5, e4) # 3.2
+    e7 = BinOp("*", e1, e6) # 6.4
+    assert checker.check(e7).type == NumType()
+    assert runtime.eval(e7) == Fraction(32, 5)
+
+    e8 = UnOp("-", e7)
+    assert checker.check(e8).type == NumType()
+    assert checker.check(e8).type == NumType()
+    assert runtime.eval(e8) == Fraction(-32, 5)
+
+# def test_let_eval():
+#     """
+#     Tests the eval method of the runtime environment with the Let paradigm.
+#     """
+#     checker = StaticTypeChecker()
+#     runtime = RuntimeEnvironment()
+#     a  = Variable("a")
+#     e1 = NumLiteral(5)
+#     e4 = NumLiteral(10)
+#     e7 = NumLiteral(4)
+#     e2 = BinOp("+", a, a)
+#     e  = Let(a, e1, BinOp("+", a, Let(a, e2, e2)))
+#     assert runtime.eval(e) == 25
+#     e  = Let(a, e1, BinOp("+", Let(a, e2, e2), a))
+#     assert runtime.eval(e) == 25
+#     e3 = NumLiteral(6)
+#     e  = BinOp("+", Let(a, e1, e2), Let(a, e3, e2))
+#     assert runtime.eval(e) == 22
+#     e10 = Let(a,e4,e2)
+#     e8 = BinOp("*",a,e7)
+#     e9 = BinOp("==",e10,e8)
+#     e = Let(a, e1, e9)
+#     assert runtime.eval(e) == True
+    
+
+def test_bool_eval():
+    """
+    Tests the eval method of the runtime environment with boolean expressions.
+    """
+    checker = StaticTypeChecker()
+    runtime = RuntimeEnvironment()
+    a = NumLiteral(5)
+    b = NumLiteral(6)
+    c = NumLiteral(1)
+
+    e = BinOp("==", a, BinOp("-", b, c))
+    assert checker.check(e).type == BoolType()
+    assert runtime.eval(e) == True
+
+    e = BinOp("!=", a, BinOp("-", b, c))
+    assert checker.check(e).type == BoolType()
+    assert runtime.eval(e) == False
+
+    e = If(BinOp("==", a, BinOp("-", b, c)), NumLiteral(1), NumLiteral(2))
+
+    assert runtime.eval(e) == Fraction(1)
+
+def test_sequence_eval():
+    runtime = RuntimeEnvironment()
+    a = NumLiteral(5)
+    b = NumLiteral(6)
+    c = NumLiteral(1)
+
+    v = Variable("v")
+    w = Let(v, a, a)
+    x = Let(v, BinOp("+", v, v), a)
+
+    p = Let(v, b, b)
+    q = Let(v, BinOp("-", v, v), b) 
+
+
+    f = ASTSequence([w, x, v])
+    g = ASTSequence([p, q, v])
+
+
+    g = If(BinOp("==", a, BinOp("-", b, c)), f, g)
+
+
+# def test_for_loop():
+#     runtime = RuntimeEnvironment()
+#     a = NumLiteral(0)
+#     b = NumLiteral(1)
+#     c = NumLiteral(2)
+#     d = NumLiteral(3)
+#     e = NumLiteral(4)
+#     f = NumLiteral(5) 
+#     g = [a,b,c,d,e,f]
+#     h  = Variable("h")
+#     e2 = BinOp("+", h, h)
+#     lo = ForLoop(h,g,e2)
+#     assert runtime.eval(lo) == 10
+
+
+# def test_stream_eval():
+#     runtime = RuntimeEnvironment()
+
+#     string = """
+#     let b = 6 end
+#     let a = 5 end
+#     if a == b then a+2 else a+1 end
+#     """
+#     L = Lexer.from_stream(Stream.from_string(string))
+#     runtime = RuntimeEnvironment()
+#     S = Parser.from_lexer(L)
+#     for s in S:
+#         runtime.eval(s)
+
+
+def test_greater_than():
+    r = RuntimeEnvironment()
+    a = NumLiteral(5)
+    b = NumLiteral(6)
+    c = BinOp(">=",b,a)
+
+    assert(r.eval(c)==True)
+
+def test_sequence_and_assign():
+    r = RuntimeEnvironment()
+    a = NumLiteral(10)
+    b = NumLiteral(6)
+    f = NumLiteral(2)
+
+    inital_declare_value = NumLiteral(0)
+
+    v = Variable("v")
+    w = Variable("w")
+
+    c_dec = Declare(v,inital_declare_value)
+    c = Assign(v,BinOp("+",a,b))
+
+    d_dec = Declare(w,inital_declare_value)
+    d = Assign(w,BinOp("*",v,v))
+
+    e = Assign(w,BinOp("/",w,f))
+
+    s = ASTSequence([c_dec,c,d_dec,d,e])
+
+    assert(r.eval(s)==128)
+
+def test_while():
+    r = RuntimeEnvironment()
+
+    j = Variable("j")
+    i = Variable("i")
+    x = Variable("x")
+    
+
+    double_it = NumLiteral(2)
+    start = NumLiteral(0)
+    increment = NumLiteral(1)
+    end = NumLiteral(8)
+
+    
+    stmt_init_j = Declare(j,start)
+    stmt_init_x = Declare(x,start)
+    cond = BinOp("<=",j,end)
+    
+    stmt0 = Declare(i,start)
+    stmt1 = Assign(i,BinOp("*",j,double_it))
+    stmt2 = Assign(x,BinOp("+",x,i))
+    stmt3 = Assign(j,BinOp("+",j,increment))
+
+    loop_statements = ASTSequence([stmt0,stmt1,stmt2,stmt3])
+    loop = While(cond,loop_statements)
+
+    s = ASTSequence([stmt_init_j,stmt_init_x,loop])
+
+    assert(r.eval(s)==9)
+
+    ## test looks like
+
+    # int j=0
+    # int x=0
+
+    # while(j<=8):
+    #     int i = 0
+    #     i = 2*j
+    #     x = x+i
+    #     j=j+1
+
+
+def test_while_initial_cond_false():
+    r = RuntimeEnvironment()
+
+    j = Variable("j")
+    i = Variable("i")
+    x = Variable("x")
+    
+
+    double_it = NumLiteral(2)
+    start = NumLiteral(0)
+    increment = NumLiteral(1)
+    end = NumLiteral(8)
+
+    
+    stmt_init_j = Declare(j,start)
+    stmt_init_x = Declare(x,start)
+    cond = BinOp(">=",j,end)
+
+    stmt0 = Declare(i,start)    
+    stmt1 = Assign(i,BinOp("*",j,double_it))
+    stmt2 = Assign(x,BinOp("+",x,i))
+    stmt3 = Assign(j,BinOp("+",j,increment))
+
+    loop_statements = ASTSequence([stmt0,stmt1,stmt2,stmt3])
+    loop = While(cond,loop_statements)
+
+    s = ASTSequence([stmt_init_j,stmt_init_x,loop])
+
+    assert(r.eval(s)==None)  
+
+
+# #for an initially true condition, while and do-while work identically
+def test_do_while_initial_cond_true():
+    r = RuntimeEnvironment()
+
+    j = Variable("j")
+    i = Variable("i")
+    x = Variable("x")
+    
+
+    double_it = NumLiteral(2)
+    start = NumLiteral(0)
+    increment = NumLiteral(1)
+    end = NumLiteral(8)
+
+    
+    stmt_init_j = Declare(j,start)
+    stmt_init_x = Declare(x,start)
+    cond = BinOp("<=",j,end)
+
+    stmt0 = Declare(i,start)    
+    stmt1 = Assign(i,BinOp("*",j,double_it))
+    stmt2 = Assign(x,BinOp("+",x,i))
+    stmt3 = Assign(j,BinOp("+",j,increment))
+
+    loop_statements = ASTSequence([stmt0,stmt1,stmt2,stmt3])
+    loop = DoWhile(loop_statements,cond)
+
+    s = ASTSequence([stmt_init_j,stmt_init_x,loop])
+
+    assert(r.eval(s)==9) 
+
+
+# #for an initially false conditon, while doesn't work and do-while executes once
+
+def test_do_while_initial_cond_false():
+    r = RuntimeEnvironment()
+
+    j = Variable("j")
+    i = Variable("i")
+    x = Variable("x")
+    
+
+    double_it = NumLiteral(2)
+    start = NumLiteral(0)
+    increment = NumLiteral(1)
+    end = NumLiteral(8)
+
+    
+    stmt_init_j = Declare(j,start)
+    stmt_init_x = Declare(x,start)
+    ##change is here
+    cond = BinOp(">=",j,end)
+    
+    stmt0 = Declare(i,start)
+    stmt1 = Assign(i,BinOp("*",j,double_it))
+    stmt2 = Assign(x,BinOp("+",x,i))
+    stmt3 = Assign(j,BinOp("+",j,increment))
+
+    loop_statements = ASTSequence([stmt0,stmt1,stmt2,stmt3])
+    loop = DoWhile(loop_statements,cond)
+
+    s = ASTSequence([stmt_init_j,stmt_init_x,loop])
+
+    assert(r.eval(s)==1)
+
+
+def test_nested_assignment_scope_loops():
+
+    # int c = 0
+    # int i = 0
+
+    # while(i<10):
+    #     int j = 0
+
+    #     while(j<10):
+    #         int i=5
+
+    #         while(i>0):
+    #             c=c+1
+    #             i=i-1
+            
+    #         j=j+1
         
-        if environment:
-            self.environment = environment
-        if not self.environment:
-            self.environment = {}
+    #     i=i+1
+    
+    # c should be 500
 
-        match program:
-            case NumLiteral(value):
-                return value
+    r = RuntimeEnvironment()
 
-            case Variable(name):
-                #can add one more part about variables declared without a value 
-                #referring to outer scope variables with the same name
-                scope_1 = self.scope
-                while ( len(self.environments) < (scope_1+1)):
-                    scope_1 = scope_1 - 1
-                
-                #adding the not None helps me to assign an inner-scope "x" which was declared None
-                #with an outer-scope x
+    c = Variable("c")
+    i = Variable("i")
+    j = Variable("j")
 
-                #this bypasses the rule of referring to the innermost declaration of "x" because "x" when
-                #declared None can create problems in Assign(x,(x+1))
-                #Only in such cases where I want to assign the new None "x" using the value of an
-                #outer "x"
+    start = NumLiteral(0)
+    end = NumLiteral(10)
+    increment = NumLiteral(1)
+    five =  NumLiteral(5)
 
-                ## OR
 
-                #We stay in the current scope, and raise an error that we are assigning a 
-                # initially-None variable in terms of itself.
+    declare_c = Declare(c,start)
+    declare_i = Declare(i,start)
 
-                while(scope_1>=0):
-                        if name in self.environments[scope_1]:
-                            return self.environments[scope_1][name]
+    innermost_loop_cond = BinOp(">",i,start)
+    stmt_innermost_1 = Assign(c,BinOp("+",c,increment))
+    stmt_innermost_2 = Assign(i,BinOp("-",i,increment))
 
-                        #   if(self.environment[scope_1][name]==None):
-                        #         raise AssignmentUsingNone(name)
-                            
-                        scope_1 = scope_1 - 1
+    innermost_loop = While(innermost_loop_cond,ASTSequence([stmt_innermost_1,stmt_innermost_2]))
 
-                raise DeclarationError(name)
-            
-            
-            #a declaration returns the value to be declared
-            case Declare(Variable(name), value):
-                value_to_be_declared = self.eval(value)
-                curent_scope = self.scope
 
-                if(name in self.environments[curent_scope]):
-                    raise VariableRedeclaration(name)
-                else:
-                    self.environments[curent_scope][name] = value_to_be_declared
 
-                return value_to_be_declared
-            
-            
-            case Assign(Variable(name) ,expression):
+    second_loop_cond = BinOp("<",j,end)
 
-                scp = self.scope
-                val = self.eval(expression)
+    second_loop_stmt1 = Declare(i,five)
+    second_loop_stmt2 = innermost_loop
+    second_loop_stmt3 = Assign(j,BinOp("+",j,increment))
 
-                if(name in self.environments[scp]):
-                    #variable has been declared in the current scope already
-                    #so, update it's assignment
-                    self.environments[scp][name]=val
-                else:
-                    flag = False
-                    scope_x = scp-1
+    second_loop = While(second_loop_cond,ASTSequence([second_loop_stmt1,second_loop_stmt2,second_loop_stmt3]))
 
-                    while(scope_x>=0):
-                        if(name in self.environments[scope_x]):
-                            #variable found declared in some outer scope
-                            #so, apply the assignment in that outer scope
 
-                            flag = True
-                            self.environments[scope_x][name]=val
-                            break
-                        else:
-                            scope_x=scope_x-1
-                    
-                    #trying to assign to an undeclared variable
-                    if(flag==False):
-                        raise DeclarationError(name)    
-                
-                return val
-            
+    outermost_loop_cond = BinOp("<",i,end)
 
-            case ASTSequence(seq):
-                """
-                Special case. Evaluates all but the last element in a loop, 
-                then returns the evaluation of the last element.
-                """
-                for ast in seq[:-1]:
-                    x = self.eval(ast)
-                    #print(x)
+    outermost_loop_stmt1 = Declare(j,start)
+    outermost_loop_stmt2 = second_loop
+    outermost_loop_stmt3 = Assign(i,BinOp("+",i,increment))
 
-                return self.eval(seq[-1])
-            
+    outermost_loop = While(outermost_loop_cond,ASTSequence([outermost_loop_stmt1,outermost_loop_stmt2,outermost_loop_stmt3]))
 
-            case Let(Variable(name), e1, e2):
-                """
-                Let is a special case. It evaluates e1, then adds the result
-                to the environment, then evaluates e2 with the new environment.
-                """
-                value = self.eval(e1)
-                self.scope += 1
-                self.environments.append({ name: value })
-                expression = self.eval(e2)
-                self.environments.pop()
-                self.scope -= 1
-                return expression
 
-            case Range(left, right):
-                """
-                Evaluates and returns range from left to return, as an ASTSequence.
-                """
-                AST_sequence = []
-                for i in range(int(left.value), int(right.value)+1):
-                    AST_sequence.append(NumLiteral(i))
-                return ASTSequence(AST_sequence)
+    prgrm = ASTSequence([declare_c,declare_i,outermost_loop])
 
-            case Print(expression):
-                if isinstance(expression, ASTSequence):
-                    expression_list = expression.seq
-                    for expression in expression_list[:-1]:
-                        print(expression.value) # TODO replace with something like: extract_value(exp)
-                                                # TODO so it works both for strings and numbers.
-                    print(expression_list[-1].value, end="")
-                    return expression_list[-1].value
-                else:
-                    to_return = self.eval(expression)
-                    print(to_return)
-                    return to_return
+    assert(r.eval(prgrm)==10)
 
-            # Binary operations are all the same, except for the operator.
-            case BinOp("+", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left + right
-            case BinOp("-", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left - right
-            case BinOp("*", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left * right
-            case BinOp("/", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left / right
-            case BinOp("==", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left == right
-            case BinOp("!=", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left != right
-            case BinOp("<", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left < right
-            case BinOp(">", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left > right
-            case BinOp("<=", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left <= right
-            case BinOp(">=", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left >= right
-            case BinOp("&&", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left and right
-            case BinOp("||", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left or right
 
-            case BinOp("=", Variable(name), right):
-                right = self.eval(right)
-                self.environments[0] = self.environments[0] | { name: right }
-                return right
+# testing for function
 
-            # Unary operation is the same, except for the operator.
-            case UnOp("-", right):
-                return 0 - self.eval(right)
+def test_for_func():
+    r = RuntimeEnvironment()
+    a = NumLiteral(9)
+    t  = Variable("a")
+    li = [t]
+    li_ = [a]
+    f = Print(t)
+    f_2 = funct_ret(a)
+    f_3 = ASTSequence([f,f_2])
+    go = funct_def("hi", li, f_3)
+    go_ = funct_call("hi", li_)
+    r.eval(go)
+    print(r.eval(go_))
 
-            # Again, If is different, so we define it separately.
-            case If(cond, e1, e2):
-                if self.eval(cond) == True:
-                    self.scope += 1
-                    to_return = self.eval(e1)
-                    self.scope -= 1
-                else:
-                    self.scope += 1
-                    to_return = self.eval(e2)
-                    self.scope -= 1
-                
-                return to_return
-            
-            case ForLoop(Variable(name), sequence, stat):
-                if not isinstance(sequence, ASTSequence):
-                    sequence = self.eval(sequence)
-                length = sequence.length
-                value_list = sequence.seq
-                for expression in value_list: 
-                    v1 = self.eval(expression)
-                    self.scope += 1
-                    self.environments.append({ name : v1 })
-                    result = self.eval(stat)
-                    self.scope -= 1
-                    self.environments.pop()
-                return(result)
-            
-            case While(cond, sequence):
 
-                truth_value = self.eval(cond)
-
-                if type(truth_value) != bool:
-                    raise InvalidCondition(cond)
-                
-                final_value = None
-
-                while(truth_value):
-
-                    self.scope += 1
-                    scp = self.scope
-                    
-                    current_scope_mappings={}
-                    self.environments.append(current_scope_mappings)
-                    final_value = self.eval(sequence)
-                    
-                    truth_value= self.eval(cond)
-                    self.environments.pop()
-                    self.scope -= 1
-                
-                return final_value
-            
-            case DoWhile(sequence, cond):
-
-                final_value = None
-                self.scope += 1
-                scp = self.scope
-                    
-                current_scope_mappings={}
-                self.environments.append(current_scope_mappings)
-                final_value = self.eval(sequence)
-
-                self.environments.pop()
-                self.scope -= 1
-
-                truth_value = self.eval(cond)
-
-                if type(truth_value) != bool:
-                    raise InvalidCondition
-                
-                while(truth_value):
-
-                    self.scope += 1
-                    scp = self.scope
-                    
-                    current_scope_mappings={}
-                    self.environments.append(current_scope_mappings)
-                    final_value = self.eval(sequence)
-                    
-                    truth_value= self.eval(cond)
-                    self.environments.pop()
-                    self.scope -= 1
-                
-                return final_value
-            
-
-            case funct_def(name, arg_list, body, ret_val):
-                func = [arg_list, body, ret_val]
-                self.func_defs[name] = func
-                return(NumLiteral(0))
-
-            #dynamic scoping on function calls 
-            case funct_call(name, arg_val):
-                if name in self.func_defs:
-                    self.scope = self.scope + 1
-                    dict = {}
-                    arg_name = self.func_defs[name][0]
-                    if(len(arg_name)!=len(arg_val)):
-                        raise Exception("Not enough arguements")
-                    for x in range(len(arg_name)):
-                        v1 = self.eval(arg_val[x])
-                        dict[arg_name[x].name] = v1
-                    self.environments.append(dict)
-                    m = self.eval(self.func_defs[name][1])
-                    m1 = self.eval(self.func_defs[name][2])
-                    self.environments.pop()
-                    self.scope -= 1 
-                    return(m1)
-                else:
-                    raise Exception("Function is not defined")           
-            
-            
-            
-                
-        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+# main
+if __name__ == "__main__":
+    test_for_func()
+    test_nested_assignment_scope_loops()
+    
+    
