@@ -382,10 +382,30 @@ def test_for_func():
     r.eval(go)
     print(r.eval(go_))
 
+# test for recursive functions, a function to find the factorial of a number 
+def test_rec_funct():
+    r = RuntimeEnvironment()
+    a = NumLiteral(7)
+    a2 = NumLiteral(1)
+    t  = Variable("a")
+    li = [t]
+    li_ = [a]
+    cond = BinOp("<=",t ,a2)
+    e1 = funct_ret(a2)
+    e2_1 = Assign(t,BinOp("-",t,a2))
+    e4 = funct_call("hi", li)
+    e2_2 = funct_ret(BinOp("*",BinOp("+",t,a2),e4))
+    e2 = ASTSequence([e2_1, e2_2])
+    f = If(cond, e1, e2)
+    go = funct_def("hi", li, f)
+    go_ = funct_call("hi", li_)
+    r.eval(go)
+    print(r.eval(go_)) 
 
 # main
 if __name__ == "__main__":
     test_for_func()
     test_nested_assignment_scope_loops()
+    test_rec_funct()
     
     
