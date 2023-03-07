@@ -1,0 +1,52 @@
+digraph {
+	label="for a in range 1 to 10 end do if c > 3 then a=a+1 else b=b+1 end end"
+	node_0 [label=For shape=invtriangle]
+	node_1 [label=a]
+	node_0 -> node_1
+	node_2 [label=1]
+	range_2 [label=2]
+	node_2 -> range_2
+	range_3 [label=3]
+	range_2 -> range_3
+	range_4 [label=4]
+	range_3 -> range_4
+	range_5 [label=5]
+	range_4 -> range_5
+	range_6 [label=6]
+	range_5 -> range_6
+	range_7 [label=7]
+	range_6 -> range_7
+	range_8 [label=8]
+	range_7 -> range_8
+	range_9 [label=9]
+	range_8 -> range_9
+	node_0 -> node_2
+	node_3 [label=If shape=diamond]
+	node_4 [label=">"]
+	node_5 [label=c]
+	node_4 -> node_5
+	node_6 [label=3]
+	node_4 -> node_6
+	node_3 -> node_4
+	node_7 [label="="]
+	node_8 [label=a]
+	node_7 -> node_8
+	node_9 [label="+"]
+	node_10 [label=a]
+	node_9 -> node_10
+	node_11 [label=1]
+	node_9 -> node_11
+	node_7 -> node_9
+	node_3 -> node_7
+	node_12 [label="="]
+	node_13 [label=b]
+	node_12 -> node_13
+	node_14 [label="+"]
+	node_15 [label=b]
+	node_14 -> node_15
+	node_16 [label=1]
+	node_14 -> node_16
+	node_12 -> node_14
+	node_3 -> node_12
+	node_0 -> node_3
+}

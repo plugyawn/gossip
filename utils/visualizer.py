@@ -5,6 +5,7 @@ from utils.errors import EndOfStream, EndOfTokens, TokenError
 from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
 from core import RuntimeEnvironment
 import graphviz as gv
+from math import floor
 
 dot  = gv.Digraph()
 dot.node_attr.update(shape='box', style='rounded')
@@ -42,10 +43,30 @@ class ASTViz:
             dot.edge(id, self.treebuilder(node.e1, self.depth))
             dot.edge(id, self.treebuilder(node.e2, self.depth))
 
+        if type(node) == While:
+            dot.node(id, "While", shape = "invtriangle")
+            dot.edge(id, self.treebuilder(node.cond, self.depth))
+            dot.edge(id, self.treebuilder(node.seq, self.depth))
+
+        if type(node) == ForLoop:
+            dot.node(id, "For", shape = "invtriangle")
+            dot.edge(id, self.treebuilder(node.var, self.depth))
+            dot.edge(id, self.treebuilder(node.val_list, self.depth))
+            dot.edge(id, self.treebuilder(node.stat, self.depth))
+
+        if type(node) == Range:
+            dot.node(id, f"{floor(node.start.value)}")
+            range_id = "range_{}"
+            past_node = id
+            for _ in range(floor(node.start.value) + 1, floor(node.end.value)):
+                current_node = range_id.format(_)
+                dot.node(current_node, f"{_}")
+                dot.edge(past_node, current_node)
+                past_node = current_node
+
         if type(node) == Declare:
             dot.node(id, "Declare")
             dot.edge(id, self.treebuilder(node.var, self.depth))
-            print(node.value, self.depth, "pass as edge from Declare")
             dot.edge(id, self.treebuilder(node.value, self.depth))
             
         if type(node) == Variable:
