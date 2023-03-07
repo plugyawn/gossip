@@ -29,6 +29,7 @@ class RuntimeEnvironment():
             self.environment = environment
         if not self.environment:
             self.environment = {}
+        
 
         match program:
             case NumLiteral(value):
@@ -68,6 +69,9 @@ class RuntimeEnvironment():
             
             #a declaration returns the value to be declared
             case Declare(Variable(name), value):
+                while ( len(self.environments) < (self.scope+1)):
+                    self.scope = self.scope - 1
+                    
                 value_to_be_declared = self.eval(value)
                 curent_scope = self.scope
 
@@ -81,9 +85,11 @@ class RuntimeEnvironment():
             
             case Assign(Variable(name) ,expression):
 
+                
+                while ( len(self.environments) < (self.scope+1)):
+                    self.scope = self.scope - 1
                 scp = self.scope
                 val = self.eval(expression)
-
                 if(name in self.environments[scp]):
                     #variable has been declared in the current scope already
                     #so, update it's assignment
@@ -305,6 +311,7 @@ class RuntimeEnvironment():
 
 
             case funct_ret(funct_val):
+                #print(funct_val)
                 return(self.eval(funct_val))
             
             case funct_def(name, arg_list, body):
