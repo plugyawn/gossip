@@ -56,10 +56,10 @@ class ASTViz:
 
         if type(node) == Range:
             dot.node(id, f"{floor(node.start.value)}")
-            range_id = "range_{}"
+            range_id = "range_{}_{}"
             past_node = id
             for _ in range(floor(node.start.value) + 1, floor(node.end.value)):
-                current_node = range_id.format(_)
+                current_node = range_id.format(_, self.depth)
                 dot.node(current_node, f"{_}")
                 dot.edge(past_node, current_node)
                 past_node = current_node
