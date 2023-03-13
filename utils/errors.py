@@ -76,3 +76,10 @@ class AssignmentUsingNone(Exception):
     def __init__(self,var):
         self.var = var
         print(f"Trying to assign using {var} which has no assigned value itself.")
+
+class InvalidFileExtensionError(Exception):
+    """
+    Raised when the file extension is not valid.
+    """
+    def __init__(self, ext):
+        print(f"InvalidFileExtension: {ext} is not a valid file extension for gossip language.")
