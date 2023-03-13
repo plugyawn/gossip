@@ -292,7 +292,7 @@ class Parser:
     def parse_assign(self):
         """
         Parse an assignment.
-        Examples: | a = 6 |, to assign 6 to a.
+        Examples: | assign a = 6 end |, to assign 6 to a.
         """
         self.lexer.match(Keyword("assign"))
         var = self.parse_atomic_expression()
@@ -330,7 +330,7 @@ class Parser:
     def parse_print(self):
         """
         Parse a print statement.
-        Examples: | print a |, to print the value of a.
+        Examples: | print a end |, to print the value of a.
         """
         self.lexer.match(Keyword("print"))
         expression = self.parse_expression()
@@ -363,7 +363,7 @@ class Parser:
     def parse_declare(self):
         """
         Parse a declaration.
-        Examples: | declare a = 10 |, to declare a."""
+        Examples: | declare a = 10 end |, to declare a."""
         self.lexer.match(Keyword("declare"))
         var = self.parse_atomic_expression()
         self.lexer.match(Operator("="))
