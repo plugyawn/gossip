@@ -2,16 +2,10 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping, Optional
 
-@dataclass
-class NumType:
-    pass
 
-@dataclass
-class BoolType:
-    pass
-
-SimType = NumType | BoolType
-
+"""
+The following are used in the typechecking step.
+"""
 @dataclass
 class NumType:
     pass
@@ -78,6 +72,7 @@ class Range:
     start: 'AST'
     end: 'AST'
     type: Optional[SimType] = None
+
 @dataclass
 class ASTSequence:
     seq: list['AST'] | list
@@ -117,8 +112,9 @@ class DoWhile:
 
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile
 
-
 Value = Fraction | bool
+
+
 """
 The following are used in the lexer.
 """
