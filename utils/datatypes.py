@@ -2,15 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping, Optional
 
-@dataclass
-class NumType:
-    pass
-
-@dataclass
-class BoolType:
-    pass
-
-SimType = NumType | BoolType
+# Supported variable types
 
 @dataclass
 class NumType:

@@ -170,6 +170,7 @@ class GossipArgumentParser(argparse.ArgumentParser):
         addarg("-u", "--update", action="store_true", help="update the tool to the latest version, if available.")
         addarg("-i", "--interpret", action="store_true", help= "start a prompt where you can write pretty gossip.")
         addarg("-s", "--show-feedback", action="store_true", help="show feedback whenever a command is written.")
+        addarg("-v", "--visualize", action="store_true", help="show a visualization of the gossip code, line by line.")
 
         # Make sure data is properly formatted.
 
@@ -216,10 +217,7 @@ d"     YD                                     888                               
             sys.exit(0)
 
         if opts.interpret:
-            if opts.show_feedback:
-                interpret(feedback = True)
-            else:
-                interpret()
+            interpret(feedback = opts.show_feedback, visualize = opts.visualize)
             sys.exit(0)
 
         
