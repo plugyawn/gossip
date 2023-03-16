@@ -109,7 +109,11 @@ class Bool:
 @dataclass
 class Keyword:
     word: str
-
+        
+@dataclass
+class Symbols:
+    symbol: str
+        
 @dataclass
 class Identifier:
     word: str
