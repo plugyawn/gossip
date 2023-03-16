@@ -138,3 +138,6 @@ class Operator:
 @dataclass
 class Buffer:
     buf: str
+@dataclass
+class Symbols:
+    symbol: str
