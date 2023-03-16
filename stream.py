@@ -2,14 +2,16 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range
+from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
 from core import RuntimeEnvironment
 
-keywords = "let assign for range do to if then else in end".split()
+
+keywords = "let assign for while repeat print declare range do to if then else in  ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = " \t\n"
-symbols = ", ; ( )".split()
+symbols = "; , ( ) { } [ ] ".split()
+
 
 @dataclass
 class Stream:
@@ -39,7 +41,7 @@ class Stream:
         self.pos = self.pos - 1
 
 # Define the token types.
-Token = Num | Bool | Keyword | Identifier | Operator
+Token = Num | Bool | Keyword | Identifier | Operator | Symbols
 
 def word_to_token(word):
     if word in keywords:
@@ -52,6 +54,8 @@ def word_to_token(word):
         return Bool(False)
     if word in symbolic_operators:
         return Operator(word)
+    if word in symbols:
+        return Symbols(word)
     return Identifier(word)
 
 @dataclass
@@ -113,8 +117,15 @@ class Lexer:
                                 return word_to_token(s)
                         except EndOfStream:
                             return word_to_token(s)
+
+                case c if c in symbols: 
+                    s = c
+                    return word_to_token(s)
                 case c if c in whitespace:
                     return self.next_token()
+
+
+    
         except EndOfStream:
             raise EndOfTokens
 
@@ -180,7 +191,19 @@ class Parser:
                 return self.parse_for()
             case Keyword("range"):
                 return self.parse_range()
-            case Keyword("end"):
+            case Keyword("print"):
+                return self.parse_print()
+            case Keyword("declare"):
+                return self.parse_declare()
+            case Keyword("while"):
+                return self.parse_while()
+            case Keyword("repeat"):
+                return self.parse_repeat()
+            case Symbols(";"):
+                return self.lexer.__next__()
+            case Symbols("{"):
+                return self.parse_ast_seq()
+            case Symbols("}"):
                 return self.lexer.__next__()
             case _:
                 return self.parse_simple()
@@ -265,7 +288,7 @@ class Parser:
         a = self.parse_expression()
         self.lexer.match(Keyword("in"))
         b = self.parse_expression()
-        self.lexer.match(Keyword("end"))
+        self.lexer.match(Symbols(";"))
         return Let(var, a, b)
 
     def parse_if(self):
@@ -279,6 +302,7 @@ class Parser:
         e1 = self.parse_expression()
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
+        self.lexer.match(Symbols(";"))
         return If(cond, e1, e2)
 
     def parse_assign(self):
@@ -290,7 +314,7 @@ class Parser:
         var = self.parse_atomic_expression()
         self.lexer.match(Operator("="))
         a = self.parse_expression()
-        self.lexer.match(Keyword("end"))
+        self.lexer.match(Symbols(";"))
         return Assign(var, a)
 
     def parse_for(self):
@@ -304,7 +328,7 @@ class Parser:
         iter = self.parse_expression()
         self.lexer.match(Keyword("do"))
         task = self.parse_expression()
-        self.lexer.match(Keyword("end"))
+        self.lexer.match(Symbols(";"))
         return ForLoop(var, iter, task)
 
     def parse_range(self):
@@ -313,12 +337,66 @@ class Parser:
         Examples: | range 1 to 10 |, to define a range from 1 to 10.
         """
         self.lexer.match(Keyword("range"))
+        self.lexer.match(Symbols("("))
         left = self.parse_atomic_expression()
-        self.lexer.match(Keyword("to"))
+        self.lexer.match(Symbols(","))
         right = self.parse_atomic_expression()
-        self.lexer.match(Keyword("end"))
+        self.lexer.match(Symbols(")"))
         return Range(left, right)
 
+    def parse_print(self):
+        """
+        Parse a print statement.
+        Examples: | print a |, to print the value of a.
+        """
+        self.lexer.match(Keyword("print"))
+        expression = self.parse_expression()
+        self.lexer.match(Symbols(";"))
+        return Print(expression)
+
+    def parse_while(self):
+        """
+        Parse a while loop.
+        Examples: | while a == b do a + 1 end |, to define a and use it in an expression.
+        """
+        self.lexer.match(Keyword("while"))
+        cond = self.parse_expression()
+        self.lexer.match(Keyword("do"))
+        task = self.parse_expression()
+        self.lexer.match(Symbols(";"))
+        return While(cond, task)
+
+    def parse_repeat(self):
+        """
+        Parse a repeat loop.
+        Examples: | repeat a + 1 until a == b |, to define a and use it in an expression.
+        """
+        self.lexer.match(Keyword("repeat"))
+        task = self.parse_expression()
+        self.lexer.match(Keyword("while"))
+        cond = self.parse_expression()
+        self.lexer.match(Symbols(";"))
+        return DoWhile(task, cond)
+
+    def parse_declare(self):
+        """
+        Parse a declaration.
+        Examples: | declare a = 10 |, to declare a."""
+        self.lexer.match(Keyword("declare"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Operator("="))
+        a = self.parse_expression()
+        self.lexer.match(Symbols(";"))
+        return Declare(var, a)
+    
+    def parse_ast_seq(self):
+        li = []
+        self.lexer.match(Symbols("{"))
+        while self.lexer.peek_token() != Symbols("}"):    
+            var = self.parse_expression()
+            li.append(var)
+        self.lexer.match(Symbols("}"))
+        return ASTSequence(li)
     def __iter__(self):
         return self
     
