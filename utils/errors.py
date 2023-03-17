@@ -76,3 +76,28 @@ class AssignmentUsingNone(Exception):
     def __init__(self,var):
         self.var = var
         print(f"Trying to assign using {var} which has no assigned value itself.")
+
+
+
+
+class InvalidConcatenation(Exception):
+    def __init__(self):
+        print(f"Invalid attempted concatenation of different operand types.")
+
+
+class InvalidSlicing(Exception):
+    def __init__(self,msg=None):
+        if(msg==None):
+            print(msg)
+        else:
+            print(f"Slice index out of range.")
+
+
+class InvalidOperation(Exception):
+    def __init__(self, op, opr1, opr2=None):
+        if(opr2==None):
+            print(f"Invalid operation. Cannot perform {op} on {opr1} objects.")
+
+        print(f"Invalid operation. Cannot perform {op} on {opr1} and {opr2} objects.")
+
+

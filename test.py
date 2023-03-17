@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare, StringLiteral, ListObject, StringSlice
 from utils.typechecker import StaticTypeChecker
-
+from utils.errors import *
 
 def test_eval():
     """
@@ -366,6 +366,102 @@ def test_nested_assignment_scope_loops():
     assert(r.eval(prgrm)==10)
 
 
+#strings test
+
+def test_strings_assignment():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = StringLiteral("Jack")
+    val2 = StringLiteral("Bauer")
+    
+
+    declare_x = Declare(x,val)
+    assign_x = Assign(x,val2)
+
+    block = ASTSequence([declare_x,assign_x])
+
+    assert(r.eval(block)=="Bauer")
+
+
+def test_strings_concat():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    y = Variable("y")
+    val = StringLiteral("Jack")
+    val2 = StringLiteral("Bauer")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,val2)
+
+    concat = BinOp("+",x,y)
+    assign_x = Assign(x,concat)
+
+    block = ASTSequence([declare_x, declare_y, assign_x, x])
+
+    assert(r.eval(block)=="JackBauer")
+
+def test_strings_concat_error():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    y = Variable("y")
+    val = StringLiteral("Jack")
+    val2 = NumLiteral(10)
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,val2)
+
+    concat = BinOp("+",x,y)
+    assign_x = Assign(x,concat)
+
+    block = ASTSequence([declare_x, declare_y, assign_x, x])
+
+    assert(r.eval(block)==InvalidConcatenation)
+
+
+def test_strings_slicing():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = StringLiteral("JackBauer")
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    strt = NumLiteral(0)
+    end = NumLiteral(4)
+    sliced = StringSlice(x,strt,end)
+    declare_y = Declare(y,sliced)
+
+
+    block = ASTSequence([declare_x, declare_y, y])
+    assert(r.eval(block)=="Jack")
+
+
+
+# #Numbers and bools are treated as the same, need some more datatype distinction.
+# def test_need_more_errors():
+#     r = RuntimeEnvironment()
+#     x = Variable("x")
+#     y = Variable("y")
+
+#     declare_x = Declare(x,StringLiteral("Jack"))
+#     declare_y = Declare(y,BoolLiteral(True))
+
+#     stmt = BinOp("/",x,y)
+#     block = ASTSequence([declare_x,declare_y,stmt])
+
+#     assert(r.eval(block)=="Jack")
+
+
+
+
+
+
 # main
 if __name__ == "__main__":
     test_eval()
@@ -379,3 +475,8 @@ if __name__ == "__main__":
     test_do_while_initial_cond_true()
     test_do_while_initial_cond_false()
     test_nested_assignment_scope_loops()
+    test_strings_assignment()
+    test_strings_concat()
+    test_strings_concat_error()
+    test_strings_slicing()
+    test_need_more_errors()

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile
-from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice
+from utils.datatypes import NumType,BoolType,StringType,ListType
+
+from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation
 
 
 class RuntimeEnvironment():
@@ -31,6 +33,31 @@ class RuntimeEnvironment():
         match program:
             case NumLiteral(value):
                 return value
+            
+            case BoolLiteral(value):
+                return value
+            
+            case StringLiteral(value):
+                return value
+            
+            case StringSlice(Variable(name),start, end):
+                full_string = self.eval(Variable(name))
+
+                #slice indices must be integers and our default type is Fraction for numbers
+                strt = int(self.eval(start))
+                d_end = int(self.eval(end))
+
+                
+                try:
+                    return full_string[strt:d_end]
+                except:
+                    if(strt<0 or d_end>len(full_string)):
+                        raise InvalidSlicing("Slice Index out of range")
+                    else:
+                        raise InvalidSlicing()
+
+
+
 
             case Variable(name):
                 scope = self.scope
@@ -46,6 +73,9 @@ class RuntimeEnvironment():
             
             
             case Declare(Variable(name), value):
+                # if(value.type==StringType):
+                # TODO : bind variables to the types of their values
+
                 value_to_be_declared = self.eval(value)
                 curent_scope = self.scope
 
@@ -127,62 +157,122 @@ class RuntimeEnvironment():
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
-                left = self.eval(left)
-                right = self.eval(right)
-                return left + right
+                try:
+                    if(left.type==StringType and right.type==StringType):
+                        print("gotcha")
+                        dummy_string = left.value + right.value
+                        return dummy_string
+                    else:
+                        left = self.eval(left)
+                        right = self.eval(right)
+                        return left + right
+                except:
+                    return InvalidConcatenation
+
             case BinOp("-", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left - right
+                try:
+                    return left - right
+                except:
+                    raise InvalidOperation("-",left,right)
             case BinOp("*", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left * right
+                try:
+                    return left * right
+                except:
+                    raise InvalidOperation("*",left,right)
             case BinOp("/", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left / right
+                try:
+                    return left / right
+                except:
+                    raise InvalidOperation("/",left,right)
+                
             case BinOp("==", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left == right
+                
+                try:
+                    return left == right
+                except:
+                    raise InvalidOperation("==",left,right)
             case BinOp("!=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left != right
+                
+                try:
+                    return left != right
+                except:
+                    raise InvalidOperation("!=",left,right)
+                
             case BinOp("<", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left < right
+
+                try:
+                    return left < right
+                except:
+                    raise InvalidOperation("<",left,right)
+                
             case BinOp(">", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left > right
+
+                try:
+                    return left > right
+                except:
+                    raise InvalidOperation(">",left,right)
+                
             case BinOp("<=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left <= right
+                
+                try:
+                    return left <= right
+                except:
+                    raise InvalidOperation("<=",left,right)
+                
             case BinOp(">=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left >= right
+                
+                try:
+                    return left >= right
+                except:
+                    raise InvalidOperation(">=",left,right)
+                
             case BinOp("&&", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left and right
+                
+                try:
+                    return left and right
+                except:
+                    raise InvalidOperation("&&",left,right)
+                
             case BinOp("||", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
-                return left or right
+                
+                try:
+                    return left or right
+                except:
+                    raise InvalidOperation("||",left,right)
 
-            case BinOp("=", Variable(name), right):
-                right = self.eval(right)
-                self.environments[0] = self.environments[0] | { name: right }
-                return right
+            # case BinOp("=", Variable(name), right):
+            #     right = self.eval(right)
+            #     self.environments[0] = self.environments[0] | { name: right }
+            #     return right
 
             # Unary operation is the same, except for the operator.
             case UnOp("-", right):
-                return 0 - self.eval(right)
+                try:
+                    return 0 - self.eval(right)
+                except:
+                    InvalidOperation("Unary Negation",)
 
             # Again, If is different, so we define it separately.
             case If(cond, e1, e2):
