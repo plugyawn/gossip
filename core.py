@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
-from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation
+from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
 
 
 class RuntimeEnvironment():
@@ -57,7 +57,66 @@ class RuntimeEnvironment():
                         raise InvalidSlicing()
 
 
+            case ListObject(elements,element_type):
+                n = len(elements)
 
+                for i in range(n):
+                    if(type(self.eval(elements[i])) is not element_type):
+                        raise InvalidArgumentToList(element_type)
+                    elements[i] = self.eval(elements[i])
+                
+                return elements
+            
+
+
+            case ListCons(to_add, base_list):
+                to_add = self.eval(to_add)
+                the_type = None
+                scp = self.scope
+
+                if(isinstance(base_list,ListObject)):
+                    the_type = base_list.element_type
+                elif(isinstance(base_list,Variable)):
+
+                    while(scp>=0):
+                        if(base_list.name in self.environments[scp]):
+                            the_type = self.environments[scp][base_list.name]['element_type']
+                    
+                        scp-=1
+
+                    if(the_type==None):
+                        raise ListError("Variable referenced during Cons operation doesn't exist.")
+                                        
+                else:
+                    raise ListError("Argument to Cons() is not a list.")
+                
+
+
+
+                if(type(to_add) is not the_type):
+                    raise ListError("Input element is not of the same type as given list type.")
+                
+
+
+                new_list = []
+                new_list.append(to_add)
+                
+                if(isinstance(base_list,ListObject)):
+                    for num in base_list:
+                        new_list.append(num)
+                else:
+                    for num in self.eval(base_list):
+                        new_list.append(num)
+                
+
+                if(isinstance(base_list,Variable)):
+                    SCOPE = self.scope
+                    self.environments[SCOPE][base_list.name]['value'] = new_list
+                
+
+
+                return new_list            
+            
 
             case Variable(name):
                 scope = self.scope
@@ -65,40 +124,114 @@ class RuntimeEnvironment():
                     scope -= 1
 
                 while scope >= 0:
-                        if name in self.environments[scope]:
-                            return self.environments[scope][name]
-                        scope -= 1
+                    if name in self.environments[scope]:
+                        return self.environments[scope][name]['value']
+                    scope -= 1
 
                 raise DeclarationError(name)
             
             
             case Declare(Variable(name), value):
-                # if(value.type==StringType):
-                # TODO : bind variables to the types of their values
 
-                value_to_be_declared = self.eval(value)
                 curent_scope = self.scope
-
                 if(name in self.environments[curent_scope]):
                     raise VariableRedeclaration(name)
-                else:
-                    self.environments[curent_scope][name] = value_to_be_declared
 
-                return value_to_be_declared
+                if(isinstance(value,ListObject)):
+                    elems = self.eval(value)
+                    scp = self.scope
+                    
+                    self.environments[curent_scope][name] = {}
+                    self.environments[scp][name]['value'] = elems
+                    self.environments[scp][name]['type'] = list
+                    self.environments[scp][name]['element_type'] = value.element_type
+
+                    return elems
+                
+                elif(isinstance(value,Variable)):
+                    value_to_be_declared = self.eval(value)
+                    value_type = None
+                    value_name = value.name
+                    if_val_is_list_its_el_type = None
+
+                    scp = self.scope
+                    while len(self.environments) < (scp + 1):
+                        scp-= 1
+
+                    while scp >= 0:
+                        if value_name in self.environments[scp]:
+                            value_type = self.environments[scp][value_name]['type']
+
+                            if(value_type is list):
+                                if_val_is_list_its_el_type = self.environments[scp][value_name]['element_type']
+
+                        scp -= 1
+
+
+
+                    curent_scope = self.scope
+
+                    if(if_val_is_list_its_el_type==None):
+                        
+                        self.environments[curent_scope][name] = {}
+                        self.environments[curent_scope][name]['value'] = value_to_be_declared
+                        self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+
+                    else:
+                        
+                        self.environments[curent_scope][name] = {}
+                        self.environments[curent_scope][name]['value'] = value_to_be_declared
+                        self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+                        self.environments[curent_scope][name]['element_type'] = if_val_is_list_its_el_type
+                
+                    return value_to_be_declared
+
+
+
+                else:
+                    value_to_be_declared = self.eval(value)
+                    curent_scope = self.scope
+                    
+                    
+                    self.environments[curent_scope][name] = {}
+                    self.environments[curent_scope][name]['value'] = value_to_be_declared
+                    self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+
+                    return value_to_be_declared
+                
+
+                
             
             
             case Assign(Variable(name), expression):
                 val = self.eval(expression)
 
+                var_type = None
+                scp = self.scope
+
+                while len(self.environments) < (scp + 1):
+                    scp-= 1
+
+                while scp >= 0:
+                    if name in self.environments[scp]:
+                        var_type = self.environments[scp][name]['type']
+
+                    scp -= 1
+                
+                if(var_type is not type(val)):
+                    raise BadAssignment(name,var_type,type(val))
+
+
+
                 if name in self.environments[self.scope]:
-                    self.environments[self.scope][name] = val
+                    self.environments[self.scope][name]['value'] = val
                 else:
                     flag = False
                     scope = self.scope - 1
                     while scope >= 0:
                         if name in self.environments[scope]:
                             flag = True
-                            self.environments[scope][name] = val
+                            self.environments[scope][name]['value'] = val
                             break
                         else:
                             scope -= 1
@@ -125,9 +258,9 @@ class RuntimeEnvironment():
                 Let is a special case. It evaluates e1, then adds the result
                 to the environment, then evaluates e2 with the new environment.
                 """
-                value = self.eval(e1)
+                val = self.eval(e1)
                 self.scope += 1
-                self.environments.append({ name: value })
+                self.environments.append({ name: {'value': val} })
                 expression = self.eval(e2)
                 self.environments.pop()
                 self.scope -= 1
@@ -154,6 +287,36 @@ class RuntimeEnvironment():
                     to_return = self.eval(expression)
                     print(to_return)
                     return to_return
+
+            
+            
+            #List Operations
+
+            case ListOp("is-empty?", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)!=0):
+                    return False
+                else:
+                    return True
+
+            case ListOp("head", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)==0):
+                    raise ListError("No head in an empty list")
+                else:
+                    return base_list[0]
+            
+            case ListOp("tail", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)==0):
+                    raise ListError("No tail in an empty list")
+                else:
+                    return base_list[1:]
+
+
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
@@ -190,6 +353,15 @@ class RuntimeEnvironment():
                     return left / right
                 except:
                     raise InvalidOperation("/",left,right)
+            
+            case BinOp("%", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+
+                try:
+                    return left%right
+                except:
+                    raise InvalidOperation("%", left, right)
                 
             case BinOp("==", left, right):
                 left = self.eval(left)
@@ -267,12 +439,16 @@ class RuntimeEnvironment():
             #     self.environments[0] = self.environments[0] | { name: right }
             #     return right
 
+
+
+
+
             # Unary operation is the same, except for the operator.
             case UnOp("-", right):
                 try:
                     return 0 - self.eval(right)
                 except:
-                    InvalidOperation("Unary Negation",)
+                    InvalidOperation("Unary Negation",right)
 
             # Again, If is different, so we define it separately.
             case If(cond, e1, e2):

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Union, Mapping, Optional
+from typing import Union, Mapping, Optional, List
 
 # Supported variable types
 
@@ -46,12 +46,24 @@ class StringLiteral:
     
 
 
-
 @dataclass
 class ListObject:
-    value: list
-    type: ListType()
-    element_type: None
+    elements: list()
+    element_type: int | float | str | list
+    type: Optional[ListType] = ListType()
+
+
+@dataclass
+class ListCons:
+    to_add: 'AST'
+    base_list: 'AST'
+    #If I have an empty 
+
+
+@dataclass
+class ListOp:
+    op: str
+    base_list: 'AST'
 
 
 @dataclass
@@ -145,13 +157,12 @@ class While:
     
 
 
-
 @dataclass
 class DoWhile:
     seq: 'AST'
     cond: 'AST'
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While| DoWhile | StringLiteral | ListObject | StringSlice
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While| DoWhile | StringLiteral | ListObject | StringSlice | ListCons | ListOp
 
 
 Value = Fraction | bool | str | list
