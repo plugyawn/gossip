@@ -76,3 +76,47 @@ class AssignmentUsingNone(Exception):
     def __init__(self,var):
         self.var = var
         print(f"Trying to assign using {var} which has no assigned value itself.")
+
+
+
+
+class InvalidConcatenation(Exception):
+    def __init__(self):
+        print(f"Invalid attempted concatenation of different operand types.")
+
+
+class InvalidSlicing(Exception):
+    def __init__(self,msg=None):
+        if(msg==None):
+            print(msg)
+        else:
+            print(f"Slice index out of range.")
+
+
+class InvalidOperation(Exception):
+    def __init__(self, op, opr1, opr2=None):
+        if(opr2==None):
+            print(f"Invalid operation. Cannot perform {op} on {opr1} objects.")
+
+        print(f"Invalid operation. Cannot perform {op} on {opr1} and {opr2} objects.")
+
+
+class InvalidArgumentToList(Exception):
+    def __init__(self, list_type):
+        print(f"One or more inputs to list are not of type {list_type}.")
+
+
+
+class ListError(Exception):
+    def __init__(self,msg):
+        print(msg)
+
+
+class ReferentialError(Exception):
+    def __init__(self,var):
+        print(f"The variable {var} referenced during assignment does not exist.")
+
+
+class BadAssignment(Exception):
+    def __init__(self,var,var_type,val_type):
+        print(f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type")

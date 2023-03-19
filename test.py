@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Let, Value, If, Print, BoolLiteral, UnOp, ASTSequence, NumType, BoolType, ForLoop, Assign, While, DoWhile, Declare, StringLiteral, ListObject, StringSlice, ListCons, ListOp
 from utils.typechecker import StaticTypeChecker
-
+from utils.errors import *
 
 def test_eval():
     """
@@ -366,16 +366,311 @@ def test_nested_assignment_scope_loops():
     assert(r.eval(prgrm)==10)
 
 
+#strings test
+
+def test_strings_assignment():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = StringLiteral("Jack")
+    val2 = StringLiteral("Bauer")
+    
+
+    declare_x = Declare(x,val)
+    assign_x = Assign(x,val2)
+
+    block = ASTSequence([declare_x,assign_x])
+
+    assert(r.eval(block)=="Bauer")
+
+
+def test_strings_concat():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    y = Variable("y")
+    val = StringLiteral("Jack")
+    val2 = StringLiteral("Bauer")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,val2)
+
+    concat = BinOp("+",x,y)
+    assign_x = Assign(x,concat)
+
+    block = ASTSequence([declare_x, declare_y, assign_x, x])
+
+    assert(r.eval(block)=="JackBauer")
+
+def strings_concat_error():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    y = Variable("y")
+    val = StringLiteral("Jack")
+    val2 = NumLiteral(10)
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,val2)
+
+    concat = BinOp("+",x,y)
+    assign_x = Assign(x,concat)
+
+    block = ASTSequence([declare_x, declare_y, assign_x, x])
+
+    assert(r.eval(block)==InvalidConcatenation)
+
+
+def test_strings_slicing():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = StringLiteral("JackBauer")
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    strt = NumLiteral(0)
+    end = NumLiteral(4)
+    sliced = StringSlice(x,strt,end)
+    declare_y = Declare(y,sliced)
+
+
+    block = ASTSequence([declare_x, declare_y, y])
+    assert(r.eval(block)=="Jack")
+
+
+
+
+def test_list_assgn_and_variability():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+
+
+    block = ASTSequence([declare_x, declare_y, y])
+    
+    assert(r.eval(block)==[1,2,3,4,5])
+
+
+
+def test_list_cons():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+    z = Variable("z")
+    w = Variable("w")
+    declare_z = Declare(z,NumLiteral(4))
+    declare_w = Declare(w, NumLiteral(5))
+
+    add_to_y = ListCons(BinOp("+",z,w),y)
+
+
+
+    block = ASTSequence([declare_x, declare_y, declare_w, declare_z, add_to_y, y])
+    
+    assert(r.eval(block)==[9,1,2,3,4,5])
+
+
+def list_type_wont_change_error():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+    z = Variable("z")
+    
+    declare_z = Declare(z, StringLiteral("JackBauer"))
+    add_to_y = ListCons(z,y)
+
+    block = ASTSequence([declare_x, declare_y, declare_z, add_to_y, y])
+    
+    assert(r.eval(block)==["JackBauer",1,2,3,4,5])
+
+
+
+def mut_var_wont_change_type():
+    r = RuntimeEnvironment()
+    x = Variable("x")
+
+    declare_x = Declare(x,NumLiteral(5))
+    assign_x = Assign(x,StringLiteral("JackBauer"))
+
+    block = ASTSequence([declare_x,assign_x])
+
+    #assertion will fail as Fraction type variable "x" can't be set to a string now.
+    assert(r.eval(block)=="JackBauer")
+
+
+def test_list_head():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+    z = Variable("z")
+    w = Variable("w")
+    declare_z = Declare(z,NumLiteral(4))
+    declare_w = Declare(w, NumLiteral(5))
+
+    add_to_y = ListCons(BinOp("+",z,w),y)
+    get_y_head = ListOp("head",y)
+
+
+
+    block = ASTSequence([declare_x, declare_y, declare_w, declare_z, add_to_y, get_y_head])
+    
+    assert(r.eval(block)==9)
+
+
+
+def test_list_tail():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+    z = Variable("z")
+    w = Variable("w")
+    declare_z = Declare(z,NumLiteral(4))
+    declare_w = Declare(w, NumLiteral(5))
+
+    add_to_y = ListCons(BinOp("+",z,w),y)
+    get_y_tail = ListOp("tail",y)
+
+
+
+    block = ASTSequence([declare_x, declare_y, declare_w, declare_z, add_to_y, get_y_tail])
+    
+    assert(r.eval(block)==[1,2,3,4,5])
+
+
+
+
+def test_list_isempty():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([NumLiteral(1),NumLiteral(2),NumLiteral(3),NumLiteral(4),NumLiteral(5)], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    
+    z = Variable("z")
+    w = Variable("w")
+    declare_z = Declare(z,NumLiteral(4))
+    declare_w = Declare(w, NumLiteral(5))
+
+    add_to_y = ListCons(BinOp("+",z,w),y)
+    get_y_isempty = ListOp("is-empty?",y)
+
+
+
+    block = ASTSequence([declare_x, declare_y, declare_w, declare_z, add_to_y, get_y_isempty])
+    
+    assert(r.eval(block)==False)
+
+
+
+
+def test_list_isempty_true():
+    r = RuntimeEnvironment()
+
+    x = Variable("x")
+    val = ListObject([], Fraction)
+    y = Variable("y")
+    
+
+    declare_x = Declare(x,val)
+    declare_y = Declare(y,x)
+    get_y_isempty = ListOp("is-empty?",y)
+
+
+
+    block = ASTSequence([declare_x, declare_y, get_y_isempty])
+    
+    assert(r.eval(block)==True)
+
+
+
+
+
 # main
 if __name__ == "__main__":
     test_eval()
     test_bool_eval()
     test_sequence_eval()
-    
     test_greater_than()
+
     test_sequence_and_assign()
     test_while()
     test_while_initial_cond_false()
     test_do_while_initial_cond_true()
     test_do_while_initial_cond_false()
     test_nested_assignment_scope_loops()
+
+    test_strings_assignment()
+    test_strings_concat()
+    test_strings_slicing()
+
+
+    test_list_assgn_and_variability()
+    test_list_cons()
+    test_list_head()
+    test_list_tail()
+    test_list_isempty()
+    test_list_isempty_true()
+
+
+    # ERROR TESTS
+
+    #1
+    # strings_concat_error()  #will display error for concatenating number with string
+    # - won't be detected by pytest, will be detected when running test.py
+
+
+
+    #2
+    # list_type_wont_change_error() #will display error for inserting an element of different type in a list
+    # - won't be detected by pytest, will be detected when running test.py
+
+
+
+    #3
+    #mut_var_wont_change_type()  #will display error for trying to assign a string value to a variable 
+    # initially declared as a number.
+
+    

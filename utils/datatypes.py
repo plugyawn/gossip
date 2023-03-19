@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Union, Mapping, Optional
+from typing import Union, Mapping, Optional, List
 
 # Supported variable types
 
@@ -13,6 +13,15 @@ class BoolType:
     pass
 
 SimType = NumType | BoolType
+
+@dataclass
+class StringType:
+    pass
+
+@dataclass
+class ListType:
+    pass
+
 
 """
 The following are used in the evaluation step.
@@ -28,6 +37,34 @@ class NumLiteral:
 class BoolLiteral:
     value: bool
     type = BoolType()
+
+
+@dataclass
+class StringLiteral:
+    value: str
+    type: Optional[StringType] = StringType()
+    
+
+
+@dataclass
+class ListObject:
+    elements: list()
+    element_type: int | float | str | list
+    type: Optional[ListType] = ListType()
+
+
+@dataclass
+class ListCons:
+    to_add: 'AST'
+    base_list: 'AST'
+    #If I have an empty 
+
+
+@dataclass
+class ListOp:
+    op: str
+    base_list: 'AST'
+
 
 @dataclass
 class BinOp:
@@ -45,7 +82,15 @@ class UnOp:
 @dataclass
 class Variable:
     name: str
-    type: Optional[SimType] = None
+    type: Optional[NumType|BoolType|StringType|ListType]=None
+
+
+@dataclass
+class StringSlice:
+    var: Variable
+    start: NumType()
+    end: NumType()
+
 
 @dataclass
 class Let:
@@ -70,11 +115,14 @@ class Range:
     start: 'AST'
     end: 'AST'
     type: Optional[SimType] = None
+
+
 @dataclass
 class ASTSequence:
     seq: list['AST'] | list
     type: Optional[SimType] = None
     length = lambda self: len(self.seq)
+
 
 @dataclass
 class ForLoop:
@@ -82,19 +130,25 @@ class ForLoop:
     val_list: list['AST']
     stat: 'AST' 
 
+
 @dataclass
 class Print:
     value: 'AST'
         
+
+
 @dataclass
 class Declare:
     var:'AST'
     value: 'AST'
 
+
 @dataclass
 class Assign:
     var: 'AST'
     expression: 'AST'
+
+
 
 @dataclass
 class While:
@@ -102,15 +156,19 @@ class While:
     seq: 'AST'
     
 
+
 @dataclass
 class DoWhile:
     seq: 'AST'
     cond: 'AST'
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While| DoWhile | StringLiteral | ListObject | StringSlice | ListCons | ListOp
 
 
-Value = Fraction | bool
+Value = Fraction | bool | str | list
+
+
+
 """
 The following are used in the lexer.
 """
@@ -122,6 +180,15 @@ class Num:
 @dataclass
 class Bool:
     b: bool
+
+@dataclass
+class StringToken:
+    s: str
+
+
+@dataclass
+class ListToken:
+    l: list
 
 @dataclass
 class Keyword:
