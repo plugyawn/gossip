@@ -72,6 +72,13 @@ class ListCons:
 class ListOp:
     op: str
     base_list: "AST"
+    index : Optional[SimType] = None
+
+
+@dataclass
+class ListIndex:
+    index: 'AST'
+    base_list: 'AST'
 
 
 @dataclass

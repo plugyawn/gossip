@@ -1,27 +1,17 @@
 from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
-<<<<<<< HEAD
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, StringLiteral, StringSlice, ListObject, ListCons, ListOp
-=======
-from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
 from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
-<<<<<<< HEAD
 whitespace = " \t\n"
 symbols = "; , ( ) { } [ ] ' .".split()
 list_utils = "cons head tail empty".split()
-=======
-whitespace = [" ", "\n"]
-symbols = "; , ( ) { } [ ] ".split()
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 
 r = RuntimeEnvironment()
 
@@ -55,11 +45,7 @@ class Stream:
 
 
 # Define the token types.
-<<<<<<< HEAD
 Token = Num | Bool | Keyword | Identifier | Operator | Symbols | StringToken | ListToken
-=======
-Token = Num | Bool | Keyword | Identifier | Operator | Symbols | Whitespace
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 
 def word_to_token(word):
     if word in keywords:
@@ -273,6 +259,44 @@ class Parser:
                 return ListOp(s,obj)
             else:
                 return ListOp(op_val,obj)
+    
+
+    def parse_list_index(self,obj):
+        self.lexer.match(Symbols("["))
+        op_val_var = self.parse_atomic_expression()
+        self.lexer.match(Symbols("]"))
+
+        # if not isinstance(op_val_var,Variable):
+        #     raise ListOpError("Invalid function for lists.")
+        
+        # op_val = op_val_var.name
+        # if op_val not in list_utils:
+        #     raise ListOpError("Invalid function for lists.")
+        
+        # print(op_val)
+        
+        # if(op_val == 'cons'):
+        #     self.lexer.match(Symbols("("))
+        #     to_add = self.parse_expression()
+        #     self.lexer.match(Symbols(")"))
+
+        #     # print("In Cons")
+        #     # print(ListCons(to_add,obj))
+
+        #     return ListCons(to_add,obj)        
+        # else:
+        #     # print("In Rest Operations")
+            
+        #     if(op_val=='empty'):
+        #         s = "is-"
+        #         s+=op_val
+        #         s+="?"
+
+        #         return ListOp(s,obj)
+        #     else:
+        #         return ListOp(op_val,obj)
+
+        return ListIndex(op_val_var,obj)
 
 
 
@@ -333,6 +357,8 @@ class Parser:
 
                 if(self.lexer.peek_token()==Symbols(".")):
                     return self.parse_list_op(obj=Variable(name))
+                elif(self.lexer.peek_token()==Symbols("[")):
+                    return self.parse_list_index(obj=Variable(name))
                 
                 return Variable(name)
             case Num(value):

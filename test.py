@@ -26,6 +26,7 @@ from utils.datatypes import (
     StringSlice,
     ListCons,
     ListOp,
+    ListIndex,
 )
 from utils.typechecker import StaticTypeChecker
 from utils.errors import *

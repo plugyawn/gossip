@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, ListIndex
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -351,12 +351,44 @@ class RuntimeEnvironment():
                     raise ListError("No tail in an empty list")
                 else:
                     return base_list[1:]
+            
+
+            case ListIndex(index,base_list):
+                value_type = None
+
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Object attempted to be indexed is not a list.")
+                
+
+
+                base_list = self.eval(base_list)
+                ind = int(self.eval(index))
+
+                if(ind<0 or ind>=len(base_list)):
+                    raise ListError("List index out of range.")
+                else:
+                    return base_list[ind]
+                
+                
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
                 try:
                     if(left.type==StringType and right.type==StringType):
-                        print("gotcha")
+                        # print("gotcha")
                         dummy_string = left.value + right.value
                         return dummy_string
                     else:

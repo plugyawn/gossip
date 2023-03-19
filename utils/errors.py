@@ -138,7 +138,6 @@ class ReferentialError(Exception):
 
 
 class BadAssignment(Exception):
-<<<<<<< HEAD
     def __init__(self,var,var_type,val_type):
         print(f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type")
 
@@ -152,7 +151,3 @@ class StringError(Exception):
 class ListOpError(Exception):
     def __init__(self,msg):
         print(msg)
-=======
-    def __init__(self, var, var_type, val_type):
-        print(f"{RED}Assignment Error{RESET}: Trying to assign value of {val_type} to variable {var} of {var_type} type")
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
