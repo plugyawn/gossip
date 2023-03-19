@@ -4,7 +4,7 @@ from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
-from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
+from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
 
 
 class RuntimeEnvironment():
@@ -52,10 +52,9 @@ class RuntimeEnvironment():
                     return full_string[strt:d_end]
                 except:
                     if(strt<0 or d_end>len(full_string)):
-                        raise InvalidSlicing("Slice Index out of range")
+                        raise IndexOutOfBoundsError("Slice Index out of range")
                     else:
-                        raise InvalidSlicing()
-
+                        raise IndexOutOfBoundsError()
 
             case ListObject(elements,element_type):
                 n = len(elements)
@@ -67,7 +66,6 @@ class RuntimeEnvironment():
                 
                 return elements
             
-
 
             case ListCons(to_add, base_list):
                 to_add = self.eval(to_add)
@@ -90,18 +88,13 @@ class RuntimeEnvironment():
                 else:
                     raise ListError("Argument to Cons() is not a list.")
                 
-
-
-
                 if(type(to_add) is not the_type):
                     raise ListError("Input element is not of the same type as given list type.")
-                
-
 
                 new_list = []
                 new_list.append(to_add)
                 
-                if(isinstance(base_list,ListObject)):
+                if isinstance(base_list,ListObject):
                     for num in base_list:
                         new_list.append(num)
                 else:
@@ -109,12 +102,10 @@ class RuntimeEnvironment():
                         new_list.append(num)
                 
 
-                if(isinstance(base_list,Variable)):
+                if isinstance(base_list,Variable):
                     SCOPE = self.scope
                     self.environments[SCOPE][base_list.name]['value'] = new_list
                 
-
-
                 return new_list            
             
 
@@ -134,10 +125,10 @@ class RuntimeEnvironment():
             case Declare(Variable(name), value):
 
                 curent_scope = self.scope
-                if(name in self.environments[curent_scope]):
-                    raise VariableRedeclaration(name)
+                if name in self.environments[curent_scope]:
+                    return VariableRedeclarationError(name)
 
-                if(isinstance(value,ListObject)):
+                if isinstance(value,ListObject):
                     elems = self.eval(value)
                     scp = self.scope
                     
@@ -148,7 +139,7 @@ class RuntimeEnvironment():
 
                     return elems
                 
-                elif(isinstance(value,Variable)):
+                elif isinstance(value,Variable):
                     value_to_be_declared = self.eval(value)
                     value_type = None
                     value_name = value.name
@@ -167,11 +158,9 @@ class RuntimeEnvironment():
 
                         scp -= 1
 
-
-
                     curent_scope = self.scope
 
-                    if(if_val_is_list_its_el_type==None):
+                    if if_val_is_list_its_el_type == None:
                         
                         self.environments[curent_scope][name] = {}
                         self.environments[curent_scope][name]['value'] = value_to_be_declared
@@ -186,8 +175,6 @@ class RuntimeEnvironment():
                 
                     return value_to_be_declared
 
-
-
                 else:
                     value_to_be_declared = self.eval(value)
                     curent_scope = self.scope
@@ -199,9 +186,6 @@ class RuntimeEnvironment():
 
                     return value_to_be_declared
                 
-
-                
-            
             
             case Assign(Variable(name), expression):
                 val = self.eval(expression)
@@ -221,8 +205,6 @@ class RuntimeEnvironment():
                 if(var_type is not type(val)):
                     raise BadAssignment(name,var_type,type(val))
 
-
-
                 if name in self.environments[self.scope]:
                     self.environments[self.scope][name]['value'] = val
                 else:
@@ -241,7 +223,6 @@ class RuntimeEnvironment():
                 
                 return val
             
-
             case ASTSequence(seq):
                 """
                 Special case. Evaluates all but the last element in a loop, 
@@ -289,9 +270,6 @@ class RuntimeEnvironment():
                     return to_return
 
             
-            
-            #List Operations
-
             case ListOp("is-empty?", base_list):
                 value_type = None
 
@@ -374,8 +352,6 @@ class RuntimeEnvironment():
                 else:
                     return base_list[1:]
 
-
-
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
                 try:
@@ -388,7 +364,7 @@ class RuntimeEnvironment():
                         right = self.eval(right)
                         return left + right
                 except:
-                    return InvalidConcatenation
+                    return InvalidConcatenationError
 
             case BinOp("-", left, right):
                 left = self.eval(left)
@@ -397,6 +373,7 @@ class RuntimeEnvironment():
                     return left - right
                 except:
                     raise InvalidOperation("-",left,right)
+                
             case BinOp("*", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
@@ -404,6 +381,7 @@ class RuntimeEnvironment():
                     return left * right
                 except:
                     raise InvalidOperation("*",left,right)
+                
             case BinOp("/", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
@@ -429,6 +407,7 @@ class RuntimeEnvironment():
                     return left == right
                 except:
                     raise InvalidOperation("==",left,right)
+                
             case BinOp("!=", left, right):
                 left = self.eval(left)
                 right = self.eval(right)
@@ -492,15 +471,6 @@ class RuntimeEnvironment():
                 except:
                     raise InvalidOperation("||",left,right)
 
-            # case BinOp("=", Variable(name), right):
-            #     right = self.eval(right)
-            #     self.environments[0] = self.environments[0] | { name: right }
-            #     return right
-
-
-
-
-
             # Unary operation is the same, except for the operator.
             case UnOp("-", right):
                 try:
@@ -536,11 +506,10 @@ class RuntimeEnvironment():
                 return(result)
             
             case While(cond, sequence):
-
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    raise InvalidCondition(cond)
+                    return InvalidConditionError(cond)
                 
                 final_value = None
 
@@ -560,7 +529,6 @@ class RuntimeEnvironment():
                 return final_value
             
             case DoWhile(sequence, cond):
-
                 final_value = None
                 self.scope += 1
                 scp = self.scope
@@ -575,7 +543,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    raise InvalidCondition
+                    return InvalidConditionError
                 
                 while(truth_value):
 

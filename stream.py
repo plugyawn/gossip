@@ -1,17 +1,27 @@
 from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
+<<<<<<< HEAD
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
 from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, StringLiteral, StringSlice, ListObject, ListCons, ListOp
+=======
+from utils.errors import EndOfStream, EndOfTokens, TokenError
+from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
+>>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
+<<<<<<< HEAD
 whitespace = " \t\n"
 symbols = "; , ( ) { } [ ] ' .".split()
 list_utils = "cons head tail empty".split()
+=======
+whitespace = [" ", "\n"]
+symbols = "; , ( ) { } [ ] ".split()
+>>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 
 r = RuntimeEnvironment()
 
@@ -45,7 +55,11 @@ class Stream:
 
 
 # Define the token types.
+<<<<<<< HEAD
 Token = Num | Bool | Keyword | Identifier | Operator | Symbols | StringToken | ListToken
+=======
+Token = Num | Bool | Keyword | Identifier | Operator | Symbols | Whitespace
+>>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 
 def word_to_token(word):
     if word in keywords:
@@ -60,6 +74,8 @@ def word_to_token(word):
         return Operator(word)
     if word in symbols:
         return Symbols(word)
+    if word in whitespace:
+        return Whitespace(word)
     return Identifier(word)
 
 
@@ -148,9 +164,11 @@ class Lexer:
         """
         Matches the next token to the expected token.
         """
-        if self.peek_token() == expected:
+        try:
+            assert self.peek_token() == expected
             return self.advance()
-        raise TokenError()
+        except AssertionError: 
+            return TokenError(f"Expected {expected}, got {self.peek_token()}", expected=expected, actual=self.peek_token())
 
     def advance(self):
         """
@@ -208,7 +226,7 @@ class Parser:
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
-                return self.parse_ast_seq()
+                return self.parse_AST_sequence()
             case Symbols("}"):
                 return self.lexer.__next__()
             case Symbols("'"):
@@ -400,9 +418,10 @@ class Parser:
         cond = self.parse_expression()
         self.lexer.match(Keyword("then"))
         e1 = self.parse_expression()
+        if self.lexer.peek_token() != Keyword("else"):
+            return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
-        self.lexer.match(Symbols(";"))
         return If(cond, e1, e2)
 
     def parse_assign(self):
@@ -427,8 +446,11 @@ class Parser:
         self.lexer.match(Keyword("in"))
         iter = self.parse_expression()
         self.lexer.match(Keyword("do"))
+
         task = self.parse_expression()
+
         self.lexer.match(Symbols(";"))
+
         return ForLoop(var, iter, task)
 
     def parse_range(self):
@@ -450,7 +472,9 @@ class Parser:
         Examples: | print a |, to print the value of a.
         """
         self.lexer.match(Keyword("print"))
+        self.lexer.match(Symbols("("))
         expression = self.parse_expression()
+        self.lexer.match(Symbols(")"))
         self.lexer.match(Symbols(";"))
         return Print(expression)
 
@@ -489,7 +513,7 @@ class Parser:
         self.lexer.match(Symbols(";"))
         return Declare(var, a)
     
-    def parse_ast_seq(self):
+    def parse_AST_sequence(self):
         li = []
         self.lexer.match(Symbols("{"))
         while self.lexer.peek_token() != Symbols("}"):    
@@ -498,7 +522,10 @@ class Parser:
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
     
+<<<<<<< HEAD
 
+=======
+>>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
     def __iter__(self):
         return self
     
