@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
+import os
+
 from core import RuntimeEnvironment
 from utils.datatypes import (
     AST,
@@ -79,6 +81,9 @@ def interpret(feedback=False, visualize=False):
 
         if line == "exit":
             break
+        if line == "clear":
+            os.system("clear")
+            continue
 
         persist = True if line[-1] == "{" else False if line[-2:] == "};" else persist
 

@@ -223,7 +223,6 @@ class RuntimeEnvironment():
                 
                 return val
             
-
             case ASTSequence(seq):
                 """
                 Special case. Evaluates all but the last element in a loop, 
