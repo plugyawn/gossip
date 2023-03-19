@@ -23,6 +23,7 @@ class RuntimeEnvironment():
 
 
     def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
+
         """
         Recursively evaluates an AST or ASTSequence, returning a Value.
         By default, retains the environment from the runtime environment.
@@ -122,6 +123,7 @@ class RuntimeEnvironment():
             
 
             case Variable(name):
+                # print(self.environments)
                 scope = self.scope
                 while len(self.environments) < (scope + 1):
                     scope -= 1
@@ -326,7 +328,7 @@ class RuntimeEnvironment():
             case BinOp("+", left, right):
                 try:
                     if(left.type==StringType and right.type==StringType):
-                        print("gotcha")
+                        #print("gotcha")
                         dummy_string = left.value + right.value
                         return dummy_string
                     else:
@@ -541,29 +543,50 @@ class RuntimeEnvironment():
                 #print(funct_val)
                 return(self.eval(funct_val))
             
-            case funct_def(name, arg_list, body):
+            case funct_def(Variable(name), arg_list, body):
+            
                 func = [arg_list, body]
-                self.func_defs[name] = func
-                return(NumLiteral(0))
+                funct_1 =  {"value":func, "type": str}
+                scp = self.scope
+                while len(self.environments) < (scp + 1):
+                        scp-= 1
+                
+                self.environments[scp][name] = funct_1
+                # print(self.environments)
+                return(self.eval(NumLiteral(0)))
+            
 
             #dynamic scoping on function calls 
-            case funct_call(name, arg_val):
-                if name in self.func_defs:
-                    self.scope = self.scope + 1
-                    dict = {}
-                    arg_name = self.func_defs[name][0]
-                    if(len(arg_name)!=len(arg_val)):
-                        raise Exception("Not enough arguements")
-                    for x in range(len(arg_name)):
-                        v1 = self.eval(arg_val[x])
-                        dict[arg_name[x].name] = {"value":v1, "type": type(v1)}
-                    self.environments.append(dict)
-                    m = self.eval(self.func_defs[name][1])
-                    self.environments.pop()
-                    self.scope -= 1 
-                    return(m)
-                else:
-                    raise Exception("Function is not defined")    
+            case funct_call(Variable(name), arg_val):
+                self.scope +=1
+                src = self.scope
+                # print(src)
+                if(len(self.environments)<self.scope + 1):
+                    src = len(self.environments) - 1
+
+                # print(src)
+                while src >=0:
+                    if name in self.environments[src]:  
+                        dictt = {}
+                        arg_name = self.environments[src][name]["value"][0]
+
+                        if(len(arg_name)!=len(arg_val)):
+                            raise Exception("Not enough arguements")
+                        
+                        for x in range(len(arg_name)):
+                            v1 = self.eval(arg_val[x])
+                            dictt[arg_name[x].name] = {"value":v1, "type": type(v1)}
+
+                        self.environments.append(dictt)
+                        m = self.eval(self.environments[src][name]["value"][1])
+                        if(len(self.environments)>1):
+                            self.environments.pop()
+                        self.scope -= 1 
+                        return(m)
+                    else:
+                            src -= 1 
+                    
+                raise Exception("Function is not defined")    
             
                 
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
