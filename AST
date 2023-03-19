@@ -1,4 +1,18 @@
 digraph {
-	label="exit()"
-	node_0 [label=exit]
+	label="while a +2 do {print(2);};"
+	node_0 [label=While shape=invtriangle]
+	node_1 [label="+"]
+	node_2 [label=a]
+	node_1 -> node_2
+	node_3 [label=2]
+	node_1 -> node_3
+	node_0 -> node_1
+	node_4 [label=Sequence shape=square]
+	AST_0_5 [label=0 color=grey shape=square]
+	node_5 [label=Print]
+	node_6 [label=2]
+	node_5 -> node_6
+	AST_0_5 -> node_5
+	node_4 -> AST_0_5
+	node_0 -> node_4
 }

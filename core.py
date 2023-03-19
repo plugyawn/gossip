@@ -4,7 +4,7 @@ from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
-from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
+from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
 
 
 class RuntimeEnvironment():
@@ -482,7 +482,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    raise InvalidCondition(cond)
+                    return InvalidConditionError(cond)
                 
                 final_value = None
 
@@ -517,7 +517,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    raise InvalidCondition
+                    return InvalidConditionError
                 
                 while(truth_value):
 
