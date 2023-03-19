@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -18,6 +18,8 @@ class RuntimeEnvironment():
         self.environments.append({})
         self.environment = self.environments[0]
         self.scope = 0
+        self.func_defs = {}
+        self.func_defns = []
 
     def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
         """
@@ -209,12 +211,13 @@ class RuntimeEnvironment():
                 var_type = None
                 scp = self.scope
 
-                while len(self.environments) < (scp + 1):
-                    scp-= 1
+                if len(self.environments) < (scp + 1):
+                    scp = len(self.environments) - 1 
 
                 while scp >= 0:
                     if name in self.environments[scp]:
                         var_type = self.environments[scp][name]['type']
+                        break 
 
                     scp -= 1
                 
@@ -223,11 +226,11 @@ class RuntimeEnvironment():
 
 
 
-                if name in self.environments[self.scope]:
-                    self.environments[self.scope][name]['value'] = val
+                if name in self.environments[scp]:
+                    self.environments[scp][name]['value'] = val
                 else:
                     flag = False
-                    scope = self.scope - 1
+                    scope = scp - 1
                     while scope >= 0:
                         if name in self.environments[scope]:
                             flag = True
@@ -248,7 +251,11 @@ class RuntimeEnvironment():
                 then returns the evaluation of the last element.
                 """
                 for ast in seq[:-1]:
-                    x = self.eval(ast)
+                    match ast:
+                        case funct_ret(ret_val):
+                            return self.eval(ast)
+                        case _:
+                            x = self.eval(ast)
 
                 return self.eval(seq[-1])
             
@@ -534,5 +541,35 @@ class RuntimeEnvironment():
                 
                 return final_value
             
+            case funct_ret(funct_val):
+                #print(funct_val)
+                return(self.eval(funct_val))
+            
+            case funct_def(name, arg_list, body):
+                func = [arg_list, body]
+                self.func_defs[name] = func
+                return(NumLiteral(0))
+
+            #dynamic scoping on function calls 
+            case funct_call(name, arg_val):
+                if name in self.func_defs:
+                    self.scope = self.scope + 1
+                    dict = {}
+                    arg_name = self.func_defs[name][0]
+                    if(len(arg_name)!=len(arg_val)):
+                        raise Exception("Not enough arguements")
+                    for x in range(len(arg_name)):
+                        v1 = self.eval(arg_val[x])
+                        dict[arg_name[x].name] = {"value":v1, "type": type(v1)}
+                    self.environments.append(dict)
+                    m = self.eval(self.func_defs[name][1])
+                    self.environments.pop()
+                    self.scope -= 1 
+                    return(m)
+                else:
+                    raise Exception("Function is not defined")    
+            
                 
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+
+
