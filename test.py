@@ -28,7 +28,7 @@ from utils.datatypes import (
     ListOp,
     funct_def, 
     funct_call, 
-    funct_ret
+    funct_ret,
     ListIndex,
 )
 from utils.typechecker import StaticTypeChecker

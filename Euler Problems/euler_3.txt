@@ -6,7 +6,7 @@ while n%2==0 do {
 assign maxpr = 2;
 assign n = n/2;
 
-}
+};
 
 declare i = 3;
 
@@ -16,10 +16,10 @@ while n%i==0 do {
 
 assign maxpr = i;
 assign n = n/i;
-}
+};
 
 assign i = i+2;
-}
+};
 
 
 if n>2 then print(n); else print(maxpr);;
