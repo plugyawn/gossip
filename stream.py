@@ -302,11 +302,10 @@ class Parser:
         cond = self.parse_expression()
         self.lexer.match(Keyword("then"))
         e1 = self.parse_expression()
-        if self.lexer.peek_token() == Keyword(";"):
+        if self.lexer.peek_token() != Keyword("else"):
             return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
-        self.lexer.match(Symbols(";"))
         return If(cond, e1, e2)
 
     def parse_assign(self):
