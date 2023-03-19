@@ -54,6 +54,21 @@ class ASTViz:
             dot.edge(id, self.treebuilder(node.val_list, self.depth))
             dot.edge(id, self.treebuilder(node.stat, self.depth))
 
+        if type(node) == Print:
+            dot.node(id, "Print")
+            dot.edge(id, self.treebuilder(node.value, self.depth))
+        
+        if type(node) == ASTSequence:
+            dot.node(id, "Sequence", shape = "square")
+            AST_id = "AST_{}_{}"
+            past_node = id
+            for _ in range(0, len(node.seq)):
+                current_node = AST_id.format(_, self.depth)
+                dot.node(current_node, f"{_}", shape = "square", color = "grey")
+                dot.edge(current_node, self.treebuilder(node.seq[_], current_node))
+                dot.edge(past_node, current_node)
+                past_node = current_node
+
         if type(node) == Range:
             dot.node(id, f"{floor(node.start.value)}")
             range_id = "range_{}_{}"
