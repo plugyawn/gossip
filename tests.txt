@@ -1,0 +1,8 @@
+declare sum = 0;for x in range(0,1000) do {if x%5==0 || x%3==0 then assign sum = sum + x;};print(sum);
+
+
+deffunct gi(c){print (45);if c<=1 then functret(1); else functret(c*callfun gi(c-1););;};
+
+declare sum = 2; declare i = 1; declare j = 2; declare k = 0; while j<=1000000 && i<=1000000 do {assign i = i + j; assign k = j; assign j = i; assign i = k; if i%2==0 then assign sum = sum + i; }; print(sum); 
+
+declare n  = 3; declare m = 0; for i in range(100,999) do { for j in range(100,999) do {declare prod = i*j;if prod > m then assign m = prod;};};

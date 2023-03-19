@@ -124,34 +124,34 @@ def test_sequence_eval():
     g = If(BinOp("==", a, BinOp("-", b, c)), f, g)
 
 
-# def test_for_loop():
-#     runtime = RuntimeEnvironment()
-#     a = NumLiteral(0)
-#     b = NumLiteral(1)
-#     c = NumLiteral(2)
-#     d = NumLiteral(3)
-#     e = NumLiteral(4)
-#     f = NumLiteral(5)
-#     g = [a,b,c,d,e,f]
-#     h  = Variable("h")
-#     e2 = BinOp("+", h, h)
-#     lo = ForLoop(h,g,e2)
-#     assert runtime.eval(lo) == 10
+def test_for_loop():
+    runtime = RuntimeEnvironment()
+    a = NumLiteral(0)
+    b = NumLiteral(1)
+    c = NumLiteral(2)
+    d = NumLiteral(3)
+    e = NumLiteral(4)
+    f = NumLiteral(5)
+    g = [a,b,c,d,e,f]
+    h  = Variable("h")
+    e2 = BinOp("+", h, h)
+    lo = ForLoop(h,g,e2)
+    assert runtime.eval(lo) == 10
 
 
-# def test_stream_eval():
-#     runtime = RuntimeEnvironment()
+def test_stream_eval():
+    runtime = RuntimeEnvironment()
 
-#     string = """
-#     let b = 6 end
-#     let a = 5 end
-#     if a == b then a+2 else a+1 end
-#     """
-#     L = Lexer.from_stream(Stream.from_string(string))
-#     runtime = RuntimeEnvironment()
-#     S = Parser.from_lexer(L)
-#     for s in S:
-#         runtime.eval(s)
+    string = """
+    let b = 6 end
+    let a = 5 end
+    if a == b then a+2 else a+1 end
+    """
+    L = Lexer.from_stream(Stream.from_string(string))
+    runtime = RuntimeEnvironment()
+    S = Parser.from_lexer(L)
+    for s in S:
+        runtime.eval(s)
 
 
 def test_greater_than():
