@@ -28,10 +28,10 @@ Alternatively, you can build it manually from http://www.graphviz.org/download/.
 ### Installing the Graphviz module for Python
 Once Graphviz is installed on your system, you need to install the Graphviz module for Python. You can install the module using pip or conda:
 
-```pip
+```
 pip install graphviz
 ```
-```conda
+```
 conda install graphviz
 ```
 
@@ -46,10 +46,18 @@ else:
 
 To visualise the AST for this code, we need to first generate the AST using the [`main.py`](https://github.com/plugyawn/gossip/blob/main/main.py) file provided in the Gossip repository. We can do this by running the following command:
 
-```bash
+```
 python main.py -i -v
 ```
 
 This will open the Gossip interpreter. We can then copy and paste the code into the interpreter and press enter. This will generate the AST for the code and display it.
 
 Or it will also be saved as `AST.png` in the current directory.
+
+## Explanantion
+
+The [`visualizer.py`](https://github.com/plugyawn/gossip/blob/main/utils/visualizer.py) file in the `gossip/utils` directory contains the code for visualizing the AST.
+
+This code defines a class `ASTViz` that visualizes an abstract syntax tree (AST) using the graphviz library. The `treebuilder` method recursively traverses the AST and creates nodes and edges in the graphviz representation according to the type of each node in the AST. For example, if the node is an `If` statement, a diamond-shaped node is created in the graphviz representation with edges to the condition expression and the two possible execution paths. If the node is a `While` loop, an inverted triangle-shaped node is created with edges to the loop condition expression and the loop body. If the node is a `BinOp`, a node with the operator symbol is created with edges to the left and right operands.
+
+The `depth` parameter is used to generate unique IDs for each node in the graphviz representation, and the `code` parameter is used as the label for the graph. When the `treebuilder` method is called with a depth of 0, the graphviz representation is rendered as a PNG image and displayed using the default viewer.
