@@ -21,6 +21,7 @@ class RuntimeEnvironment():
         self.func_defs = {}
         self.func_defns = []
 
+
     def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
         """
         Recursively evaluates an AST or ASTSequence, returning a Value.
@@ -251,11 +252,7 @@ class RuntimeEnvironment():
                 then returns the evaluation of the last element.
                 """
                 for ast in seq[:-1]:
-                    match ast:
-                        case funct_ret(ret_val):
-                            return self.eval(ast)
-                        case _:
-                            x = self.eval(ast)
+                    x = self.eval(ast)
 
                 return self.eval(seq[-1])
             
@@ -540,7 +537,6 @@ class RuntimeEnvironment():
                     self.scope -= 1
                 
                 return final_value
-            
             case funct_ret(funct_val):
                 #print(funct_val)
                 return(self.eval(funct_val))
@@ -571,5 +567,12 @@ class RuntimeEnvironment():
             
                 
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+
+            
+                
+        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+
+
+
 
 
