@@ -7,8 +7,8 @@ from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret ".split()
-symbolic_operators = "+ - * ** / < > <= >= == != =".split()
-word_operators = "and or not quot rem".split()
+symbolic_operators = "+ - * ** / < > <= >= == != = % & & && || |".split()
+word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ".split()
 
@@ -212,7 +212,7 @@ class Parser:
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
-                return self.parse_ast_seq()
+                return self.parse_AST_sequence()
             case Symbols("}"):
                 return self.lexer.__next__()
             case Symbols(","):
@@ -257,12 +257,28 @@ class Parser:
         Parse a multiplication expression.
         For | a * b |, this will parse the entire expression.
         """
-        left = self.parse_atomic_expression()
+        left = self.parse_mod()
         while True:
             match self.lexer.peek_token():
                 case Operator(op) if op in "*/":
                     self.lexer.advance()
-                    m = self.parse_expression()
+                    m = self.parse_mod()
+                    left = BinOp(op, left, m)
+                case _:
+                    break
+        return left
+    
+    def parse_mod(self):
+        """
+        Parse a mod expression.
+        For | a % b |, this will parse the entire expression.
+        """
+        left = self.parse_atomic_expression()
+        while True:
+            match self.lexer.peek_token():
+                case Operator(op) if op in "%":
+                    self.lexer.advance()
+                    m = self.parse_atomic_expression()
                     left = BinOp(op, left, m)
                 case _:
                     break
@@ -270,10 +286,16 @@ class Parser:
 
     def parse_simple(self):
         """
-        Parse a simple expression. 
-        # TODO - This is a bit of a misnomer, as it just calls parse_comparison().
+        Parse a &&/|| expression.
+        For | a && b |, this will parse the entire expression.
         """
-        return self.parse_comparison()
+        left = self.parse_comparison()
+        match self.lexer.peek_token():
+            case Operator(op) if op in "&& ||":
+                self.lexer.advance()
+                right = self.parse_comparison()
+                return BinOp(op, left, right)
+        return left
 
     def parse_comparison(self):
         """

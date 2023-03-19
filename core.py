@@ -125,17 +125,19 @@ class RuntimeEnvironment():
             case Declare(Variable(name), value):
 
                 curent_scope = self.scope
+                while len(self.environments) < (curent_scope + 1):
+                    curent_scope -= 1
                 if name in self.environments[curent_scope]:
                     return VariableRedeclarationError(name)
 
                 if isinstance(value,ListObject):
                     elems = self.eval(value)
-                    scp = self.scope
+                    #scp = self.scope
                     
                     self.environments[curent_scope][name] = {}
-                    self.environments[scp][name]['value'] = elems
-                    self.environments[scp][name]['type'] = list
-                    self.environments[scp][name]['element_type'] = value.element_type
+                    self.environments[curent_scope][name]['value'] = elems
+                    self.environments[curent_scope][name]['type'] = list
+                    self.environments[curent_scope][name]['element_type'] = value.element_type
 
                     return elems
                 
@@ -158,7 +160,7 @@ class RuntimeEnvironment():
 
                         scp -= 1
 
-                    curent_scope = self.scope
+                    #curent_scope = self.scope
 
                     if if_val_is_list_its_el_type == None:
                         
@@ -177,7 +179,7 @@ class RuntimeEnvironment():
 
                 else:
                     value_to_be_declared = self.eval(value)
-                    curent_scope = self.scope
+                    #curent_scope = self.scope
                     
                     
                     self.environments[curent_scope][name] = {}
@@ -209,7 +211,7 @@ class RuntimeEnvironment():
                     self.environments[scp][name]['value'] = val
                 else:
                     flag = False
-                    scope = self.scope - 1
+                    scope = scp-1
                     while scope >= 0:
                         if name in self.environments[scope]:
                             flag = True
@@ -298,7 +300,7 @@ class RuntimeEnvironment():
             case BinOp("+", left, right):
                 try:
                     if(left.type==StringType and right.type==StringType):
-                        print("gotcha")
+                        # print("gotcha")
                         dummy_string = left.value + right.value
                         return dummy_string
                     else:
@@ -428,6 +430,8 @@ class RuntimeEnvironment():
                     self.scope -= 1
                 else:
                     self.scope += 1
+                    if(e2==None):
+                        return None 
                     to_return = self.eval(e2)
                     self.scope -= 1
                 
@@ -441,7 +445,7 @@ class RuntimeEnvironment():
                 for expression in value_list: 
                     v1 = self.eval(expression)
                     self.scope += 1
-                    self.environments.append({ name : v1 })
+                    self.environments.append({ name : {"value": v1, "type": type(v1) }})
                     result = self.eval(stat)
                     self.scope -= 1
                     self.environments.pop()
@@ -548,6 +552,7 @@ class RuntimeEnvironment():
                         return(m)
                     else:
                             src -= 1 
+                    
                     
                 raise Exception("Function is not defined")               
             
