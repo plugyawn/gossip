@@ -1,0 +1,12 @@
+declare a = 9 ;
+print( a) ;
+
+print (123812073 );
+
+assign a = 123 ;
+
+print (a );
+
+declare t = 5 ;
+
+print( let r = 100 in let t = 10 in r + t ; ;) ;

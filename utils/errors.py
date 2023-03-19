@@ -145,3 +145,10 @@ class BadAssignment(Exception):
         print(
             f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type"
         )
+
+class InvalidFileExtensionError(Exception):
+    """
+    Raised when the file extension is not valid.
+    """
+    def __init__(self, ext):
+        print(f"InvalidFileExtension: {ext} is not a valid file extension for gossip language.")
