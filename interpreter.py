@@ -37,6 +37,8 @@ def interpret(feedback=False, visualize=False):
         if line == "clear":
             os.system("clear")
             continue
+        if line == "":
+            continue
 
         persist = True if line[-1] == "{" else False if line[-2:] == "};" else persist
 
@@ -44,11 +46,15 @@ def interpret(feedback=False, visualize=False):
         S = Parser.from_lexer(L)
 
         for s in S:
-            if visualize:
-                vis = ASTViz(depth=0, code=line)
-                vis.treebuilder(s)
-            if feedback:
-                print(f"{RED}{runtime.eval(s)}{RESET}")
-            else:
-                if not persist:
-                    runtime.eval(s)
+            try:
+                if visualize:
+                    vis = ASTViz(depth=0, code=line)
+                    vis.treebuilder(s)
+                if feedback:
+                    if not persist:
+                        print(f"{RED}{runtime.eval(s)}{RESET}")
+                else:
+                    if not persist:
+                            runtime.eval(s)
+            except:
+                continue
