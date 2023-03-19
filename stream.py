@@ -522,10 +522,7 @@ class Parser:
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
     
-<<<<<<< HEAD
 
-=======
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
     def __iter__(self):
         return self
     
