@@ -6,6 +6,15 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import sys
+import os
+sys.path.append(os.path.abspath('..'))
+
+
+from sphinx.application import Sphinx
+from sphinx.util.docutils import SphinxDirective
+
+
 project = 'gossip-lang'
 copyright = '2023, Progyan Dhyey Rahul Sukruta'
 author = 'Progyan Dhyey Rahul Sukruta'
