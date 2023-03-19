@@ -27,7 +27,7 @@ class EndOfStream(Exception):
     """
     Raised when the end of a stream is reached.
     """
-
+    print("EndOfStreamError: Reached End of Stream. Exiting...")
     pass
 
 
@@ -35,7 +35,7 @@ class EndOfTokens(Exception):
     """
     Raised when the end of a stream of tokens is reached.
     """
-
+    print("EndOfTokensError: Reached End of Tokens without resolving the expression.")
     pass
 
 
