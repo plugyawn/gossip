@@ -6,24 +6,23 @@ Welcome to the Gossip-lang documentation. Gossip-lang is a Python-compiled progr
 <a href = "github.com/plugyawn/gossip"><img width="417px" height="250px" src= "https://user-images.githubusercontent.com/76529011/212722586-7861a029-53d6-4e8c-af40-5fa92dc7ddf0.png"></a>
 </div>
 
-```{toctree} errors.md
-```
-```{toctree} installation_guide.md
-```
-```{toctree} usage_guide.md
-```
-```{toctree} syntax.md
-```
-```{toctree} grammar.md
-```
-
 ## Table of Contents
 
-- [Installation Guide](installation_guide.md)
-- [Usage Guide](usage_guide.md)
-- [Syntax](syntax.md)
-- [Errors](errors.md)
-- [Grammar](grammar.md)
+```{toctree} installation_guide.md 
+    :maxdepth: 1
+```
+```{toctree} usage_guide.md
+    :maxdepth: 1
+```
+```{toctree} syntax.md
+    :maxdepth: 1
+```
+```{toctree} grammar.md
+    :maxdepth: 1
+```
+```{toctree} errors.md
+    :maxdepth: 1
+```
 
 ## Installation Guide
 

@@ -1,13 +1,12 @@
 # Usage Guide
 
-
 1. To run Gossip with an input file containing Gossip code, use the -f or --from-file option followed by the path to the input file:
 
     ```bash
     python main.py -f ./path/to/input.gos
     ```
 
-    For example, to run the `hello_world.gos` file, use the following command:
+    For example, to run the `test.gos` file, use the following command:
 
     ```bash
     python main.py -f ./examples/test.gos

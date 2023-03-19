@@ -1,4 +1,4 @@
-# Gossip-lang Installation Guide
+# Installation Guide
 
 ## Prerequisites
 Before installing Gossip-lang, ensure that you have `Python 3.10.0` or a higher version installed on your system.

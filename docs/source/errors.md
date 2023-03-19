@@ -1,4 +1,4 @@
-# Gossip-lang Errors
+# Errors And Exceptions
 
 Gossip-lang comes with custom errors to help you debug your code. This page provides details on each of the custom errors that can be raised when using Gossip-lang.
 
