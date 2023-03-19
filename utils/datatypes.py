@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Union, Mapping, Optional
+from typing import Union, Mapping, Optional, List
+
 
 @dataclass
 class NumType:
@@ -10,17 +11,16 @@ class NumType:
 class BoolType:
     pass
 
-SimType = NumType | BoolType
-
 @dataclass
-class NumType:
+class StringType:
     pass
 
 @dataclass
-class BoolType:
+class ListType:
     pass
 
-SimType = NumType | BoolType
+
+SimType = NumType | BoolType | StringType|ListType
 
 """
 The following are used in the evaluation step.
@@ -38,6 +38,31 @@ class BoolLiteral:
     type = BoolType()
 
 @dataclass
+class StringLiteral:
+    value: str
+    type: Optional[StringType] = StringType()
+    
+
+
+@dataclass
+class ListObject:
+    elements: list()
+    element_type: int | float | str | list
+    type: Optional[ListType] = ListType()
+
+
+@dataclass
+class ListCons:
+    to_add: 'AST'
+    base_list: 'AST'
+    #If I have an empty 
+
+
+@dataclass
+class ListOp:
+    op: str
+    base_list: 'AST'
+@dataclass
 class BinOp:
     operator: str
     left: 'AST'
@@ -54,6 +79,13 @@ class UnOp:
 class Variable:
     name: str
     type: Optional[SimType] = None
+
+
+@dataclass
+class StringSlice:
+    var: Variable
+    start: NumType()
+    end: NumType()
 
 @dataclass
 class Let:
@@ -130,10 +162,13 @@ class funct_call:
     name: str
     arg_val: list['AST']
 
-AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile | funct_def | funct_call | funct_ret | Print
+AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile | funct_def | funct_call | funct_ret | Print | StringLiteral | ListObject | StringSlice | ListCons | ListOp
 
 
-Value = Fraction | bool
+Value = Fraction | bool | str | list
+
+
+
 """
 The following are used in the lexer.
 """
@@ -145,6 +180,15 @@ class Num:
 @dataclass
 class Bool:
     b: bool
+
+@dataclass
+class StringToken:
+    s: str
+
+
+@dataclass
+class ListToken:
+    l: list
 
 @dataclass
 class Keyword:
@@ -161,3 +205,50 @@ class Operator:
 @dataclass
 class Buffer:
     buf: str
+@dataclass
+class Symbols:
+    symbol: str
+
+
+
+Value = Fraction | bool | str | list
+"""
+The following are used in the lexer.
+"""
+@dataclass
+class Num:
+    n: int | float
+    floating: bool = False
+
+@dataclass
+class Bool:
+    b: bool
+
+@dataclass
+class StringToken:
+    s: str
+
+
+@dataclass
+class ListToken:
+    l: list
+
+@dataclass
+class Keyword:
+    word: str
+
+@dataclass
+class Identifier:
+    word: str
+
+@dataclass
+class Operator:
+    op: str
+
+@dataclass
+class Buffer:
+    buf: str
+
+@dataclass
+class Symbols:
+    symbol: str
