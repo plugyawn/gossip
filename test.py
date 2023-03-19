@@ -442,7 +442,7 @@ def strings_concat_error():
 
     block = ASTSequence([declare_x, declare_y, assign_x, x])
 
-    assert r.eval(block) == InvalidConcatenation
+    assert r.eval(block) == InvalidConcatenationError
 
 
 def test_strings_slicing():
