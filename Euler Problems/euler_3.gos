@@ -1,5 +1,5 @@
 declare n = 600851475143;
-declare maxpr = -1;
+declare maxpr = 0;
 
 while n%2==0 do {
 
