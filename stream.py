@@ -1,27 +1,17 @@
 from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
-<<<<<<< HEAD
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, StringLiteral, StringSlice, ListObject, ListCons, ListOp
-=======
-from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, StringLiteral, StringSlice, ListObject, ListCons, ListOp, Whitespace
 from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
-<<<<<<< HEAD
 whitespace = " \t\n"
 symbols = "; , ( ) { } [ ] ' .".split()
 list_utils = "cons head tail empty".split()
-=======
-whitespace = [" ", "\n"]
-symbols = "; , ( ) { } [ ] ".split()
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
 
 r = RuntimeEnvironment()
 
@@ -55,11 +45,7 @@ class Stream:
 
 
 # Define the token types.
-<<<<<<< HEAD
-Token = Num | Bool | Keyword | Identifier | Operator | Symbols | StringToken | ListToken
-=======
-Token = Num | Bool | Keyword | Identifier | Operator | Symbols | Whitespace
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
+Token = Num | Bool | Keyword | Identifier | Operator | Symbols | StringToken | ListToken | Whitespace
 
 def word_to_token(word):
     if word in keywords:
@@ -522,10 +508,7 @@ class Parser:
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
     
-<<<<<<< HEAD
 
-=======
->>>>>>> d9d8ea6bce5ae8d57b807ae0d08f91c97c69a2d9
     def __iter__(self):
         return self
     
