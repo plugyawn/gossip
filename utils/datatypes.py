@@ -27,6 +27,9 @@ class StringType:
 class ListType:
     pass
 
+@dataclass
+class Funct_obj:
+    pass 
 
 """
 The following are used in the evaluation step.
@@ -172,6 +175,20 @@ class DoWhile:
     seq: "AST"
     cond: "AST"
 
+@dataclass
+class funct_def:
+    name: str
+    var_list : list['AST']
+    body : 'AST'
+
+@dataclass
+class funct_ret:
+    ret_val: 'AST'
+
+@dataclass
+class funct_call:
+    name: 'AST'
+    arg_val: list['AST']
 
 AST = (
     ASTSequence
@@ -192,6 +209,9 @@ AST = (
     | StringSlice
     | ListCons
     | ListOp
+    | funct_def 
+    | funct_call 
+    | funct_ret
 )
 
 
