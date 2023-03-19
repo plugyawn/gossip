@@ -19,8 +19,11 @@ class StringType:
 class ListType:
     pass
 
+@dataclass
+class Funct_obj:
+    pass 
 
-SimType = NumType | BoolType | StringType|ListType
+SimType = NumType | BoolType | StringType|ListType| Funct_obj
 
 """
 The following are used in the evaluation step.
@@ -159,15 +162,13 @@ class funct_ret:
 
 @dataclass
 class funct_call:
-    name: str
+    name: 'AST'
     arg_val: list['AST']
 
 AST = ASTSequence | NumLiteral | BinOp | UnOp | Variable | Let | BoolLiteral | If | ForLoop | Declare | Assign | While | DoWhile | funct_def | funct_call | funct_ret | Print | StringLiteral | ListObject | StringSlice | ListCons | ListOp
 
 
-Value = Fraction | bool | str | list
-
-
+Value = Fraction | bool | str | list  
 
 """
 The following are used in the lexer.
