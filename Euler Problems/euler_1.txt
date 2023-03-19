@@ -1,13 +1,4 @@
-declare n = 1000;
-declare s = 0;
-    
-declare i = 1;
-    
-while(i<n){
-    if(i%3==0 || i%5==0){
-        assign s = s + i;
-    }
-    assign i = i+1;
-}
-    
-print(s)
+declare sum = 0;
+for x in range(0,1000) do 
+{if x%5==0 || x%3==0 then assign sum = sum + x;};
+print(sum);
