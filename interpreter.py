@@ -56,10 +56,19 @@ BRIGHT_INVERSE = COLORMAP["bright_inverse"]
 
 def interpret(feedback = False, visualize = False):
     runtime = RuntimeEnvironment()
+    persist = False
+
     while True:
-        line = input(f"{GREEN}{BOLD}gossip{RESET} >>> ")
+
+        if not persist:
+            line = input(f"{GREEN}{BOLD}gossip{RESET} >>> ")
+        else:
+            line += input(f"{GREEN}{BOLD}gossip{RESET} ... ... ")
+
         if line == "exit":
             break
+
+        persist = True if line[-1] == "{" else False if line[-2:] == "};" else persist
 
         L = Lexer.from_stream(Stream.from_string(line))
         S = Parser.from_lexer(L)
@@ -71,5 +80,5 @@ def interpret(feedback = False, visualize = False):
             if feedback:
                 print(f"{RED}{runtime.eval(s)}{RESET}")
             else:
-                runtime.eval(s)
-            # runtime.eval(s)
+                if not persist:
+                    runtime.eval(s)
