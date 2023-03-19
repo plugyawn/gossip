@@ -2,7 +2,19 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from core import RuntimeEnvironment
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Declare
+from utils.datatypes import (
+    AST,
+    NumLiteral,
+    BinOp,
+    Variable,
+    Value,
+    Let,
+    If,
+    BoolLiteral,
+    UnOp,
+    ASTSequence,
+    Declare,
+)
 from utils.visualizer import ASTViz
 from stream import Stream, Lexer, Parser
 
@@ -45,7 +57,7 @@ BLACK = COLORMAP["black"]
 RED = COLORMAP["red"]
 GREEN = COLORMAP["green"]
 YELLOW = COLORMAP["yellow"]
-BLUE  = COLORMAP["blue"]
+BLUE = COLORMAP["blue"]
 RESET = COLORMAP["reset"]
 
 # Some commonly used styles for easier access.
@@ -54,7 +66,7 @@ INVERSE = COLORMAP["inverse"]
 BRIGHT_INVERSE = COLORMAP["bright_inverse"]
 
 
-def interpret(feedback = False, visualize = False):
+def interpret(feedback=False, visualize=False):
     runtime = RuntimeEnvironment()
     persist = False
 
@@ -75,7 +87,7 @@ def interpret(feedback = False, visualize = False):
 
         for s in S:
             if visualize:
-                vis = ASTViz(depth = 0, code = line)
+                vis = ASTViz(depth=0, code=line)
                 vis.treebuilder(s)
             if feedback:
                 print(f"{RED}{runtime.eval(s)}{RESET}")
