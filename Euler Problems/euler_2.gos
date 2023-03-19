@@ -1,0 +1,11 @@
+declare sum = 2; 
+declare i = 1; 
+declare j = 2; 
+declare k = 0; 
+while j<=1000000 && i<=1000000 do 
+{assign i = i + j; 
+assign k = j; 
+assign j = i; 
+assign i = k; 
+if i%2==0 then assign sum = sum + i; }; 
+print(sum);

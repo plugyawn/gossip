@@ -27,6 +27,9 @@ class StringType:
 class ListType:
     pass
 
+@dataclass
+class Funct_obj:
+    pass 
 
 """
 The following are used in the evaluation step.
@@ -57,7 +60,7 @@ class StringLiteral:
 @dataclass
 class ListObject:
     elements: list()
-    element_type: int | float | str | list
+    element_type: int | float | str | list | bool
     type: Optional[ListType] = ListType()
 
 
@@ -72,6 +75,13 @@ class ListCons:
 class ListOp:
     op: str
     base_list: "AST"
+    index : Optional[SimType] = None
+
+
+@dataclass
+class ListIndex:
+    index: 'AST'
+    base_list: 'AST'
 
 
 @dataclass
@@ -172,6 +182,20 @@ class DoWhile:
     seq: "AST"
     cond: "AST"
 
+@dataclass
+class funct_def:
+    name: str
+    var_list : list['AST']
+    body : 'AST'
+
+@dataclass
+class funct_ret:
+    ret_val: 'AST'
+
+@dataclass
+class funct_call:
+    name: 'AST'
+    arg_val: list['AST']
 
 AST = (
     ASTSequence
@@ -192,6 +216,9 @@ AST = (
     | StringSlice
     | ListCons
     | ListOp
+    | funct_def 
+    | funct_call 
+    | funct_ret
 )
 
 
@@ -252,3 +279,7 @@ class Buffer:
 @dataclass
 class Symbols:
     symbol: str
+
+@dataclass
+class ListUtils:
+    operation: str
