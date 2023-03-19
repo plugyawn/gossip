@@ -2,14 +2,14 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
+from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
 from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in  ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
-whitespace = " \t\n"
+whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ".split()
 
 
@@ -41,7 +41,7 @@ class Stream:
         self.pos = self.pos - 1
 
 # Define the token types.
-Token = Num | Bool | Keyword | Identifier | Operator | Symbols
+Token = Num | Bool | Keyword | Identifier | Operator | Symbols | Whitespace
 
 def word_to_token(word):
     if word in keywords:
@@ -56,6 +56,8 @@ def word_to_token(word):
         return Operator(word)
     if word in symbols:
         return Symbols(word)
+    if word in whitespace:
+        return Whitespace(word)
     return Identifier(word)
 
 @dataclass
@@ -202,7 +204,7 @@ class Parser:
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
-                return self.parse_ast_seq()
+                return self.parse_AST_sequence()
             case Symbols("}"):
                 return self.lexer.__next__()
             case _:
@@ -300,6 +302,8 @@ class Parser:
         cond = self.parse_expression()
         self.lexer.match(Keyword("then"))
         e1 = self.parse_expression()
+        if self.lexer.peek_token() == Keyword(";"):
+            return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
         self.lexer.match(Symbols(";"))
@@ -327,8 +331,11 @@ class Parser:
         self.lexer.match(Keyword("in"))
         iter = self.parse_expression()
         self.lexer.match(Keyword("do"))
+
         task = self.parse_expression()
+
         self.lexer.match(Symbols(";"))
+
         return ForLoop(var, iter, task)
 
     def parse_range(self):
@@ -350,7 +357,9 @@ class Parser:
         Examples: | print a |, to print the value of a.
         """
         self.lexer.match(Keyword("print"))
+        self.lexer.match(Symbols("("))
         expression = self.parse_expression()
+        self.lexer.match(Symbols(")"))
         self.lexer.match(Symbols(";"))
         return Print(expression)
 
@@ -389,7 +398,7 @@ class Parser:
         self.lexer.match(Symbols(";"))
         return Declare(var, a)
     
-    def parse_ast_seq(self):
+    def parse_AST_sequence(self):
         li = []
         self.lexer.match(Symbols("{"))
         while self.lexer.peek_token() != Symbols("}"):    
@@ -397,6 +406,7 @@ class Parser:
             li.append(var)
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
+    
     def __iter__(self):
         return self
     

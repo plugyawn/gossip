@@ -128,6 +128,10 @@ class Keyword:
     word: str
 
 @dataclass
+class Whitespace:
+    word: str
+
+@dataclass
 class Identifier:
     word: str
 

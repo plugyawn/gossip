@@ -185,7 +185,7 @@ class RuntimeEnvironment():
                 return 0 - self.eval(right)
 
             # Again, If is different, so we define it separately.
-            case If(cond, e1, e2):
+            case If(cond, e1, e2 = None):
                 if self.eval(cond) == True:
                     self.scope += 1
                     to_return = self.eval(e1)
