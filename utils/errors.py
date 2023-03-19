@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-
+from utils.colors import GREEN, BOLD, RESET, RED, BLACK, YELLOW, BLUE, INVERSE, BRIGHT_INVERSE
 
 class DeclarationError(Exception):
     """
@@ -10,7 +10,7 @@ class DeclarationError(Exception):
 
     def __init__(self, name):
         self.name = name
-        print(f"DeclarationError: {name} is not declared.")
+        print(f"{RED}DeclarationError{RESET}: {name} is not declared.")
 
 
 class InvalidProgramError(Exception):
@@ -20,14 +20,14 @@ class InvalidProgramError(Exception):
 
     def __init__(self, message, verbose=True):
         self.message = message
-        print(f"InvalidProgramError: {message}")
+        print(f"{RED}InvalidProgramError{RESET}: {message}")
 
 
 class EndOfStream(Exception):
     """
     Raised when the end of a stream is reached.
     """
-    print("EndOfStreamError: Reached End of Stream. Exiting...")
+    print(f"{RED}EndOfStreamError{RESET}: Reached End of Stream. Exiting...")
     pass
 
 
@@ -35,7 +35,7 @@ class EndOfTokens(Exception):
     """
     Raised when the end of a stream of tokens is reached.
     """
-    print("EndOfTokensError: Reached End of Tokens without resolving the expression.")
+    print(f"{RED}EndOfTokensError{RESET}: Reached End of Tokens without resolving the expression.")
     pass
 
 
@@ -46,7 +46,7 @@ class TokenError(Exception):
 
     def __init__(self, message, expected, actual, verbose=True):
         self.message = message
-        print(f"TokenError: {message}")
+        print(f"{RED}TokenError{RESET}: {message}")
         pass
 
 
@@ -58,9 +58,9 @@ class TypeCheckError(Exception):
     def __init__(self, oprtype=None, message: str = None):
         self.oprtype = str(oprtype)
         if not message:
-            print(f"TypeError: Operand(s) should have the type: {oprtype}.")
+            print(f"{RED}TypeError{RESET}: Operand(s) should have the type: {oprtype}.")
         else:
-            print(f"TypeError: {message}")
+            print(f"{RED}TypeError{RESET}: {message}")
 
 
 class InvalidConditionError(Exception):
@@ -70,7 +70,7 @@ class InvalidConditionError(Exception):
 
     def __init__(self, cond):
         self.error = cond
-        print(f"InvalidConditionError: {cond} is not a valid condition.")
+        print(f"{RED}InvalidConditionError{RESET}: {cond} is not a valid condition.")
 
 
 class VariableRedeclarationError(Exception):
@@ -81,7 +81,7 @@ class VariableRedeclarationError(Exception):
     def __init__(self, var):
         self.var = var
         print(
-            f"Redeclaration Error: {var} has already been declared in the current scope."
+            f"{RED}RedeclarationError{RESET}: {var} has already been declared in the current scope."
         )
         pass
 
@@ -93,7 +93,7 @@ class AssignmentUsingNone(Exception):
 
     def __init__(self, var):
         self.var = var
-        print(f"Trying to assign using {var} which has no assigned value itself.")
+        print(f"{RED}AssignmentsUsingNoneError{RESET}: Trying to assign using {var} which has no assigned value itself.")
 
 
 class InvalidConcatenationError(Exception):
@@ -102,7 +102,7 @@ class InvalidConcatenationError(Exception):
     """
 
     def __init__(self):
-        print(f"Invalid attempted concatenation of different operand types.")
+        print(f"{RED}InvalidConcatenationError{RESET}: Invalid attempted concatenation of different operand types.")
 
 
 class IndexOutOfBoundsError(Exception):
@@ -114,37 +114,32 @@ class IndexOutOfBoundsError(Exception):
         if msg == None:
             print(msg)
         else:
-            print(f"Slice index out of range.")
+            print(f"{RED}IndexOutOfBoundsError{RESET}: Slice index out of range.")
 
 
 class InvalidOperation(Exception):
     def __init__(self, op, opr1, opr2=None):
         if opr2 == None:
-            print(f"Invalid operation. Cannot perform {op} on {opr1} objects.")
-
-        print(f"Invalid operation. Cannot perform {op} on {opr1} and {opr2} objects.")
-
+            print(f"{RED}InvalidOperationError{RESET}: Cannot perform {op} on {opr1} objects.")
 
 class InvalidArgumentToList(Exception):
     def __init__(self, list_type):
-        print(f"One or more inputs to list are not of type {list_type}.")
+        print(f"{RED}InvalidArgumentToListError{RESET}: One or more inputs to list are not of type {list_type}.")
 
 
 class ListError(Exception):
     def __init__(self, msg):
-        print(msg)
+        print(f"{RED}ListError{RESET}: {msg}")
 
 
 class ReferentialError(Exception):
     def __init__(self, var):
-        print(f"The variable {var} referenced during assignment does not exist.")
+        print(f"{RED}ReferentialError{RESET}: The variable {var} referenced during assignment does not exist.")
 
 
 class BadAssignment(Exception):
     def __init__(self, var, var_type, val_type):
-        print(
-            f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type"
-        )
+        print(f"{RED}Assignment Error{RESET}: Trying to assign value of {val_type} to variable {var} of {var_type} type")
 
 class InvalidFileExtensionError(Exception):
     """
