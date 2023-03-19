@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -128,7 +128,7 @@ class RuntimeEnvironment():
                 while len(self.environments) < (curent_scope + 1):
                     curent_scope -= 1
                 if name in self.environments[curent_scope]:
-                    return VariableRedeclarationError(name)
+                    raise VariableRedeclarationError(name)
 
                 if isinstance(value,ListObject):
                     elems = self.eval(value)
@@ -273,28 +273,118 @@ class RuntimeEnvironment():
 
             
             case ListOp("is-empty?", base_list):
-                base_list = self.eval(base_list)
+                value_type = None
 
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to IsEmpty() is not a list.")
+
+                
+                
+                base_list = self.eval(base_list)  
                 if(len(base_list)!=0):
                     return False
                 else:
                     return True
 
             case ListOp("head", base_list):
-                base_list = self.eval(base_list)
 
+                value_type = None
+
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to Head() is not a list.")
+                
+                
+                
+                base_list = self.eval(base_list)
                 if(len(base_list)==0):
                     raise ListError("No head in an empty list")
                 else:
                     return base_list[0]
             
             case ListOp("tail", base_list):
-                base_list = self.eval(base_list)
+                
+                value_type = None
 
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to IsEmpty() is not a list.")
+                
+                
+                base_list = self.eval(base_list)
                 if(len(base_list)==0):
                     raise ListError("No tail in an empty list")
                 else:
                     return base_list[1:]
+            
+
+            case ListIndex(index,base_list):
+                value_type = None
+
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Object attempted to be indexed is not a list.")
+                
+
+
+                base_list = self.eval(base_list)
+                ind = int(self.eval(index))
+
+                if(ind<0 or ind>=len(base_list)):
+                    raise ListError("List index out of range.")
+                else:
+                    return base_list[ind]
+                
+                
 
             # Binary operations are all the same, except for the operator.
             case BinOp("+", left, right):
@@ -308,7 +398,8 @@ class RuntimeEnvironment():
                         right = self.eval(right)
                         return left + right
                 except:
-                    return InvalidConcatenationError
+                    raise InvalidConcatenationError()
+                    
 
             case BinOp("-", left, right):
                 left = self.eval(left)
@@ -455,7 +546,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    return InvalidConditionError(cond)
+                    raise InvalidConditionError(cond)
                 
                 final_value = None
 
@@ -489,7 +580,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    return InvalidConditionError
+                    raise InvalidConditionError
                 
                 while(truth_value):
 

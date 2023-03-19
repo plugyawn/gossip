@@ -37,6 +37,8 @@ def interpret(feedback=False, visualize=False):
         if line == "clear":
             os.system("clear")
             continue
+        if line == "":
+            continue
 
         persist = True if line[-1] == "{" else False if line[-2:] == "};" else persist
 
@@ -44,6 +46,18 @@ def interpret(feedback=False, visualize=False):
         S = Parser.from_lexer(L)
 
         for s in S:
+            try:
+                if visualize:
+                    vis = ASTViz(depth=0, code=line)
+                    vis.treebuilder(s)
+                if feedback:
+                    if not persist:
+                        print(f"{RED}{runtime.eval(s)}{RESET}")
+                else:
+                    if not persist:
+                            runtime.eval(s)
+            except:
+                continue
             if visualize:
                 vis = ASTViz(depth=0, code=line)
                 vis.treebuilder(s)
@@ -59,4 +73,5 @@ def compile_gossip(lines):
         L = Lexer.from_stream(Stream.from_string(line))
         S = Parser.from_lexer(L)
         for s in S:
-            runtime.eval(s)
+            x = runtime.eval(s)
+            print(x)

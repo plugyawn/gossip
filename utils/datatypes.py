@@ -60,7 +60,7 @@ class StringLiteral:
 @dataclass
 class ListObject:
     elements: list()
-    element_type: int | float | str | list
+    element_type: int | float | str | list | bool
     type: Optional[ListType] = ListType()
 
 
@@ -75,6 +75,13 @@ class ListCons:
 class ListOp:
     op: str
     base_list: "AST"
+    index : Optional[SimType] = None
+
+
+@dataclass
+class ListIndex:
+    index: 'AST'
+    base_list: 'AST'
 
 
 @dataclass
@@ -272,3 +279,7 @@ class Buffer:
 @dataclass
 class Symbols:
     symbol: str
+
+@dataclass
+class ListUtils:
+    operation: str

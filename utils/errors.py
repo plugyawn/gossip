@@ -27,8 +27,8 @@ class EndOfStream(Exception):
     """
     Raised when the end of a stream is reached.
     """
+    
     print(f"{RED}EndOfStreamError{RESET}: Reached End of Stream. Exiting...")
-    pass
 
 
 class EndOfTokens(Exception):
@@ -36,7 +36,6 @@ class EndOfTokens(Exception):
     Raised when the end of a stream of tokens is reached.
     """
     print(f"{RED}EndOfTokensError{RESET}: Reached End of Tokens without resolving the expression.")
-    pass
 
 
 class TokenError(Exception):
@@ -44,10 +43,9 @@ class TokenError(Exception):
     Raised when the end of a stream of tokens is reached.
     """
 
-    def __init__(self, message, expected, actual, verbose=True):
+    def __init__(self, message):
         self.message = message
         print(f"{RED}TokenError{RESET}: {message}")
-        pass
 
 
 class TypeCheckError(Exception):
@@ -83,7 +81,6 @@ class VariableRedeclarationError(Exception):
         print(
             f"{RED}RedeclarationError{RESET}: {var} has already been declared in the current scope."
         )
-        pass
 
 
 class AssignmentUsingNone(Exception):
@@ -138,8 +135,17 @@ class ReferentialError(Exception):
 
 
 class BadAssignment(Exception):
-    def __init__(self, var, var_type, val_type):
-        print(f"{RED}Assignment Error{RESET}: Trying to assign value of {val_type} to variable {var} of {var_type} type")
+    def __init__(self,var,var_type,val_type):
+        print(f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type")
+
+
+class StringError(Exception):
+    def __init__(self):
+        print("Invalid value being assigned to string")
+
+class ListOpError(Exception):
+    def __init__(self,msg):
+        print(msg)
 
 class InvalidFileExtensionError(Exception):
     """
