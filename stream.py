@@ -2,11 +2,11 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
+from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Whitespace, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret
 from core import RuntimeEnvironment
 
 
-keywords = "let assign for while repeat print declare range do to if then else in  ".split()
+keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret ".split()
 symbolic_operators = "+ - * ** / < > <= >= == != =".split()
 word_operators = "and or not quot rem".split()
 whitespace = [" ", "\n"]
@@ -203,11 +203,19 @@ class Parser:
                 return self.parse_while()
             case Keyword("repeat"):
                 return self.parse_repeat()
+            case Keyword("deffunct"):
+                return self.parse_funct_def()
+            case Keyword("callfun"):
+                return self.parse_funct_call()
+            case Keyword("functret"):
+                return self.parse_funct_ret()
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
-                return self.parse_AST_sequence()
+                return self.parse_ast_seq()
             case Symbols("}"):
+                return self.lexer.__next__()
+            case Symbols(","):
                 return self.lexer.__next__()
             case _:
                 return self.parse_simple()
@@ -254,7 +262,7 @@ class Parser:
             match self.lexer.peek_token():
                 case Operator(op) if op in "*/":
                     self.lexer.advance()
-                    m = self.parse_atomic_expression()
+                    m = self.parse_expression()
                     left = BinOp(op, left, m)
                 case _:
                     break
@@ -308,6 +316,7 @@ class Parser:
             return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
+        self.lexer.match(Symbols(";"))
         return If(cond, e1, e2)
 
     def parse_assign(self):
@@ -407,7 +416,51 @@ class Parser:
             li.append(var)
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
+    def parse_funct_def(self):
+        li_3= []
+        li = []
+        self.lexer.match(Keyword("deffunct"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Symbols("("))
+        while self.lexer.peek_token() != Symbols(")"):    
+            var_1 = self.parse_atomic_expression()
+            li.append(var_1)
+            if(self.lexer.peek_token() == Symbols(")")):
+                break
+            self.lexer.match(Symbols(","))
+            
+        self.lexer.match(Symbols(")"))
+        li_2 = self.parse_AST_sequence()
+        li_3.append(var)
+        li_3.append(li)
+        li_3.append(li_2)
+        self.lexer.match(Symbols(";"))
+        return funct_def(var, li, li_2)
+
+        
+    def parse_funct_call(self):
+        li = []
+        self.lexer.match(Keyword("callfun"))
+        var = self.parse_atomic_expression()
+        self.lexer.match(Symbols("("))
+        while self.lexer.peek_token() != Symbols(")"):    
+            var_1 = self.parse_expression()
+            li.append(var_1)
+            if(self.lexer.peek_token() == Symbols(")")):
+                break
+            self.lexer.match(Symbols(","))
+            
+        self.lexer.match(Symbols(")"))
+        self.lexer.match(Symbols(";"))
+        return funct_call(var, li)
     
+    def parse_funct_ret(self):
+        self.lexer.match(Keyword("functret"))
+        self.lexer.match(Symbols("("))
+        li = self.parse_expression()
+        self.lexer.match(Symbols(")"))
+        self.lexer.match(Symbols(";"))
+        return funct_ret(li)   
     def __iter__(self):
         return self
     
