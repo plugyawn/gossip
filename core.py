@@ -293,24 +293,82 @@ class RuntimeEnvironment():
             #List Operations
 
             case ListOp("is-empty?", base_list):
-                base_list = self.eval(base_list)
+                value_type = None
 
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to IsEmpty() is not a list.")
+
+                
+                
+                base_list = self.eval(base_list)  
                 if(len(base_list)!=0):
                     return False
                 else:
                     return True
 
             case ListOp("head", base_list):
-                base_list = self.eval(base_list)
 
+                value_type = None
+
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to Head() is not a list.")
+                
+                
+                
+                base_list = self.eval(base_list)
                 if(len(base_list)==0):
                     raise ListError("No head in an empty list")
                 else:
                     return base_list[0]
             
             case ListOp("tail", base_list):
-                base_list = self.eval(base_list)
+                
+                value_type = None
 
+                if(not isinstance(base_list,ListObject)):
+                    if(isinstance(base_list,Variable)):
+                        value_name = base_list.name
+                        scp = self.scope
+                        while len(self.environments) < (scp + 1):
+                            scp-= 1
+
+                        while scp >= 0:
+                            if value_name in self.environments[scp]:
+                                value_type = self.environments[scp][value_name]['type']
+
+                            scp -= 1
+                    
+                    if(value_type is not list):
+                        raise ListError("Argument to IsEmpty() is not a list.")
+                
+                
+                base_list = self.eval(base_list)
                 if(len(base_list)==0):
                     raise ListError("No tail in an empty list")
                 else:

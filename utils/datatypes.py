@@ -49,7 +49,7 @@ class StringLiteral:
 @dataclass
 class ListObject:
     elements: list()
-    element_type: int | float | str | list
+    element_type: int | float | str | list | bool
     type: Optional[ListType] = ListType()
 
 
@@ -208,3 +208,7 @@ class Buffer:
 @dataclass
 class Symbols:
     symbol: str
+
+@dataclass
+class ListUtils:
+    operation: str

@@ -120,3 +120,14 @@ class ReferentialError(Exception):
 class BadAssignment(Exception):
     def __init__(self,var,var_type,val_type):
         print(f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type")
+
+
+class StringError(Exception):
+    def __init__(self):
+        print("Invalid value being assigned to string")
+
+
+
+class ListOpError(Exception):
+    def __init__(self,msg):
+        print(msg)
