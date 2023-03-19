@@ -16,8 +16,8 @@ from sphinx.util.docutils import SphinxDirective
 
 
 project = 'gossip-lang'
-copyright = '2023, Progyan Dhyey Rahul Sukruta'
-author = 'Progyan Dhyey Rahul Sukruta'
+copyright = '2023, Progyan, Dhyey, Rahul, Sukruta'
+author = 'Progyan, Dhyey, Rahul, Sukruta'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

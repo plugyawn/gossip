@@ -1,0 +1,2 @@
+graphviz==0.20.1
+Sphinx==6.1.3
