@@ -1,407 +1,601 @@
-from fractions import Fraction
 from dataclasses import dataclass
-from typing import Optional, NewType
-from utils.errors import EndOfStream, EndOfTokens, TokenError
-from utils.datatypes import Num, Bool, Keyword, Symbols, Identifier, Operator, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print
-from core import RuntimeEnvironment
+from fractions import Fraction
+from typing import Union, Mapping
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret
+from utils.datatypes import NumType,BoolType,StringType,ListType
+
+from utils.errors import DeclarationError, InvalidProgramError, InvalidCondition, VariableRedeclaration, AssignmentUsingNone, InvalidConcatenation, InvalidSlicing, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
 
 
-keywords = "let assign for while repeat print declare range do to if then else in  ".split()
-symbolic_operators = "+ - * ** / < > <= >= == != =".split()
-word_operators = "and or not quot rem".split()
-whitespace = " \t\n"
-symbols = "; , ( ) { } [ ] ".split()
+class RuntimeEnvironment():
+    """
+    The runtime environment. Instantiate to start a new environment.
+    Includes, most importantly, the eval method, which evaluates an AST
+    recursively.
+    """
+    def __init__(self):
+        self.environments = []
+        self.environments.append({})
+        self.environment = self.environments[0]
+        self.scope = 0
+        self.func_defs = {}
+        self.func_defns = []
 
 
-@dataclass
-class Stream:
-    source: str
-    pos: int
+    def eval(self, program: AST or ASTSequence, environment = None, reset_scope = False) -> Value:
 
-    def from_string(string:str , position:int = 0):
         """
-        Creates a stream from a string. Position reset to 0.
+        Recursively evaluates an AST or ASTSequence, returning a Value.
+        By default, retains the environment from the runtime environment.
+        However, you can pass in an environment to override this.
         """
-        return Stream(string, position)
+        if environment:
+            self.environment = environment
+        if not self.environment:
+            self.environment = {}
 
-    def next_char(self):
-        """
-        Returns the next character in the stream.
-        """
-        if self.pos >= len(self.source):
-            raise EndOfStream()
-        self.pos = self.pos + 1
-        return self.source[self.pos - 1]
+        match program:
+            case NumLiteral(value):
+                return value
+            
+            case BoolLiteral(value):
+                return value
+            
+            case StringLiteral(value):
+                return value
+            
+            case StringSlice(Variable(name),start, end):
+                full_string = self.eval(Variable(name))
 
-    def unget(self):
-        """
-        Moves the stream back one character.
-        """
-        assert self.pos > 0
-        self.pos = self.pos - 1
+                #slice indices must be integers and our default type is Fraction for numbers
+                strt = int(self.eval(start))
+                d_end = int(self.eval(end))
 
-# Define the token types.
-Token = Num | Bool | Keyword | Identifier | Operator | Symbols
-
-def word_to_token(word):
-    if word in keywords:
-        return Keyword(word)
-    if word in word_operators:
-        return Operator(word)
-    if word == "True":
-        return Bool(True)
-    if word == "False":
-        return Bool(False)
-    if word in symbolic_operators:
-        return Operator(word)
-    if word in symbols:
-        return Symbols(word)
-    return Identifier(word)
-
-@dataclass
-class Lexer:
-    stream: Stream
-    save: Token = None
-
-    def from_stream(s):
-        return Lexer(s)
-        
-    def next_token(self) -> Token:
-        try:
-            match self.stream.next_char():
-                case c if c.isdigit():
-                    # TODO: Handle different bases.
-                    n = int(c)  
-                    base_multiplier = 10
-                    floating = False
-                    while True:
-                        try:
-                            c = self.stream.next_char()
-                            if c.isdigit() and not floating:
-                                n = n*base_multiplier + int(c)
-                            elif c.isdigit() and floating:
-                                n = n + int(c) / base_multiplier
-                                base_multiplier = base_multiplier * 10
-                            elif c == ".":          
-                                if floating:
-                                    raise Exception("Cannot have two decimal points in a number.")
-                                floating = floating | True
-                            else:
-                                self.stream.unget()
-                                return Num(n, floating= floating)
-                        except EndOfStream:
-                            return Num(n)
-
-                case c if c in symbolic_operators: 
-                     s = c
-                     while True:
-                        try:
-                            c = self.stream.next_char()
-                            if c in symbolic_operators:
-                                s = s + c
-                            else:
-                                self.stream.unget()
-                                return word_to_token(s)
-                        except EndOfStream:
-                            return word_to_token(s)
-
-                case c if c.isalpha():
-                    s = c
-                    while True:
-                        try:
-                            c = self.stream.next_char()
-                            if c.isalpha():
-                                s = s + c
-                            else:
-                                self.stream.unget()
-                                return word_to_token(s)
-                        except EndOfStream:
-                            return word_to_token(s)
-
-                case c if c in symbols: 
-                    s = c
-                    return word_to_token(s)
-                case c if c in whitespace:
-                    return self.next_token()
+                
+                try:
+                    return full_string[strt:d_end]
+                except:
+                    if(strt<0 or d_end>len(full_string)):
+                        raise InvalidSlicing("Slice Index out of range")
+                    else:
+                        raise InvalidSlicing()
 
 
-    
-        except EndOfStream:
-            raise EndOfTokens
+            case ListObject(elements,element_type):
+                n = len(elements)
 
-    def peek_token(self):
-        """
-        Peeks at the next token, but doesn't advance the stream.
-        """
-        if self.save is not None:
-            return self.save
-        self.save = self.next_token()
-        return self.save
+                for i in range(n):
+                    if(type(self.eval(elements[i])) is not element_type):
+                        raise InvalidArgumentToList(element_type)
+                    elements[i] = self.eval(elements[i])
+                
+                return elements
+            
 
-    def match(self, expected):
-        """
-        Matches the next token to the expected token.
-        """
-        if self.peek_token() == expected:
-            return self.advance()
-        raise TokenError()
 
-    def advance(self):
-        """
-        Advances the stream by one token.
-        """
-        assert self.save is not None
-        self.save = None
+            case ListCons(to_add, base_list):
+                to_add = self.eval(to_add)
+                the_type = None
+                scp = self.scope
 
-    def __iter__(self):
-        return self
+                if(isinstance(base_list,ListObject)):
+                    the_type = base_list.element_type
+                elif(isinstance(base_list,Variable)):
 
-    def __next__(self):
-        try:
-            self.curr_token = self.next_token()
-            return self.curr_token
-        except EndOfTokens:
-            raise StopIteration
+                    while(scp>=0):
+                        if(base_list.name in self.environments[scp]):
+                            the_type = self.environments[scp][base_list.name]['element_type']
+                    
+                        scp-=1
 
-@dataclass
-class Parser:
-    lexer: Lexer
+                    if(the_type==None):
+                        raise ListError("Variable referenced during Cons operation doesn't exist.")
+                                        
+                else:
+                    raise ListError("Argument to Cons() is not a list.")
+                
 
-    def from_lexer(lexer):
-        """
-        Generate a parser from a lexer.
-        """
-        return Parser(lexer)
 
-    def parse_expression(self):
-        """
-        Parse a complete expression.
-        For | a == b |, this will parse the entire expression.
-        """
-        match self.lexer.peek_token():
-            case Keyword("if"):
-                return self.parse_if()
-            case Keyword("while"):
-                return self.parse_while()
-            case Keyword("let"):
-                return self.parse_let()
-            case Keyword("assign"):
-                return self.parse_assign()
-            case Keyword("for"):
-                return self.parse_for()
-            case Keyword("range"):
-                return self.parse_range()
-            case Keyword("print"):
-                return self.parse_print()
-            case Keyword("declare"):
-                return self.parse_declare()
-            case Keyword("while"):
-                return self.parse_while()
-            case Keyword("repeat"):
-                return self.parse_repeat()
-            case Symbols(";"):
-                return self.lexer.__next__()
-            case Symbols("{"):
-                return self.parse_ast_seq()
-            case Symbols("}"):
-                return self.lexer.__next__()
-            case _:
-                return self.parse_simple()
 
-    def parse_atomic_expression(self):
-        """
-        Parse an atomic expression.
-        For | a == b |, this will parse | a |.
-        """
-        match self.lexer.peek_token():
-            case Identifier(name):
-                self.lexer.advance()
-                return Variable(name)
-            case Num(value):
-                self.lexer.advance()
-                return NumLiteral(value)
-            case Bool(value):
-                self.lexer.advance()
-                return BoolLiteral(value)
+                if(type(to_add) is not the_type):
+                    raise ListError("Input element is not of the same type as given list type.")
+                
 
-    def parse_addition(self):
-        """
-        Parse an addition expression.
-        For | a + b |, this will parse the entire expression.
-        """
-        left = self.parse_multiplication()
-        while True:
-            match self.lexer.peek_token():
-                case Operator(op) if op in "+-":
-                    self.lexer.advance()
-                    m = self.parse_multiplication()
-                    left = BinOp(op, left, m)
-                case _:
-                    break
-        return left
 
-    def parse_multiplication(self):
-        """
-        Parse a multiplication expression.
-        For | a * b |, this will parse the entire expression.
-        """
-        left = self.parse_atomic_expression()
-        while True:
-            match self.lexer.peek_token():
-                case Operator(op) if op in "*/":
-                    self.lexer.advance()
-                    m = self.parse_atomic_expression()
-                    left = BinOp(op, left, m)
-                case _:
-                    break
-        return left
+                new_list = []
+                new_list.append(to_add)
+                
+                if(isinstance(base_list,ListObject)):
+                    for num in base_list:
+                        new_list.append(num)
+                else:
+                    for num in self.eval(base_list):
+                        new_list.append(num)
+                
 
-    def parse_simple(self):
-        """
-        Parse a simple expression. 
-        # TODO - This is a bit of a misnomer, as it just calls parse_comparison().
-        """
-        return self.parse_comparison()
+                if(isinstance(base_list,Variable)):
+                    SCOPE = self.scope
+                    self.environments[SCOPE][base_list.name]['value'] = new_list
+                
 
-    def parse_comparison(self):
-        """
-        Parse a comparison expression.
-        For | a == b |, this will parse the entire expression.
-        """
-        left = self.parse_addition()
-        match self.lexer.peek_token():
-            case Operator(op) if op in symbolic_operators:
-                self.lexer.advance()
-                right = self.parse_addition()
-                return BinOp(op, left, right)
-        return left
 
-    def parse_let(self):
-        """
-        Parse a let function. 
-        Examples: | let a  = 6 end |, to define a.
-                  | let a  = 6 in a + 1 end |, to define a and use it in an expression.
-        """
-        self.lexer.match(Keyword("let"))
-        var = self.parse_atomic_expression()
-        self.lexer.match(Operator("="))
-        a = self.parse_expression()
-        self.lexer.match(Keyword("in"))
-        b = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return Let(var, a, b)
+                return new_list            
+            
 
-    def parse_if(self):
-        """
-        Parse an if function.
-        Examples: | if a == b then a+2 else a+1 end |, to define a and use it in an expression.
-        """
-        self.lexer.match(Keyword("if"))
-        cond = self.parse_expression()
-        self.lexer.match(Keyword("then"))
-        e1 = self.parse_expression()
-        self.lexer.match(Keyword("else"))
-        e2 = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return If(cond, e1, e2)
+            case Variable(name):
+                # print(self.environments)
+                scope = self.scope
+                while len(self.environments) < (scope + 1):
+                    scope -= 1
 
-    def parse_assign(self):
-        """
-        Parse an assignment.
-        Examples: | a = 6 |, to assign 6 to a.
-        """
-        self.lexer.match(Keyword("assign"))
-        var = self.parse_atomic_expression()
-        self.lexer.match(Operator("="))
-        a = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return Assign(var, a)
+                while scope >= 0:
+                    if name in self.environments[scope]:
+                        return self.environments[scope][name]['value']
+                    scope -= 1
 
-    def parse_for(self):
-        """
-        Parse a for loop.
-        Examples: | for a = 1 in 10 do a + 1 end |, to define a and use it in an expression.
-        """
-        self.lexer.match(Keyword("for"))
-        var = self.parse_atomic_expression()
-        self.lexer.match(Keyword("in"))
-        iter = self.parse_expression()
-        self.lexer.match(Keyword("do"))
-        task = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return ForLoop(var, iter, task)
+                raise DeclarationError(name)
+            
+            
+            case Declare(Variable(name), value):
 
-    def parse_range(self):
-        """
-        Parse a range.
-        Examples: | range 1 to 10 |, to define a range from 1 to 10.
-        """
-        self.lexer.match(Keyword("range"))
-        self.lexer.match(Symbols("("))
-        left = self.parse_atomic_expression()
-        self.lexer.match(Symbols(","))
-        right = self.parse_atomic_expression()
-        self.lexer.match(Symbols(")"))
-        return Range(left, right)
+                curent_scope = self.scope
+                if(name in self.environments[curent_scope]):
+                    raise VariableRedeclaration(name)
 
-    def parse_print(self):
-        """
-        Parse a print statement.
-        Examples: | print a |, to print the value of a.
-        """
-        self.lexer.match(Keyword("print"))
-        expression = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return Print(expression)
+                if(isinstance(value,ListObject)):
+                    elems = self.eval(value)
+                    scp = self.scope
+                    
+                    self.environments[curent_scope][name] = {}
+                    self.environments[scp][name]['value'] = elems
+                    self.environments[scp][name]['type'] = list
+                    self.environments[scp][name]['element_type'] = value.element_type
 
-    def parse_while(self):
-        """
-        Parse a while loop.
-        Examples: | while a == b do a + 1 end |, to define a and use it in an expression.
-        """
-        self.lexer.match(Keyword("while"))
-        cond = self.parse_expression()
-        self.lexer.match(Keyword("do"))
-        task = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return While(cond, task)
+                    return elems
+                
+                elif(isinstance(value,Variable)):
+                    value_to_be_declared = self.eval(value)
+                    value_type = None
+                    value_name = value.name
+                    if_val_is_list_its_el_type = None
 
-    def parse_repeat(self):
-        """
-        Parse a repeat loop.
-        Examples: | repeat a + 1 until a == b |, to define a and use it in an expression.
-        """
-        self.lexer.match(Keyword("repeat"))
-        task = self.parse_expression()
-        self.lexer.match(Keyword("while"))
-        cond = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return DoWhile(task, cond)
+                    scp = self.scope
+                    while len(self.environments) < (scp + 1):
+                        scp-= 1
 
-    def parse_declare(self):
-        """
-        Parse a declaration.
-        Examples: | declare a = 10 |, to declare a."""
-        self.lexer.match(Keyword("declare"))
-        var = self.parse_atomic_expression()
-        self.lexer.match(Operator("="))
-        a = self.parse_expression()
-        self.lexer.match(Symbols(";"))
-        return Declare(var, a)
-    
-    def parse_ast_seq(self):
-        li = []
-        self.lexer.match(Symbols("{"))
-        while self.lexer.peek_token() != Symbols("}"):    
-            var = self.parse_expression()
-            li.append(var)
-        self.lexer.match(Symbols("}"))
-        return ASTSequence(li)
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
-        try:
-            return self.parse_expression()
-        except EndOfTokens:
-            raise StopIteration
+                    while scp >= 0:
+                        if value_name in self.environments[scp]:
+                            value_type = self.environments[scp][value_name]['type']
+
+                            if(value_type is list):
+                                if_val_is_list_its_el_type = self.environments[scp][value_name]['element_type']
+
+                        scp -= 1
+
+
+
+                    curent_scope = self.scope
+
+                    if(if_val_is_list_its_el_type==None):
+                        
+                        self.environments[curent_scope][name] = {}
+                        self.environments[curent_scope][name]['value'] = value_to_be_declared
+                        self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+
+                    else:
+                        
+                        self.environments[curent_scope][name] = {}
+                        self.environments[curent_scope][name]['value'] = value_to_be_declared
+                        self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+                        self.environments[curent_scope][name]['element_type'] = if_val_is_list_its_el_type
+                
+                    return value_to_be_declared
+
+
+
+                else:
+                    value_to_be_declared = self.eval(value)
+                    curent_scope = self.scope
+                    
+                    
+                    self.environments[curent_scope][name] = {}
+                    self.environments[curent_scope][name]['value'] = value_to_be_declared
+                    self.environments[curent_scope][name]['type'] = type(value_to_be_declared)
+
+                    return value_to_be_declared
+                
+
+                
+            
+            
+            case Assign(Variable(name), expression):
+                val = self.eval(expression)
+
+                var_type = None
+                scp = self.scope
+
+                if len(self.environments) < (scp + 1):
+                    scp = len(self.environments) - 1 
+
+                while scp >= 0:
+                    if name in self.environments[scp]:
+                        var_type = self.environments[scp][name]['type']
+                        break 
+
+                    scp -= 1
+                
+                if(var_type is not type(val)):
+                    raise BadAssignment(name,var_type,type(val))
+
+
+
+                if name in self.environments[scp]:
+                    self.environments[scp][name]['value'] = val
+                else:
+                    flag = False
+                    scope = scp - 1
+                    while scope >= 0:
+                        if name in self.environments[scope]:
+                            flag = True
+                            self.environments[scope][name]['value'] = val
+                            break
+                        else:
+                            scope -= 1
+                    
+                    if not flag:
+                        raise DeclarationError(name)    
+                
+                return val
+            
+
+            case ASTSequence(seq):
+                """
+                Special case. Evaluates all but the last element in a loop, 
+                then returns the evaluation of the last element.
+                """
+                for ast in seq[:-1]:
+                    x = self.eval(ast)
+
+                return self.eval(seq[-1])
+            
+
+            case Let(Variable(name), e1, e2):
+                """
+                Let is a special case. It evaluates e1, then adds the result
+                to the environment, then evaluates e2 with the new environment.
+                """
+                val = self.eval(e1)
+                self.scope += 1
+                self.environments.append({ name: {'value': val} })
+                expression = self.eval(e2)
+                self.environments.pop()
+                self.scope -= 1
+                return expression
+
+            case Range(left, right):
+                """
+                Evaluates and returns range from left to return, as an ASTSequence.
+                """
+                AST_sequence = []
+                for i in range(int(left.value), int(right.value)+1):
+                    AST_sequence.append(NumLiteral(i))
+                return ASTSequence(AST_sequence)
+
+            case Print(expression):
+                if isinstance(expression, ASTSequence):
+                    expression_list = expression.seq
+                    for expression in expression_list[:-1]:
+                        print(expression.value) # TODO replace with something like: extract_value(exp)
+                                                # TODO so it works both for strings and numbers.
+                    print(expression_list[-1].value, end="")
+                    return expression_list[-1].value
+                else:
+                    to_return = self.eval(expression)
+                    print(to_return)
+                    return to_return
+
+            
+            
+            #List Operations
+
+            case ListOp("is-empty?", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)!=0):
+                    return False
+                else:
+                    return True
+
+            case ListOp("head", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)==0):
+                    raise ListError("No head in an empty list")
+                else:
+                    return base_list[0]
+            
+            case ListOp("tail", base_list):
+                base_list = self.eval(base_list)
+
+                if(len(base_list)==0):
+                    raise ListError("No tail in an empty list")
+                else:
+                    return base_list[1:]
+
+
+
+            # Binary operations are all the same, except for the operator.
+            case BinOp("+", left, right):
+                try:
+                    if(left.type==StringType and right.type==StringType):
+                        #print("gotcha")
+                        dummy_string = left.value + right.value
+                        return dummy_string
+                    else:
+                        left = self.eval(left)
+                        right = self.eval(right)
+                        return left + right
+                except:
+                    return InvalidConcatenation
+
+            case BinOp("-", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                try:
+                    return left - right
+                except:
+                    raise InvalidOperation("-",left,right)
+            case BinOp("*", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                try:
+                    return left * right
+                except:
+                    raise InvalidOperation("*",left,right)
+            case BinOp("/", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                try:
+                    return left / right
+                except:
+                    raise InvalidOperation("/",left,right)
+            
+            case BinOp("%", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+
+                try:
+                    return left%right
+                except:
+                    raise InvalidOperation("%", left, right)
+                
+            case BinOp("==", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left == right
+                except:
+                    raise InvalidOperation("==",left,right)
+            case BinOp("!=", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left != right
+                except:
+                    raise InvalidOperation("!=",left,right)
+                
+            case BinOp("<", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+
+                try:
+                    return left < right
+                except:
+                    raise InvalidOperation("<",left,right)
+                
+            case BinOp(">", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+
+                try:
+                    return left > right
+                except:
+                    raise InvalidOperation(">",left,right)
+                
+            case BinOp("<=", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left <= right
+                except:
+                    raise InvalidOperation("<=",left,right)
+                
+            case BinOp(">=", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left >= right
+                except:
+                    raise InvalidOperation(">=",left,right)
+                
+            case BinOp("&&", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left and right
+                except:
+                    raise InvalidOperation("&&",left,right)
+                
+            case BinOp("||", left, right):
+                left = self.eval(left)
+                right = self.eval(right)
+                
+                try:
+                    return left or right
+                except:
+                    raise InvalidOperation("||",left,right)
+
+            # case BinOp("=", Variable(name), right):
+            #     right = self.eval(right)
+            #     self.environments[0] = self.environments[0] | { name: right }
+            #     return right
+
+
+
+
+
+            # Unary operation is the same, except for the operator.
+            case UnOp("-", right):
+                try:
+                    return 0 - self.eval(right)
+                except:
+                    InvalidOperation("Unary Negation",right)
+
+            # Again, If is different, so we define it separately.
+            case If(cond, e1, e2):
+                if self.eval(cond) == True:
+                    self.scope += 1
+                    to_return = self.eval(e1)
+                    self.scope -= 1
+                else:
+                    self.scope += 1
+                    to_return = self.eval(e2)
+                    self.scope -= 1
+                
+                return to_return
+            
+            case ForLoop(Variable(name), sequence, stat):
+                if not isinstance(sequence, ASTSequence):
+                    sequence = self.eval(sequence)
+                length = sequence.length
+                value_list = sequence.seq
+                for expression in value_list: 
+                    v1 = self.eval(expression)
+                    self.scope += 1
+                    self.environments.append({ name : v1 })
+                    result = self.eval(stat)
+                    self.scope -= 1
+                    self.environments.pop()
+                return(result)
+            
+            case While(cond, sequence):
+
+                truth_value = self.eval(cond)
+
+                if type(truth_value) != bool:
+                    raise InvalidCondition(cond)
+                
+                final_value = None
+
+                while(truth_value):
+
+                    self.scope += 1
+                    scp = self.scope
+                    
+                    current_scope_mappings={}
+                    self.environments.append(current_scope_mappings)
+                    final_value = self.eval(sequence)
+                    
+                    truth_value= self.eval(cond)
+                    self.environments.pop()
+                    self.scope -= 1
+                
+                return final_value
+            
+            case DoWhile(sequence, cond):
+
+                final_value = None
+                self.scope += 1
+                scp = self.scope
+                    
+                current_scope_mappings={}
+                self.environments.append(current_scope_mappings)
+                final_value = self.eval(sequence)
+
+                self.environments.pop()
+                self.scope -= 1
+
+                truth_value = self.eval(cond)
+
+                if type(truth_value) != bool:
+                    raise InvalidCondition
+                
+                while(truth_value):
+
+                    self.scope += 1
+                    scp = self.scope
+                    
+                    current_scope_mappings={}
+                    self.environments.append(current_scope_mappings)
+                    final_value = self.eval(sequence)
+                    
+                    truth_value= self.eval(cond)
+                    self.environments.pop()
+                    self.scope -= 1
+                
+                return final_value
+            case funct_ret(funct_val):
+                #print(funct_val)
+                return(self.eval(funct_val))
+            
+            case funct_def(Variable(name), arg_list, body):
+            
+                func = [arg_list, body]
+                funct_1 =  {"value":func, "type": str}
+                scp = self.scope
+                while len(self.environments) < (scp + 1):
+                        scp-= 1
+                
+                self.environments[scp][name] = funct_1
+                # print(self.environments)
+                return(self.eval(NumLiteral(0)))
+            
+
+            #dynamic scoping on function calls 
+            case funct_call(Variable(name), arg_val):
+                self.scope +=1
+                src = self.scope
+                # print(src)
+                if(len(self.environments)<self.scope + 1):
+                    src = len(self.environments) - 1
+
+                # print(src)
+                while src >=0:
+                    if name in self.environments[src]:  
+                        dictt = {}
+                        arg_name = self.environments[src][name]["value"][0]
+
+                        if(len(arg_name)!=len(arg_val)):
+                            raise Exception("Not enough arguements")
+                        
+                        for x in range(len(arg_name)):
+                            v1 = self.eval(arg_val[x])
+                            dictt[arg_name[x].name] = {"value":v1, "type": type(v1)}
+
+                        self.environments.append(dictt)
+                        m = self.eval(self.environments[src][name]["value"][1])
+                        if(len(self.environments)>1):
+                            self.environments.pop()
+                        self.scope -= 1 
+                        return(m)
+                    else:
+                            src -= 1 
+                    
+                raise Exception("Function is not defined")    
+            
+                
+        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+
+            
+                
+        raise InvalidProgramError(f"Runtime environment does not support program: {program}.")
+
+
+
+
+
