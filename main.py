@@ -238,7 +238,7 @@ d"     YD                                     888                               
                     ext = file_path.split(".")[-1]
                     raise InvalidFileExtensionError(ext)
                 with open(file_path, 'r') as f:
-                    lines = f.readlines()
+                    lines = f.read()
                     compile_gossip(lines)
             except FileNotFoundError:
                 print(f"Error: File '{file_path}' not found.")

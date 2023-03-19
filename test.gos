@@ -1,12 +1,26 @@
-declare a = 9 ;
-print( a) ;
+declare n = 600851475143;
+declare maxpr = 0;
+while n%2==0 do {
+assign maxpr = 2;
+assign n = n/2;};
 
-print (123812073 );
+declare i = 3;
+while i*i<=n do {
+while n%i==0 do {
+assign maxpr = i;
+assign n = n/i;};
+assign i = i+2;};
 
-assign a = 123 ;
+if n>2 then {
+    print(n);
+    } else{
+        print(maxpr);
+        };
+        
+print(12421312);
 
-print (a );
-
-declare t = 5 ;
-
-print( let r = 100 in let t = 10 in r + t ; ;) ;
+if 3 > 2 then {
+    print(1);
+    } else{
+        print(2);
+        };
