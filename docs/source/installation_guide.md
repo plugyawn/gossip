@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ```
 This will install all the required dependencies listed in the `requirements.txt` file.
 
-4. Optionnally, you can create a virtual environment using the following command:
+4. Optionally, you can create a virtual environment using the following command:
 
 ```bash
 pipenv install -r requirements.txt
