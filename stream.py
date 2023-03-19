@@ -150,11 +150,11 @@ class Lexer:
         """
         Matches the next token to the expected token.
         """
-        try:
-            assert self.peek_token() == expected
+
+        if self.peek_token() == expected:
             return self.advance()
-        except AssertionError: 
-            return TokenError(f"Expected {expected}, got {self.peek_token()}", expected=expected, actual=self.peek_token())
+        else: 
+            raise TokenError(f"Expected {expected}, got {self.peek_token()}")
 
     def advance(self):
         """

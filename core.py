@@ -126,7 +126,7 @@ class RuntimeEnvironment():
 
                 curent_scope = self.scope
                 if name in self.environments[curent_scope]:
-                    return VariableRedeclarationError(name)
+                    raise VariableRedeclarationError(name)
 
                 if isinstance(value,ListObject):
                     elems = self.eval(value)
@@ -364,7 +364,8 @@ class RuntimeEnvironment():
                         right = self.eval(right)
                         return left + right
                 except:
-                    return InvalidConcatenationError
+                    raise InvalidConcatenationError()
+                    
 
             case BinOp("-", left, right):
                 left = self.eval(left)
@@ -509,7 +510,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    return InvalidConditionError(cond)
+                    raise InvalidConditionError(cond)
                 
                 final_value = None
 
@@ -543,7 +544,7 @@ class RuntimeEnvironment():
                 truth_value = self.eval(cond)
 
                 if type(truth_value) != bool:
-                    return InvalidConditionError
+                    raise InvalidConditionError
                 
                 while(truth_value):
 
