@@ -1,0 +1,12 @@
+declare x = 40;
+declare y = True;
+
+while y==True do {
+declare done =True;
+
+for i in range(1,21) do {
+if x%i!=0 then assign done = False;;};;
+
+if done==False then assign x=x+1; else assign y = True;;};;
+
+print(x);

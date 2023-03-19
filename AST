@@ -1,0 +1,38 @@
+digraph {
+	label="if 4 > 2 then{print(5);print(6);} else{print(7);print(4);};"
+	node_0 [label=If shape=diamond]
+	node_1 [label=">"]
+	node_2 [label=4]
+	node_1 -> node_2
+	node_3 [label=2]
+	node_1 -> node_3
+	node_0 -> node_1
+	node_4 [label=Sequence shape=square]
+	AST_0_5 [label=0 color=grey shape=square]
+	node_5 [label=Print]
+	node_6 [label=5]
+	node_5 -> node_6
+	AST_0_5 -> node_5
+	node_4 -> AST_0_5
+	AST_1_7 [label=1 color=grey shape=square]
+	node_7 [label=Print]
+	node_8 [label=6]
+	node_7 -> node_8
+	AST_1_7 -> node_7
+	AST_0_5 -> AST_1_7
+	node_0 -> node_4
+	node_9 [label=Sequence shape=square]
+	AST_0_10 [label=0 color=grey shape=square]
+	node_10 [label=Print]
+	node_11 [label=7]
+	node_10 -> node_11
+	AST_0_10 -> node_10
+	node_9 -> AST_0_10
+	AST_1_12 [label=1 color=grey shape=square]
+	node_12 [label=Print]
+	node_13 [label=4]
+	node_12 -> node_13
+	AST_1_12 -> node_12
+	AST_0_10 -> AST_1_12
+	node_0 -> node_9
+}
