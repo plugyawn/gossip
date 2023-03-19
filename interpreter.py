@@ -58,3 +58,19 @@ def interpret(feedback=False, visualize=False):
                             runtime.eval(s)
             except:
                 continue
+            if visualize:
+                vis = ASTViz(depth=0, code=line)
+                vis.treebuilder(s)
+            if feedback:
+                print(f"{RED}{runtime.eval(s)}{RESET}")
+            else:
+                if not persist:
+                    runtime.eval(s)
+
+def compile_gossip(lines):
+    runtime = RuntimeEnvironment()
+    for line in lines:
+        L = Lexer.from_stream(Stream.from_string(line))
+        S = Parser.from_lexer(L)
+        for s in S:
+            runtime.eval(s)

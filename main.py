@@ -44,7 +44,8 @@ import urllib.request
 import uuid
 import webbrowser
 
-from interpreter import interpret
+from interpreter import interpret, compile_gossip
+from utils.errors import InvalidFileExtensionError
 
 _VERSION_ = "0.0.1a"
 _DESCRIPTION_ = "Run beautiful Gossip-Lang code, straight from your terminal."
@@ -228,9 +229,21 @@ d"     YD                                     888                               
 
     def main():
 
-        GossipArgumentParser.show_title_card()
-
         opts = GossipArgumentParser.parse_arguments()
+
+        if opts.from_file:
+            file_path = opts.from_file
+            try:
+                if not file_path.endswith(".gos") and os.path.exists(file_path):
+                    ext = file_path.split(".")[-1]
+                    raise InvalidFileExtensionError(ext)
+                with open(file_path, 'r') as f:
+                    lines = f.readlines()
+                    compile_gossip(lines)
+            except FileNotFoundError:
+                print(f"Error: File '{file_path}' not found.")
+                sys.exit(1)
+            sys.exit(0)
 
         if opts.update:
             latest = GossipArgumentParser.update_latest()
@@ -243,6 +256,7 @@ d"     YD                                     888                               
             sys.exit(0)
 
         if opts.interpret:
+            GossipArgumentParser.show_title_card()
             interpret(feedback=opts.show_feedback, visualize=opts.visualize)
             sys.exit(0)
 

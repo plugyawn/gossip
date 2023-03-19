@@ -146,3 +146,10 @@ class StringError(Exception):
 class ListOpError(Exception):
     def __init__(self,msg):
         print(msg)
+
+class InvalidFileExtensionError(Exception):
+    """
+    Raised when the file extension is not valid.
+    """
+    def __init__(self, ext):
+        print(f"InvalidFileExtension: {ext} is not a valid file extension for gossip language.")

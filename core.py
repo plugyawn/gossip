@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, ListIndex
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -193,20 +193,20 @@ class RuntimeEnvironment():
                 var_type = None
                 scp = self.scope
 
-                while len(self.environments) < (scp + 1):
-                    scp-= 1
+                if len(self.environments) < (scp + 1):
+                    scp = len(self.environments) - 1 
 
                 while scp >= 0:
                     if name in self.environments[scp]:
                         var_type = self.environments[scp][name]['type']
-
+                        break 
                     scp -= 1
                 
                 if(var_type is not type(val)):
                     raise BadAssignment(name,var_type,type(val))
 
-                if name in self.environments[self.scope]:
-                    self.environments[self.scope][name]['value'] = val
+                if name in self.environments[scp]:
+                    self.environments[scp][name]['value'] = val
                 else:
                     flag = False
                     scope = self.scope - 1
@@ -592,6 +592,55 @@ class RuntimeEnvironment():
                     self.scope -= 1
                 
                 return final_value
+            
+            case funct_ret(funct_val):
+                #print(funct_val)
+                return(self.eval(funct_val))
+            
+            case funct_def(Variable(name), arg_list, body):
+            
+                func = [arg_list, body]
+                funct_1 =  {"value":func, "type": str}
+                scp = self.scope
+                while len(self.environments) < (scp + 1):
+                        scp-= 1
+                
+                self.environments[scp][name] = funct_1
+                # print(self.environments)
+                return(self.eval(NumLiteral(0)))
+            
+
+            #dynamic scoping on function calls 
+            case funct_call(Variable(name), arg_val):
+                self.scope +=1
+                src = self.scope
+                # print(src)
+                if(len(self.environments)<self.scope + 1):
+                    src = len(self.environments) - 1
+
+                # print(src)
+                while src >=0:
+                    if name in self.environments[src]:  
+                        dictt = {}
+                        arg_name = self.environments[src][name]["value"][0]
+
+                        if(len(arg_name)!=len(arg_val)):
+                            raise Exception("Not enough arguements")
+                        
+                        for x in range(len(arg_name)):
+                            v1 = self.eval(arg_val[x])
+                            dictt[arg_name[x].name] = {"value":v1, "type": type(v1)}
+
+                        self.environments.append(dictt)
+                        m = self.eval(self.environments[src][name]["value"][1])
+                        if(len(self.environments)>1):
+                            self.environments.pop()
+                        self.scope -= 1 
+                        return(m)
+                    else:
+                            src -= 1 
+                    
+                raise Exception("Function is not defined")               
             
                 
         raise InvalidProgramError(f"Runtime environment does not support program: {program}.")

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 declare n = 1000;
 declare s = 0;
     
@@ -11,3 +12,9 @@ while(i<n){
 }
     
 print(s)
+=======
+declare sum = 0;
+for x in range(0,1000) do 
+{if x%5==0 || x%3==0 then assign sum = sum + x;};
+print(sum);
+>>>>>>> 67eedcf1d9d4eec871f8b0669870a4313f768a93
