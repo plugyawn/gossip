@@ -364,43 +364,6 @@ def test_nested_assignment_scope_loops():
 
     assert(r.eval(prgrm)==10)
 
-
-# testing for function
-
-def test_for_func():
-    r = RuntimeEnvironment()
-    a = NumLiteral(9)
-    t  = Variable("a")
-    li = [t]
-    li_ = [a]
-    f = Print(t)
-    f_2 = funct_ret(a)
-    f_3 = ASTSequence([f,f_2])
-    go = funct_def("hi", li, f_3)
-    go_ = funct_call("hi", li_)
-    r.eval(go)
-    print(r.eval(go_))
-
-# test for reccursive functions
-def test_rec_funct():
-    r = RuntimeEnvironment()
-    a = NumLiteral(7)
-    a2 = NumLiteral(1)
-    t  = Variable("a")
-    li = [t]
-    li_ = [a]
-    cond = BinOp("<=",t ,a2)
-    e1 = funct_ret(a2)
-    e2_1 = Assign(t,BinOp("-",t,a2))
-    e4 = funct_call("hi", li)
-    e2_2 = funct_ret(BinOp("*",BinOp("+",t,a2),e4))
-    e2 = ASTSequence([e2_1, e2_2])
-    f = If(cond, e1, e2)
-    go = funct_def("hi", li, f)
-    go_ = funct_call("hi", li_)
-    r.eval(go)
-    print(r.eval(go_)) 
-
 #strings test
 
 def test_strings_assignment():
@@ -658,6 +621,44 @@ def test_list_isempty_true():
     block = ASTSequence([declare_x, declare_y, get_y_isempty])
     
     assert(r.eval(block)==True)
+
+# testing for function
+
+def test_for_func():
+    r = RuntimeEnvironment()
+    a = NumLiteral(9)
+    t  = Variable("a")
+    li = [t]
+    li_ = [a]
+    f = Print(t)
+    f_2 = funct_ret(a)
+    f_3 = ASTSequence([f,f_2])
+    go = funct_def(Variable("hi"), li, f_3)
+    go_ = funct_call(Variable("hi"), li_)  
+    r.eval(go)
+    assert(r.eval(go_)==9)
+
+# test for reccursive functions
+def test_rec_funct():
+    r = RuntimeEnvironment()
+    a = NumLiteral(7)
+    a2 = NumLiteral(1)
+    t  = Variable("a")
+    li = [t]
+    li_ = [a]
+    cond = BinOp("<=",t ,a2)
+    e1 = funct_ret(a2)
+    
+    e2_1 = Assign(t,BinOp("-",t,a2))
+    e4 = funct_call(Variable("hi"), li)
+    e2_2 = funct_ret(BinOp("*",BinOp("+",t,a2),e4))
+    e2 = ASTSequence([e2_1, e2_2])
+    f = If(cond, e1, e2)
+    go = funct_def(Variable("hi"), li, f)
+    go_ = funct_call(Variable("hi"), li_)
+    r.eval(go)
+    assert(r.eval(go_)==5040)
+
 # main
 if __name__ == "__main__":
     test_eval()
