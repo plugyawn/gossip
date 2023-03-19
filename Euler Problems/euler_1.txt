@@ -1,0 +1,13 @@
+declare n = 1000;
+declare s = 0;
+    
+declare i = 1;
+    
+while(i<n){
+    if(i%3==0 || i%5==0){
+        assign s = s + i;
+    }
+    assign i = i+1;
+}
+    
+print(s)
