@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from utils.colors import GREEN, BOLD, RESET, RED, BLACK, YELLOW, BLUE, INVERSE, BRIGHT_INVERSE
+import pdb
 
 class DeclarationError(Exception):
     """
@@ -22,20 +23,32 @@ class InvalidProgramError(Exception):
         self.message = message
         print(f"{RED}InvalidProgramError{RESET}: {message}")
 
+class InvalidTokenError(Exception):
+    """
+    Raised when an invalid token is encountered.
+    """
+
+    def __init__(self, token, verbose=True):
+        self.token = token
+        print(f"{RED}InvalidTokenError{RESET}: {token} is not a valid token.")
+
 
 class EndOfStream(Exception):
     """
     Raised when the end of a stream is reached.
     """
-    
-    print(f"{RED}EndOfStreamError{RESET}: Reached End of Stream. Exiting...")
+    def __init__(self):
+        # print(f"{RED}EndOfStreamError{RESET}: Reached End of Stream. Exiting...")
+        pass
 
 
 class EndOfTokens(Exception):
     """
     Raised when the end of a stream of tokens is reached.
     """
-    print(f"{RED}EndOfTokensError{RESET}: Reached End of Tokens without resolving the expression.")
+    def __init__(self):
+        # print(f"{RED}EndOfTokensError{RESET}: Reached End of Tokens without resolving the expression.")
+        pass
 
 
 class TokenError(Exception):

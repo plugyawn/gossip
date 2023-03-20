@@ -1,0 +1,19 @@
+deffunct check(n){
+declare m = 0; 
+declare r = n;
+declare q = 1; 
+while r>0 do {
+assign m = m*q+r%10; 
+assign r = r - r%10; 
+assign r = r/10; 
+if q==1 then assign q = 10;}; 
+functret(m);
+};
+declare n  = 3; 
+declare m = 0; 
+for i in range(100,999) do { 
+for j in range(100,999) do {
+declare prod = i*j;
+declare a = callfun check(prod);;
+if prod > m && prod == a then assign m = prod;};};
+print(m); 

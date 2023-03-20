@@ -2,7 +2,7 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
 from core import RuntimeEnvironment
 
 
@@ -105,7 +105,11 @@ class Lexer:
                      while True:
                         try:
                             c = self.stream.next_char()
-                            if c in symbolic_operators:
+
+                            if c =="-":
+                                self.stream.unget()
+                                return word_to_token(s)
+                            elif c in symbolic_operators:
                                 s = s + c
                             else:
                                 self.stream.unget()
@@ -267,11 +271,24 @@ class Parser:
                 return ListOp(s,obj)
             else:
                 return ListOp(op_val,obj)
+            
+
+    
+    def parse_slice(self,obj):
+        ind1 = self.parse_expression()
+
+        if(self.lexer.peek_token()==Symbols(",")):
+            self.lexer.advance()
+            ind2 = self.parse_expression()
+            return StringSlice(obj,ind1,ind2)
+        else:
+            return ListIndex(ind1,obj)
+
     
 
-    def parse_list_index(self,obj):
+    def parse_index(self,obj):
         self.lexer.match(Symbols("["))
-        op_val_var = self.parse_atomic_expression()
+        x = self.parse_slice(obj)
         self.lexer.match(Symbols("]"))
 
         # if not isinstance(op_val_var,Variable):
@@ -304,7 +321,7 @@ class Parser:
         #     else:
         #         return ListOp(op_val,obj)
 
-        return ListIndex(op_val_var,obj)
+        return x
 
 
 
@@ -330,6 +347,7 @@ class Parser:
 
         self.lexer.match(Symbols("]")) 
         list_type = type(r.eval(list_elems[0]))
+            
 
         return ListObject(list_elems,list_type)
 
@@ -366,7 +384,7 @@ class Parser:
                 if(self.lexer.peek_token()==Symbols(".")):
                     return self.parse_list_op(obj=Variable(name))
                 elif(self.lexer.peek_token()==Symbols("[")):
-                    return self.parse_list_index(obj=Variable(name))
+                    return self.parse_index(obj=Variable(name))
                 
                 return Variable(name)
             case Num(value):
@@ -407,6 +425,18 @@ class Parser:
                 case _:
                     break
         return left
+    
+    def parse_uneg(self):
+        right = None
+        if(self.lexer.peek_token()==Operator("-")):
+            self.lexer.advance()
+            right = self.parse_atomic_expression()
+            return UnOp("-",right)
+        else:
+            right = self.parse_atomic_expression()
+            return right
+
+
     
     def parse_mod(self):
         """

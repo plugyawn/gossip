@@ -126,6 +126,7 @@ class RuntimeEnvironment():
                 curent_scope = self.scope
                 while len(self.environments) < (curent_scope + 1):
                     curent_scope -= 1
+                # print(self.environments)
                 if name in self.environments[curent_scope]:
                     raise VariableRedeclarationError(name)
 
@@ -370,8 +371,8 @@ class RuntimeEnvironment():
 
                             scp -= 1
                     
-                    if(value_type is not list):
-                        raise ListError("Object attempted to be indexed is not a list.")
+                    # if(value_type is not list):
+                    #     raise ListError("Object attempted to be indexed is not a list.")
                 
 
 
@@ -379,7 +380,7 @@ class RuntimeEnvironment():
                 ind = int(self.eval(index))
 
                 if(ind<0 or ind>=len(base_list)):
-                    raise ListError("List index out of range.")
+                    raise ListError("Index out of range.")
                 else:
                     return base_list[ind]
                 
