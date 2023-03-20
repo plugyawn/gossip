@@ -64,8 +64,9 @@ The above code would throw an error related to Bad Assignment of variables.
 
 ## Strings
 
-Strings are defined the same way as numbers, and are written exclusively with single quotes ('). 
+Strings are defined the same way as numbers, and are written exclusively with single quotes ('). Strings support indexing, concatenation and slicing operations.
 
+### Concatenation
 ```python
 declare x = 'Hello World!'
 assign x = x+x 
@@ -73,6 +74,28 @@ print(x)
 ```
 
 This prints out `HelloWorld!HelloWorld!`, as is expected. Strings cannot be operated upon with numbers.
+
+### Slicing
+The slice operation takes two indices- the start and the end index. Sliced portion of the string is in the index range `[start,end)`.
+
+```python
+declare i = 1;
+declare word = 'abcdefghi';
+print(word[i,i+3]);
+```
+
+This prints out the characters in the string from index 1 to index 3 - `bcd`.
+
+### Indexing
+This is used to access the character at a particular index in the string. Gossip follows 0-indexing (the first index value is 0 and increments by 1).
+
+```python
+declare i = 1;
+declare word = 'abcdefghi';
+print(word[i+3]);
+```
+This prints out `'d'`- the element at index 4.
+
 
 ## Lists
 
@@ -84,7 +107,7 @@ declare y = ['abc','def','ghi'];
 declare z = [True, False, True];
 ```
 
-Lists support five operations - `head`, `tail`, `empty`, `cons`, `indexing`.
+Lists support five operations - `head`, `tail`, `empty`, `cons`, `indexing`, `slicing`.
 
 ### Head and Tail, Empty
 Head returns the first element of a list. Tail returns a list of all elements except the first element. Empty checks whether a list is empty or not. It
@@ -123,6 +146,17 @@ print(l[ind+2]);
 ```
 
 The above code prints `'jkl'` as it's output.
+
+### Slicing
+The slice operation takes two indices- the start and the end index. Sliced portion of the string is in the index range `[start,end)`.
+
+```python
+declare i = 1;
+declare l = ['abc','def','ghi','jkl','mno'];
+print(l[i,i+3]);
+```
+
+This prints out the characters in the list of elements from from index 1 to index 3 - `['def','ghi','jkl']`.
 
 ## Operators
 
