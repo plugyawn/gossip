@@ -7,7 +7,7 @@ from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret".split()
-symbolic_operators = "+ - * ** / < > <= >= == != = % & & && || |".split()
+symbolic_operators = "+ - * ** / < > <= >= == != = % &  && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ' .".split()
@@ -413,13 +413,22 @@ class Parser:
         Parse a mod expression.
         For | a % b |, this will parse the entire expression.
         """
-        left = self.parse_atomic_expression()
+        if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+            left = self.parse_atomic_expression()
+        else:
+            left = self.parse_expression()
+
         while True:
             match self.lexer.peek_token():
                 case Operator(op) if op in "%":
                     self.lexer.advance()
-                    m = self.parse_atomic_expression()
-                    left = BinOp(op, left, m)
+                    if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+                        m = self.parse_atomic_expression()
+                        left = BinOp(op, left, m)
+                    else:
+                        m = self.parse_expression()
+                        left = BinOp(op, left, m)
+
                 case _:
                     break
         return left
@@ -475,6 +484,7 @@ class Parser:
         self.lexer.match(Keyword("then"))
         e1 = self.parse_expression()
         if self.lexer.peek_token() != Keyword("else"):
+
             return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
@@ -507,7 +517,6 @@ class Parser:
         task = self.parse_expression()
 
         self.lexer.match(Symbols(";"))
-
         return ForLoop(var, iter, task)
 
     def parse_range(self):
@@ -578,6 +587,7 @@ class Parser:
             li.append(var)
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
+    
     def parse_funct_def(self):
         li_3= []
         li = []

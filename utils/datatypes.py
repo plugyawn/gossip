@@ -150,7 +150,7 @@ class ASTSequence:
 @dataclass
 class ForLoop:
     var: "AST"
-    val_list: list["AST"]
+    val_list: "AST"
     stat: "AST"
 
 

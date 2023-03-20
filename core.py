@@ -123,7 +123,6 @@ class RuntimeEnvironment():
             
             
             case Declare(Variable(name), value):
-
                 curent_scope = self.scope
                 while len(self.environments) < (curent_scope + 1):
                     curent_scope -= 1

@@ -136,7 +136,7 @@ def test_for_loop():
     d = NumLiteral(3)
     e = NumLiteral(4)
     f = NumLiteral(5)
-    g = [a,b,c,d,e,f]
+    g = ASTSequence([a,b,c,d,e,f])
     h  = Variable("h")
     e2 = BinOp("+", h, h)
     lo = ForLoop(h,g,e2)
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     test_bool_eval()
     test_sequence_eval()
     test_greater_than()
-
+    test_for_loop()
     test_sequence_and_assign()
     test_while()
     test_while_initial_cond_false()

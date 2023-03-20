@@ -1,8 +1,22 @@
 declare sum = 0;for x in range(0,1000) do {if x%5==0 || x%3==0 then assign sum = sum + x;};print(sum);
 
 
-deffunct gi(c){print (45);if c<=1 then functret(1); else functret(c*callfun gi(c-1););;};
+deffunct functorial(c){if c<=1 then functret(1); else functret(c*callfun functorial(c-1););;};
 
 declare sum = 2; declare i = 1; declare j = 2; declare k = 0; while j<=1000000 && i<=1000000 do {assign i = i + j; assign k = j; assign j = i; assign i = k; if i%2==0 then assign sum = sum + i; }; print(sum); 
 
-declare n  = 3; declare m = 0; for i in range(100,999) do { for j in range(100,999) do {declare prod = i*j;if prod > m then assign m = prod;};};
+deffunct check(n){declare m = 0; declare r = n;declare q = 1; while r>0 do {assign m = m*q+r%10; print(q); assign r = r - r%10; assign r = r/10; if q==1 then assign q = 10;}; functret(m);};
+declare n  = 3; declare m = 0; for i in range(100,999) do { for j in range(100,999) do {declare prod = i*j;declare a = callfun check(prod);;if prod > m && prod == a then assign m = prod;};};print(m);
+
+
+declare x = 40;declare y = 1;while y!=1 do {declare done = 1; declare i = 1; while i<21 do { if x%i!=0 then assign done = 0;; assign i = i+1;}; if done==0 then assign x=x+1;else assign y = 0;;};
+print(x);
+
+declare y = 22; declare u = 0; while u==0 do {assign u = 1; for x in range(1,21) do {if y%x!=0 then assign u = 0;}; assign y = y + 1;};print(y);
+
+declare y = 2520; declare u = 0; while u==0 do {assign u = 1; for x in {20 19 18 17 16 14 13 11} do {if y%x!=0 then assign u = 0;;}; assign y = y + 2520;};print(y);
+
+
+declare y = 20*19*18*17*16*14*13*11 ; 
+declare t = 0;
+for x in {2 3 5 7} do {declare u = 1; assign t = 1; while u==1 do {assign y = y/x;print(y); for xi in {20 18 16 14} do {if y%xi!=0 && t==0 then {assign u = 0;assign y = y*x;assign t = 1;};;};};};
