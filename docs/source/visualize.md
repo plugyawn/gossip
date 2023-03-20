@@ -56,7 +56,7 @@ This will open the Gossip interpreter. We can then copy and paste the code into 
 Or it will also be saved as `AST.png` in the current directory. Below is the AST for the above code:
 
 <div align = center>
-<a href = "github.com/plugyawn/gossip"><img src= "AST.png"></a>
+<a href = "github.com/plugyawn/gossip"><img src= "https://user-images.githubusercontent.com/76208965/226355258-31c0f5b6-7e2e-454c-a0d1-564dad4f9eec.png"></a>
 </div>
 
 ## Explanantion
