@@ -1,0 +1,30 @@
+declare prod = 1;
+declare primes = [2,3,5,7,11,13,17,19];
+
+declare prime_index = 0;
+declare max_prime_index = 8;
+
+while prime_index<max_prime_index do {
+declare prime =primes[prime_index];
+declare i = 20;
+
+declare exp = -1;
+
+while i>prime do {
+declare count = 0;
+declare x = i;
+
+while x%prime==0 do{
+    assign count = count +1;
+    assign x = x/prime;
+}
+
+if count>exp then assign exp = count;
+
+if i==prime then { declare y = 0; while y<exp do {assign prod = prod*prime; assign y = y+1;}}
+assign i = i-1;
+
+};
+
+
+print(prod);

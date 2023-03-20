@@ -6,6 +6,7 @@ import codecs
 import functools
 import gzip
 import json
+import pdb
 
 from typing import (
     Any,
@@ -44,13 +45,14 @@ import urllib.request
 import uuid
 import webbrowser
 
-from interpreter import interpret
+from interpreter import interpret, compile_gossip
+from utils.errors import InvalidFileExtensionError
 
 _VERSION_ = "0.0.1a"
 _DESCRIPTION_ = "Run beautiful Gossip-Lang code, straight from your terminal."
 _AUTHOR_ = "Dhyey Thummar, Progyan Das, Rahul Chembakasseril, Sukruta Prakash Midigeshi"
 _LAST_MODIFIED_ = "2023-01"
-_GIT_LINK_ = 'https://github.com/plugyawn/gossip'
+_GIT_LINK_ = "https://github.com/plugyawn/gossip"
 
 # Color codes for more flavorful output -- contamination is bad, so we want it in red.
 
@@ -93,14 +95,13 @@ BLACK = COLORMAP["black"]
 RED = COLORMAP["red"]
 GREEN = COLORMAP["green"]
 YELLOW = COLORMAP["yellow"]
-BLUE  = COLORMAP["blue"]
+BLUE = COLORMAP["blue"]
 RESET = COLORMAP["reset"]
 
 # Some commonly used styles for easier access.
 BOLD = COLORMAP["bold"]
 INVERSE = COLORMAP["inverse"]
 BRIGHT_INVERSE = COLORMAP["bright_inverse"]
-
 
 
 class GossipArgumentParser(argparse.ArgumentParser):
@@ -119,7 +120,6 @@ class GossipArgumentParser(argparse.ArgumentParser):
         print(f"Last Modified: {GREEN}{_LAST_MODIFIED_}{RESET}")
         # color this text
 
-
     @staticmethod
     def print_custom_helper() -> None:
         """
@@ -127,24 +127,26 @@ class GossipArgumentParser(argparse.ArgumentParser):
         """
         print("Usage patterns about the tool to be printed here.")
 
-
     @staticmethod
     def update_latest() -> None:
         """
         Update the tool.
         Borrowed from Jarun/Googler.
         """
-        request = urllib.request.Request(f'{_GIT_LINK_}/releases?per_page=1',
-                                         headers={'Accept': 'application/vnd.github.v3+json'})
+        request = urllib.request.Request(
+            f"{_GIT_LINK_}/releases?per_page=1",
+            headers={"Accept": "application/vnd.github.v3+json"},
+        )
         response = urllib.request.urlopen(request)
         if response.status != 200:
             raise http.client.HTTPException(response.reason)
         import json
-        return json.loads(response.read().decode('utf-8'))[0]['tag_name']
 
-    def parse_arguments(args = None, namespace = None) -> argparse.Namespace:
+        return json.loads(response.read().decode("utf-8"))[0]["tag_name"]
+
+    def parse_arguments(args=None, namespace=None) -> argparse.Namespace:
         """
-        Parse predict_contamination arguments. 
+        Parse predict_contamination arguments.
 
         Parameters
         ----------
@@ -152,7 +154,7 @@ class GossipArgumentParser(argparse.ArgumentParser):
         args: list, optional
             List of arguments to parse. Defaults to None.
 
-        
+
         Returns
         -------
         argparse.Namespace
@@ -160,17 +162,41 @@ class GossipArgumentParser(argparse.ArgumentParser):
             Works like a dictionary, but it isn't a subclass, so it doesn't have all the methods.
         """
 
-        argparser = GossipArgumentParser(description= _DESCRIPTION_)
-        
+        argparser = GossipArgumentParser(description=_DESCRIPTION_)
+
         # Bind the add_arg method to the variable -- the name is too long to type again and again.
         addarg = argparser.add_argument
 
-        
-        addarg("-f", "--from-file", type = str, help="path to input .gos file containing gossip.")
-        addarg("-u", "--update", action="store_true", help="update the tool to the latest version, if available.")
-        addarg("-i", "--interpret", action="store_true", help= "start a prompt where you can write pretty gossip.")
-        addarg("-s", "--show-feedback", action="store_true", help="show feedback whenever a command is written.")
-        addarg("-v", "--visualize", action="store_true", help="show a visualization of the gossip code, line by line.")
+        addarg(
+            "-f",
+            "--from-file",
+            type=str,
+            help="path to input .gos file containing gossip.",
+        )
+        addarg(
+            "-u",
+            "--update",
+            action="store_true",
+            help="update the tool to the latest version, if available.",
+        )
+        addarg(
+            "-i",
+            "--interpret",
+            action="store_true",
+            help="start a prompt where you can write pretty gossip.",
+        )
+        addarg(
+            "-s",
+            "--show-feedback",
+            action="store_true",
+            help="show feedback whenever a command is written.",
+        )
+        addarg(
+            "-v",
+            "--visualize",
+            action="store_true",
+            help="show a visualization of the gossip code, line by line.",
+        )
 
         # Make sure data is properly formatted.
 
@@ -183,7 +209,8 @@ class GossipArgumentParser(argparse.ArgumentParser):
         """
         Show a fancy title.
         """
-        print(f"""{GREEN}                             
+        print(
+            f"""{GREEN}                             
                                         o8o                     oooo                                   
                                                                 `888                                   
  .oooooooo  .ooooo.   .oooo.o  .oooo.o oooo  oo.ooooo.           888   .oooo.   ooo. .oo.    .oooooooo 
@@ -198,13 +225,25 @@ d"     YD                                     888                               
                                             {RED}{BOLD}Version: {_VERSION_}{RESET} | {RED}{_DESCRIPTION_}{RESET}
                                             {RED}{BOLD}Authors{RESET}:{RED} {_AUTHOR_}{RESET}
 
-        {RESET}""")
+        {RESET}"""
+        )
 
     def main():
-
-        GossipArgumentParser.show_title_card()
-
         opts = GossipArgumentParser.parse_arguments()
+
+        if opts.from_file:
+            file_path = opts.from_file
+            try:
+                if not file_path.endswith(".gos") and os.path.exists(file_path):
+                    ext = file_path.split(".")[-1]
+                    raise InvalidFileExtensionError(ext)
+                with open(file_path, 'r') as f:
+                    lines = f.read()
+                    compile_gossip(lines)
+            except FileNotFoundError:
+                print(f"Error: File '{file_path}' not found.")
+                sys.exit(1)
+            sys.exit(0)
 
         if opts.update:
             latest = GossipArgumentParser.update_latest()
@@ -217,10 +256,10 @@ d"     YD                                     888                               
             sys.exit(0)
 
         if opts.interpret:
-            interpret(feedback = opts.show_feedback, visualize = opts.visualize)
+            GossipArgumentParser.show_title_card()
+            interpret(feedback=opts.show_feedback, visualize=opts.visualize)
             sys.exit(0)
 
-        
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     GossipArgumentParser.main()

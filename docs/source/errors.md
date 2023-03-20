@@ -4,7 +4,13 @@ Gossip-lang comes with custom errors to help you debug your code. This page prov
 
 ## DeclarationError
 
-Raised when a variable is called but has not been defined before.
+Raised when a variable is called but has not been defined before. For example,
+
+```python
+declare a = 10;
+assign a = a * b;
+```
+When `b` hasn't been declared.
 
 ```python
 class DeclarationError(Exception):
@@ -17,6 +23,13 @@ class DeclarationError(Exception):
 
 Raised when a program is invalid.
 
+For example,
+
+```
+declare;
+```
+Without any other attributes, the declare flag fails.
+
 ```python
 class InvalidProgramError(Exception):
     def __init__(self, message, verbose=True):
@@ -26,7 +39,13 @@ class InvalidProgramError(Exception):
 
 ## EndOfStream
 
-Raised when the end of a stream is reached.
+Raised when the end of a stream is reached without any resolution.
+
+For example,
+```
+for i in range
+```
+Without any further code, this hanging ForLoop construct is meaningless.
 
 ```python
 class EndOfStream(Exception):
@@ -35,7 +54,7 @@ class EndOfStream(Exception):
 
 ## EndOfTokens
 
-Raised when the end of a stream of tokens is reached.
+Raised when the end of a stream of tokens is reached. This is similar to `EndOfStreams` and often occurs together.
 
 ```python
 class EndOfTokens(Exception):
@@ -44,7 +63,12 @@ class EndOfTokens(Exception):
 
 ## TokenError
 
-Raised when an invalid token is encountered.
+Raised when an invalid token is encountered. 
+```
+declare a ~ 40;
+```
+
+In the March, 2023 version of Gossip, the tilde (`~`) is meaningless.
 
 ```python
 class TokenError(Exception):
@@ -54,6 +78,10 @@ class TokenError(Exception):
 ## TypeCheckError
 
 Raised when the type of the operands in the operation are not of valid type.
+
+```python
+declare sample = True * False
+```
 
 ```python
 class TypeCheckError(Exception):
@@ -68,6 +96,11 @@ class TypeCheckError(Exception):
 ## InvalidCondition
 
 Raised when an invalid condition is passed to a while loop.
+```python
+while a + 2 do {
+    print(a);
+};
+```
 
 ```python
 class InvalidCondition(Exception):
@@ -78,7 +111,14 @@ class InvalidCondition(Exception):
 
 ## VariableRedeclaration
 
-Raised when a variable is re-declared in the same scope.
+Raised when a variable is re-declared in the same or a child scope.
+
+```python
+declare a = 20;
+declare a = 10;
+```
+
+In such a case, one should employ the `assign` construct.
 
 ```python
 class VariableRedeclaration(Exception):
@@ -91,6 +131,10 @@ class VariableRedeclaration(Exception):
 ## AssignmentUsingNone
 
 Raised when trying to assign using a variable that has no assigned value itself.
+```
+assign a = 20;
+```
+When `a` has not been declared before.
 
 ```python
 class AssignmentUsingNone(Exception):
