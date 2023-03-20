@@ -127,6 +127,7 @@ class RuntimeEnvironment():
                 curent_scope = self.scope
                 while len(self.environments) < (curent_scope + 1):
                     curent_scope -= 1
+                # print(self.environments)
                 if name in self.environments[curent_scope]:
                     raise VariableRedeclarationError(name)
 

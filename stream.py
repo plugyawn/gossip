@@ -2,7 +2,7 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
 from core import RuntimeEnvironment
 
 
@@ -105,7 +105,11 @@ class Lexer:
                      while True:
                         try:
                             c = self.stream.next_char()
-                            if c in symbolic_operators:
+
+                            if c =="-":
+                                self.stream.unget()
+                                return word_to_token(s)
+                            elif c in symbolic_operators:
                                 s = s + c
                             else:
                                 self.stream.unget()
@@ -408,17 +412,29 @@ class Parser:
                     break
         return left
     
+    def parse_uneg(self):
+        right = None
+        if(self.lexer.peek_token()==Operator("-")):
+            self.lexer.advance()
+            right = self.parse_atomic_expression()
+            return UnOp("-",right)
+        else:
+            right = self.parse_atomic_expression()
+            return right
+
+
+    
     def parse_mod(self):
         """
         Parse a mod expression.
         For | a % b |, this will parse the entire expression.
         """
-        left = self.parse_atomic_expression()
+        left = self.parse_uneg()
         while True:
             match self.lexer.peek_token():
                 case Operator(op) if op in "%":
                     self.lexer.advance()
-                    m = self.parse_atomic_expression()
+                    m = self.parse_uneg()
                     left = BinOp(op, left, m)
                 case _:
                     break
