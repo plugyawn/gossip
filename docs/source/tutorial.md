@@ -75,24 +75,35 @@ if n>2 then print(n); else print(maxpr);;
 
 ```bash
 deffunct check(n){
-declare m = 0; 
-declare r = n;
-declare q = 1; 
-while r>0 do {
-assign m = m*q+r%10; 
-assign r = r - r%10; 
-assign r = r/10; 
-if q==1 then assign q = 10;}; 
-functret(m);
-};
+    declare m = 0; 
+    declare r = n;
+    declare q = 1; 
+    while r>0 do {
+        assign m = m*q+r%10; 
+        assign r = r - r%10; 
+        assign r = r/10; 
+        if q==1 then assign q = 10;}; 
+        functret(m);};
+
 declare n  = 3; 
 declare m = 0; 
-for i in range(100,999) do { 
-for j in range(100,999) do {
-declare prod = i*j;
-declare a = callfun check(prod);;
-if prod > m && prod == a then assign m = prod;};};
-print(m); 
+declare i = 999;
+declare j = 999;
+while i>= 100 do { 
+    assign j = 999; 
+    while j>= 900 && m==0 do {
+        declare prod = i*j;
+        declare a = callfun check(prod);;
+        if prod == a then {
+            assign m = 1; 
+            assign n = prod;
+            }
+            assign j = j -1; 
+            }; 
+        assign i = i - 1;
+    }; 
+print(n);
+
 ```
 ## Problem 5: Smallest multiple
 `Problem`: 2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder. What is the smallest positive number that is evenly divisible by all of the numbers from 1 to 20?
