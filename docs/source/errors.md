@@ -36,6 +36,24 @@ class InvalidProgramError(Exception):
         self.message = message
         print(f"InvalidProgramError: {message}")
 ```
+## InvalidTokenError
+
+Raised when an invalid token is encountered.
+
+For example,
+```
+```
+
+```python
+class InvalidTokenError(Exception):
+    """
+    Raised when an invalid token is encountered.
+    """
+
+    def __init__(self, token, verbose=True):
+        self.token = token
+        print(f"{RED}InvalidTokenError{RESET}: {token} is not a valid token.")
+```
 
 ## EndOfStream
 
@@ -143,4 +161,107 @@ class AssignmentUsingNone(Exception):
         print(f"Trying to assign using {var} which has no assigned value itself.")
 ```
 
+## InvalidConcatenationError
+
+Raised when a variable is assigned using a variable that has no assigned value itself.
+
+```python
+class InvalidConcatenationError(Exception):
+    def __init__(self):
+        print(f"{RED}InvalidConcatenationError{RESET}: Invalid attempted concatenation of different operand types.")
+```
+
+## IndexOutOfBoundsError
+
+Raised when the index passed to a list is out of bounds.
+
+```python
+class IndexOutOfBoundsError(Exception):
+    def __init__(self, msg=None):
+        if msg == None:
+            print(msg)
+        else:
+            print(f"{RED}IndexOutOfBoundsError{RESET}: Slice index out of range.")
+```
+
+## InvalidOperation
+
+Raised when an invalid operation is performed on an object.
+
+```python
+class InvalidOperation(Exception):
+    def __init__(self, op, opr1, opr2=None):
+        if opr2 == None:
+            print(f"{RED}InvalidOperationError{RESET}: Cannot perform {op} on {opr1} objects.")
+```
+
+## InvalidArgumentToList
+
+Raised when one or more arguments passed to the `list` construct are not of the same type.
+
+```python
+class InvalidArgumentToList(Exception):
+    def __init__(self, list_type):
+        print(f"{RED}InvalidArgumentToListError{RESET}: One or more inputs to list are not of type {list_type}.")
+```
+
+## ListError
+
+Raised if any errors occur when using the `list` construct.
+
+```python
+class ListError(Exception):
+    def __init__(self, msg):
+        print(f"{RED}ListError{RESET}: {msg}")
+```
+
+## ReferentialError
+
+Raised when a variable is referenced during assignment but has not been declared before.
+
+```python
+class ReferentialError(Exception):
+    def __init__(self, var):
+        print(f"{RED}ReferentialError{RESET}: The variable {var} referenced during assignment does not exist.")
+```
+
+## BadAssignment
+
+Raised when a variable is assigned a value of a different type.
+
+```python
+class BadAssignment(Exception):
+    def __init__(self,var,var_type,val_type):
+        print(f"Assignment Error- Trying to assign value of {val_type} to variable {var} of {var_type} type")
+```
+
+## StringError
+
+Raised when a string is assigned a value of a different type.
+
+```python
+class StringError(Exception):
+    def __init__(self):
+        print("Invalid value being assigned to string")
+```
+
+## ListOpError
+
+Raised when an invalid operation is performed on a list.
+
+```python
+class ListOpError(Exception):
+    def __init__(self,msg):
+        print(msg)
+```
+
+## InvalidFileExtensionError
+
+Raised when the file extension is not valid.
+
+```python
+class InvalidFileExtensionError(Exception):
+    def __init__(self, ext):
+        print(f"InvalidFileExtension: {ext} is not a valid file extension for gossip language.")
+```
 Refer to the [syntax](syntax.md) for more information on how to avoid these errors.

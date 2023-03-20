@@ -30,12 +30,12 @@ declare i = 1;
 declare j = 2; 
 declare k = 0; 
 while j<=1000000 && i<=1000000 do {
-    assign i = i + j; 
+    i = i + j; 
     assign k = j; 
     assign j = i; 
     assign i = k; 
     if i%2==0 then assign sum = sum + i; 
-}; 
+    }; 
 print(sum);
 ```
 ## Problem 3: Largest prime factor
@@ -44,24 +44,19 @@ print(sum);
 `Solution`:
 ```bash
 declare n = 600851475143;
-declare maxpr = -1;
-
+declare maxpr = 0;
 while n%2==0 do {
-    assign maxpr = 2;
-    assign n = n/2;
-}
+assign maxpr = 2;
+assign n = n/2;};
 
 declare i = 3;
-
 while i*i<=n do {
-    while n%i==0 do {
-        assign maxpr = i;
-        assign n = n/i;
-    }
-    assign i = i+2;
-}
+while n%i==0 do {
+assign maxpr = i;
+assign n = n/i;};
+assign i = i+2;};
 
-if n>2 then print(n); else print(maxpr);
+if n>2 then print(n); else print(maxpr);;
 ```
 ## Problem 4: Largest palindrome product
 `Problem`: A palindromic number reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99. Find the largest palindrome made from the product of two 3-digit numbers.
@@ -69,7 +64,25 @@ if n>2 then print(n); else print(maxpr);
 `Solution`:
 
 ```bash
-// TODO: Add solution
+deffunct check(n){
+declare m = 0; 
+declare r = n;
+declare q = 1; 
+while r>0 do {
+assign m = m*q+r%10; 
+assign r = r - r%10; 
+assign r = r/10; 
+if q==1 then assign q = 10;}; 
+functret(m);
+};
+declare n  = 3; 
+declare m = 0; 
+for i in range(100,999) do { 
+for j in range(100,999) do {
+declare prod = i*j;
+declare a = callfun check(prod);;
+if prod > m && prod == a then assign m = prod;};};
+print(m); 
 ```
 ## Problem 5: Smallest multiple
 `Problem`: 2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder. What is the smallest positive number that is evenly divisible by all of the numbers from 1 to 20?
@@ -77,6 +90,35 @@ if n>2 then print(n); else print(maxpr);
 `Solution`:
 
 ```bash
-// TODO: Add solution
+declare prod = 1;
+declare primes = [2,3,5,7,11,13,17,19];
+
+declare prime_index = 0;
+declare max_prime_index = 8;
+
+while prime_index<max_prime_index do {
+declare prime =primes[prime_index];
+declare i = 20;
+
+declare exp = -1;
+
+while i>prime do {
+declare count = 0;
+declare x = i;
+
+while x%prime==0 do{
+    assign count = count +1;
+    assign x = x/prime;
+}
+
+if count>exp then assign exp = count;
+
+if i==prime then { declare y = 0; while y<exp do {assign prod = prod*prime; assign y = y+1;}}
+assign i = i-1;
+
+};
+
+
+print(prod);
 ```
 That concludes this tutorial on using Gossip to solve some of the Euler problems. We encourage you to try solving the remaining problems on your own.

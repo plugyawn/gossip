@@ -1,5 +1,4 @@
-``Usage Guide``
-===============
+# Usage Guide
 
 1. Gossip is written in `.gos` files, which is the officially supported extension for Gossip. To run the intrerpreter with an input file containing Gossip code, use the -f or --from-file option followed by the path to the input file:
 

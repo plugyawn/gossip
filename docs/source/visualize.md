@@ -38,21 +38,26 @@ conda install graphviz
 ## Visualising the AST
 Now that we have installed Graphviz and the Graphviz module for Python, we can use it to visualise the AST for a Gossip code. Let's take the following Gossip code as an example:
 ```
-if a > 5:
-    b = 3
-else:
-    b = 1
+if 1 < 4 then{
+print(4);
+} else {
+print(1);
+};
 ``` 
 
 To visualise the AST for this code, we need to first generate the AST using the [`main.py`](https://github.com/plugyawn/gossip/blob/main/main.py) file provided in the Gossip repository. We can do this by running the following command:
 
-```
+```bash
 python main.py -i -v
 ```
 
 This will open the Gossip interpreter. We can then copy and paste the code into the interpreter and press enter. This will generate the AST for the code and display it.
 
-Or it will also be saved as `AST.png` in the current directory.
+Or it will also be saved as `AST.png` in the current directory. Below is the AST for the above code:
+
+<div align = center>
+<a href = "github.com/plugyawn/gossip"><img src= "AST.png"></a>
+</div>
 
 ## Explanantion
 
