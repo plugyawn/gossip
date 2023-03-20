@@ -1,12 +1,13 @@
 declare x = 40;
-declare y = True;
+declare y = 1;
 
-while y==True do {
-declare done =True;
+while y==1 do {
+declare done =1;
+declare i = 1;
 
-for i in range(1,21) do {
-if x%i!=0 then assign done = False;;};;
+while i<21 do {
+if x%i!=0 then assign done = 0;;
+assign i = i+1;};
 
-if done==False then assign x=x+1; else assign y = True;;};;
-
+if done==0 then assign x=x+1;else assign y = 0;;};
 print(x);
