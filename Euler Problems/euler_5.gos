@@ -1,13 +1,30 @@
-declare x = 40;
-declare y = 1;
+declare prod = 1;
+declare primes = [2,3,5,7,11,13,17,19];
 
-while y==1 do {
-declare done =1;
-declare i = 1;
+declare prime_index = 0;
+declare max_prime_index = 8;
 
-while i<21 do {
-if x%i!=0 then assign done = 0;;
-assign i = i+1;};
+while prime_index<max_prime_index do {
+declare prime =primes[prime_index];
+declare i = 20;
 
-if done==0 then assign x=x+1;else assign y = 0;;};
-print(x);
+declare exp = -1;
+
+while i>prime do {
+declare count = 0;
+declare x = i;
+
+while x%prime==0 do{
+    assign count = count +1;
+    assign x = x/prime;
+}
+
+if count>exp then assign exp = count;
+
+if i==prime then { declare y = 0; while y<exp do {assign prod = prod*prime; assign y = y+1;}}
+assign i = i-1;
+
+};
+
+
+print(prod);

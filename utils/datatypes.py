@@ -108,8 +108,8 @@ class Variable:
 @dataclass
 class StringSlice:
     var: Variable
-    start: NumType()
-    end: NumType()
+    start: 'AST'
+    end: 'AST'
 
 
 @dataclass
@@ -150,7 +150,7 @@ class ASTSequence:
 @dataclass
 class ForLoop:
     var: "AST"
-    val_list: list["AST"]
+    val_list: "AST"
     stat: "AST"
 
 

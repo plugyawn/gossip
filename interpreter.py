@@ -71,10 +71,9 @@ def interpret(feedback=False, visualize=False):
 
 def compile_gossip(lines):
     runtime = RuntimeEnvironment()
-    L = Lexer.from_stream(Stream.from_string(lines))
-    S = Parser.from_lexer(L)
-    for s in S:
-        print(s)
-        r = runtime.eval(s)
-        
-            
+    for line in lines:
+        L = Lexer.from_stream(Stream.from_string(line))
+        S = Parser.from_lexer(L)
+        for s in S:
+            x = runtime.eval(s)
+            print(x)
