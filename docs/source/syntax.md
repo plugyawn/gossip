@@ -84,9 +84,9 @@ declare y = ['abc','def','ghi'];
 declare z = [True, False, True];
 ```
 
-Lists support five operations - head, tail, empty, cons, indexing.
+Lists support five operations - `head`, `tail`, `empty`, `cons`, `indexing`.
 
-### Head and Tail
+### Head and Tail, Empty
 Head returns the first element of a list. Tail returns a list of all elements except the first element. Empty checks whether a list is empty or not. It
 returns True when it is, and False otherwise.
 ```python
@@ -95,7 +95,7 @@ print(x.tail);
 print(x.empty);
 ```
 
-This prints out 1, [2,3,4,5], False
+This prints out `1`, `[2,3,4,5]`, `False`
 
 ### Cons
 This method is used to add an element to the head of the list. Lists have fixed types. So, attempting to add an element having type different from those already
@@ -105,7 +105,7 @@ x.cons(29);
 print(x);
 ```
 
-This prints out [29,1,2,3,4,5]
+This prints out `[29,1,2,3,4,5]`
 
 ```python
 x.cons('abc');
@@ -122,7 +122,7 @@ declare ind = 1;
 print(l[ind+2]);
 ```
 
-The above code prints 'jkl' as it's output.
+The above code prints `'jkl'` as it's output.
 
 ## Operators
 
