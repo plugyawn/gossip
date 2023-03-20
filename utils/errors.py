@@ -23,6 +23,15 @@ class InvalidProgramError(Exception):
         self.message = message
         print(f"{RED}InvalidProgramError{RESET}: {message}")
 
+class InvalidTokenError(Exception):
+    """
+    Raised when an invalid token is encountered.
+    """
+
+    def __init__(self, token, verbose=True):
+        self.token = token
+        print(f"{RED}InvalidTokenError{RESET}: {token} is not a valid token.")
+
 
 class EndOfStream(Exception):
     """
