@@ -430,14 +430,38 @@ class Parser:
         right = None
         if(self.lexer.peek_token()==Operator("-")):
             self.lexer.advance()
-            right = self.parse_atomic_expression()
-            return UnOp("-",right)
+            # right = self.parse_atomic_expression()
+            # return UnOp("-",right)
+            if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+                m = self.parse_atomic_expression()
+                right = UnOp("-",m)
+            else:
+                m = self.parse_expression()
+                right = UnOp("-",m)
         else:
-            right = self.parse_atomic_expression()
-            return right
+                if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+                    right = self.parse_atomic_expression()
+                else:
+                    right = self.parse_expression()
+
+        return right
 
 
-    
+    def parse_mod(self):
+        """
+        Parse a mod expression.
+        For | a % b |, this will parse the entire expression.
+        """
+        left = self.parse_uneg()
+        while True:
+            match self.lexer.peek_token():
+                case Operator(op) if op in "%":
+                    self.lexer.advance()
+                    m = self.parse_uneg()
+                    left = BinOp(op, left, m)
+                case _:
+                    break
+        return left   
     def parse_mod(self):
         """
         Parse a mod expression.
