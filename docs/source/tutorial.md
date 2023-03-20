@@ -8,11 +8,18 @@ In this tutorial, we will use the Gossip programming language to solve some of t
 `Solution`:
 
 ```bash
-declare sum = 0;
-for x in range(0,1000) do {
-    if x%5==0 || x%3==0 then assign sum = sum + x;
+declare n = 1000;
+declare s = 0;
+    
+declare i = 1;
+    
+while i<n do {
+    if i%3==0 || i%5==0 then 
+        {assign s = s + i;
+    }
+    assign i = i+1;
 };
-print(sum);
+print(s);
 ```
 
 ## Problem 2: Even Fibonacci numbers
@@ -25,17 +32,17 @@ By considering the terms in the Fibonacci sequence whose values do not exceed fo
 `Solution`:
 
 ```bash
-declare sum = 2; 
-declare i = 1; 
-declare j = 2; 
+declare sum = 0; 
+declare i = 0; 
+declare j = 1; 
 declare k = 0; 
-while j<=1000000 && i<=1000000 do {
-    i = i + j; 
-    assign k = j; 
-    assign j = i; 
-    assign i = k; 
-    if i%2==0 then assign sum = sum + i; 
+while j<=4000000 do {
+    assign k = i + j; 
+    assign i = j; 
+    assign j = k; 
+    if j%2==0 then assign sum = sum + j; 
     }; 
+
 print(sum);
 ```
 ## Problem 3: Largest prime factor
@@ -46,15 +53,18 @@ print(sum);
 declare n = 600851475143;
 declare maxpr = 0;
 while n%2==0 do {
-assign maxpr = 2;
-assign n = n/2;};
+    assign maxpr = 2;
+    assign n = n/2;
+    };
 
 declare i = 3;
 while i*i<=n do {
-while n%i==0 do {
-assign maxpr = i;
-assign n = n/i;};
-assign i = i+2;};
+    while n%i==0 do {
+        assign maxpr = i;
+        assign n = n/i;
+    };
+    assign i = i+2;
+};
 
 if n>2 then print(n); else print(maxpr);;
 ```
@@ -90,35 +100,23 @@ print(m);
 `Solution`:
 
 ```bash
-declare prod = 1;
-declare primes = [2,3,5,7,11,13,17,19];
-
-declare prime_index = 0;
-declare max_prime_index = 8;
-
-while prime_index<max_prime_index do {
-declare prime =primes[prime_index];
-declare i = 20;
-
-declare exp = -1;
-
-while i>prime do {
-declare count = 0;
-declare x = i;
-
-while x%prime==0 do{
-    assign count = count +1;
-    assign x = x/prime;
-}
-
-if count>exp then assign exp = count;
-
-if i==prime then { declare y = 0; while y<exp do {assign prod = prod*prime; assign y = y+1;}}
-assign i = i-1;
-
+declare sum = 2; 
+declare i = 1; 
+declare j = 2; 
+declare k = 0; 
+declare x = [2,3,5,7,11,13,17,19];
+declare y = [4,2,1,1, 1, 1, 1, 1];
+declare z = 1;
+declare c = 0;
+for i in range(0, 7) do{
+    assign c = 0;
+    while c < y[i] do {
+        assign z = z*x[i]; 
+        assign c = c+1;
+        };
 };
 
+print(z);
 
-print(prod);
 ```
 That concludes this tutorial on using Gossip to solve some of the Euler problems. We encourage you to try solving the remaining problems on your own.
