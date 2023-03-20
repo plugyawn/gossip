@@ -271,11 +271,24 @@ class Parser:
                 return ListOp(s,obj)
             else:
                 return ListOp(op_val,obj)
+            
+
+    
+    def parse_slice(self,obj):
+        ind1 = self.parse_expression()
+
+        if(self.lexer.peek_token()==Symbols(",")):
+            self.lexer.advance()
+            ind2 = self.parse_expression()
+            return StringSlice(obj,ind1,ind2)
+        else:
+            return ListIndex(ind1,obj)
+
     
 
-    def parse_list_index(self,obj):
+    def parse_index(self,obj):
         self.lexer.match(Symbols("["))
-        op_val_var = self.parse_expression()
+        x = self.parse_slice(obj)
         self.lexer.match(Symbols("]"))
 
         # if not isinstance(op_val_var,Variable):
@@ -308,7 +321,7 @@ class Parser:
         #     else:
         #         return ListOp(op_val,obj)
 
-        return ListIndex(op_val_var,obj)
+        return x
 
 
 
@@ -323,8 +336,6 @@ class Parser:
         while self.lexer.peek_token() != Symbols("]"):
             x = self.parse_expression()
             list_elems.append(x)
-            # print(x)
-            # print(list_elems)
 
             if self.lexer.peek_token() == Symbols("]"):
                 break
@@ -373,7 +384,7 @@ class Parser:
                 if(self.lexer.peek_token()==Symbols(".")):
                     return self.parse_list_op(obj=Variable(name))
                 elif(self.lexer.peek_token()==Symbols("[")):
-                    return self.parse_list_index(obj=Variable(name))
+                    return self.parse_index(obj=Variable(name))
                 
                 return Variable(name)
             case Num(value):

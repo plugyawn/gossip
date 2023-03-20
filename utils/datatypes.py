@@ -108,8 +108,8 @@ class Variable:
 @dataclass
 class StringSlice:
     var: Variable
-    start: NumType()
-    end: NumType()
+    start: 'AST'
+    end: 'AST'
 
 
 @dataclass
