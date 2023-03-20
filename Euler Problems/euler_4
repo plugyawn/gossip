@@ -11,8 +11,8 @@ functret(m);
 };
 declare n  = 3; 
 declare m = 0; 
-for i in range(1,56) do { 
-for j in range(1,56) do {
+for i in range(100,999) do { 
+for j in range(100,999) do {
 declare prod = i*j;
 declare a = callfun check(prod);;
 if prod > m && prod == a then assign m = prod;};};
