@@ -6,6 +6,7 @@ import codecs
 import functools
 import gzip
 import json
+import pdb
 
 from typing import (
     Any,
@@ -228,7 +229,6 @@ d"     YD                                     888                               
         )
 
     def main():
-
         opts = GossipArgumentParser.parse_arguments()
 
         if opts.from_file:
