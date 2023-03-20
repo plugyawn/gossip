@@ -7,7 +7,7 @@ from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret".split()
-symbolic_operators = "+ - * ** / < > <= >= == != = % & & && || |".split()
+symbolic_operators = "+ - * ** / < > <= >= == != = % & & && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ' .".split()
@@ -275,7 +275,7 @@ class Parser:
 
     def parse_list_index(self,obj):
         self.lexer.match(Symbols("["))
-        op_val_var = self.parse_atomic_expression()
+        op_val_var = self.parse_expression()
         self.lexer.match(Symbols("]"))
 
         # if not isinstance(op_val_var,Variable):
@@ -323,6 +323,8 @@ class Parser:
         while self.lexer.peek_token() != Symbols("]"):
             x = self.parse_expression()
             list_elems.append(x)
+            # print(x)
+            # print(list_elems)
 
             if self.lexer.peek_token() == Symbols("]"):
                 break
@@ -334,6 +336,7 @@ class Parser:
 
         self.lexer.match(Symbols("]")) 
         list_type = type(r.eval(list_elems[0]))
+            
 
         return ListObject(list_elems,list_type)
 

@@ -38,14 +38,18 @@ class EndOfStream(Exception):
     Raised when the end of a stream is reached.
     """
     def __init__(self):
+        # print(f"{RED}EndOfStreamError{RESET}: Reached End of Stream. Exiting...")
         pass
+
 
 class EndOfTokens(Exception):
     """
     Raised when the end of a stream of tokens is reached.
     """
     def __init__(self):
+        # print(f"{RED}EndOfTokensError{RESET}: Reached End of Tokens without resolving the expression.")
         pass
+
 
 class TokenError(Exception):
     """

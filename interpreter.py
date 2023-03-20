@@ -74,7 +74,7 @@ def compile_gossip(lines):
     L = Lexer.from_stream(Stream.from_string(lines))
     S = Parser.from_lexer(L)
     for s in S:
-        print(s)
+        # print(s)
         r = runtime.eval(s)
         
             
