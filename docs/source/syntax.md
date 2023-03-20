@@ -4,7 +4,7 @@ Gossip is a dynamically typed, interpreted programming language. This document s
 
 ## General Syntax
 
-All statements in gossip compulsorily end with a semicolon. Variables are dynamically typed, and typechecked with a typechecker. 
+All statements in gossip compulsorily end with a semicolon. Variables are dynamically typed, and typechecked with a typechecker. Variables, once identified by a type during declaration, cannot be assigned values of other datatypes. 
 
 ```python
 declare a = 9;
@@ -54,6 +54,14 @@ Once declared, a variable cannot be re-declared in the same or a child scope. Fo
 assign x = 20;
 ```
 
+Once declared with a value, the variable is bound to be assigned values only of that type. This extends to Numbers, Booleans, Strings and Lists.
+
+```python
+declare x = 20;
+assign x = 'abc';
+```
+The above code would throw an error related to Bad Assignment of variables.
+
 ## Strings
 
 Strings are defined the same way as numbers, and are written exclusively with single quotes ('). 
@@ -65,6 +73,56 @@ print(x)
 ```
 
 This prints out `HelloWorld!HelloWorld!`, as is expected. Strings cannot be operated upon with numbers.
+
+## Lists
+
+Lists are declared and assigned using similar methods as other datatypes.
+
+```python
+declare x = [1,2,3,4,5];
+declare y = ['abc','def','ghi'];
+declare z = [True, False, True];
+```
+
+Lists support five operations - `head`, `tail`, `empty`, `cons`, `indexing`.
+
+### Head and Tail, Empty
+Head returns the first element of a list. Tail returns a list of all elements except the first element. Empty checks whether a list is empty or not. It
+returns True when it is, and False otherwise.
+```python
+print(x.head);
+print(x.tail);
+print(x.empty);
+```
+
+This prints out `1`, `[2,3,4,5]`, `False`
+
+### Cons
+This method is used to add an element to the head of the list. Lists have fixed types. So, attempting to add an element having type different from those already
+in the list would throw an error.
+```python
+x.cons(29);
+print(x);
+```
+
+This prints out `[29,1,2,3,4,5]`
+
+```python
+x.cons('abc');
+```
+
+This throws an error.
+
+### Indexing
+This is used to access elements at a particular index in the list. Gossip follows 0-indexing (the first index value is 0 and increments by 1).
+
+```python
+declare l = ['abc','def','ghi','jkl','mno'];
+declare ind = 1;
+print(l[ind+2]);
+```
+
+The above code prints `'jkl'` as it's output.
 
 ## Operators
 
@@ -183,5 +241,5 @@ x = x + 1;
 A print statement in Gossip looks like this:
 
 ```
-print('Hello, world!')
+print('Hello, world!');
 ```
