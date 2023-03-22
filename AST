@@ -1,18 +1,48 @@
 digraph {
-	label="if n>2 then print(n); else print(maxpr);;"
-	node_0 [label=If shape=diamond]
-	node_1 [label=">"]
-	node_2 [label=n]
+	label="{declare a = 10;assign a= a*10*a*a;assign a = 10*a;};"
+	node_0 [label=Sequence shape=square]
+	AST_0_1 [label=0 color=grey shape=square]
+	node_1 [label=Declare]
+	node_2 [label=a]
 	node_1 -> node_2
-	node_3 [label=2]
+	node_3 [label=10]
 	node_1 -> node_3
-	node_0 -> node_1
-	node_4 [label=Print]
-	node_5 [label=n]
-	node_4 -> node_5
-	node_0 -> node_4
-	node_6 [label=Print]
-	node_7 [label=maxpr]
+	AST_0_1 -> node_1
+	node_0 -> AST_0_1
+	AST_1_4 [label=1 color=grey shape=square]
+	node_4 [label=Assign]
+	node_5 [label="*"]
+	node_6 [label="*"]
+	node_7 [label="*"]
+	node_8 [label=a]
+	node_8 -> node_2 [label=" is currently bound to " color=red]
+	node_7 -> node_8
+	node_9 [label=10]
+	node_7 -> node_9
 	node_6 -> node_7
-	node_0 -> node_6
+	node_10 [label=a]
+	node_10 -> node_2 [label=" is currently bound to " color=red]
+	node_6 -> node_10
+	node_5 -> node_6
+	node_11 [label=a]
+	node_11 -> node_2 [label=" is currently bound to " color=red]
+	node_5 -> node_11
+	node_4 -> node_5
+	node_12 [label=a]
+	node_4 -> node_12
+	AST_1_4 -> node_4
+	AST_0_1 -> AST_1_4
+	AST_2_13 [label=2 color=grey shape=square]
+	node_13 [label=Assign]
+	node_14 [label="*"]
+	node_15 [label=10]
+	node_14 -> node_15
+	node_16 [label=a]
+	node_16 -> node_12 [label=" is currently bound to " color=red]
+	node_14 -> node_16
+	node_13 -> node_14
+	node_17 [label=a]
+	node_13 -> node_17
+	AST_2_13 -> node_13
+	AST_1_4 -> AST_2_13
 }
