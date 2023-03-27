@@ -70,6 +70,9 @@ class ListCons:
     base_list: "AST"
     # If I have an empty
 
+@dataclass
+class Intify:
+    value: "AST"
 
 @dataclass
 class ListOp:

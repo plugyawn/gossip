@@ -1,0 +1,9 @@
+deffunct fibo(g){
+    if g<=1 then functret(g);
+    else {
+        declare f = callfun fibo(g-1);;
+        assign f = f + callfun fibo(g-2);;
+        functret (f);};
+};
+
+print(callfun fibo(30););

@@ -1,0 +1,4 @@
+deffunct factorial(c){if c<=1 then functret(1); else functret(c*callfun factorial(c-1););;};
+callfun factorial(3);
+declare f = callfun factorial(10);;
+print(f);

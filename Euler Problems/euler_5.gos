@@ -1,30 +1,17 @@
-declare prod = 1;
-declare primes = [2,3,5,7,11,13,17,19];
-
-declare prime_index = 0;
-declare max_prime_index = 8;
-
-while prime_index<max_prime_index do {
-declare prime =primes[prime_index];
-declare i = 20;
-
-declare exp = -1;
-
-while i>prime do {
-declare count = 0;
-declare x = i;
-
-while x%prime==0 do{
-    assign count = count +1;
-    assign x = x/prime;
-}
-
-if count>exp then assign exp = count;
-
-if i==prime then { declare y = 0; while y<exp do {assign prod = prod*prime; assign y = y+1;}}
-assign i = i-1;
-
+declare sum = 2; 
+declare i = 1; 
+declare j = 2; 
+declare k = 0; 
+declare x = [2,3,5,7,11,13,17,19];
+declare y = [4,2,1,1, 1, 1, 1, 1];
+declare z = 1;
+declare c = 0;
+for i in range(0, 7) do{
+    assign c = 0;
+    while c < y[i] do {
+        assign z = z*x[i]; 
+        assign c = c+1;
+        };
 };
 
-
-print(prod);
+print(z);

@@ -2,12 +2,12 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify
 from core import RuntimeEnvironment
 
 
 keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret".split()
-symbolic_operators = "+ - * ** / < > <= >= == != = % & & && || | !".split()
+symbolic_operators = "+ - * ** / < > <= >= == != = % &  && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ' .".split()
@@ -219,6 +219,8 @@ class Parser:
                 return self.parse_funct_call()
             case Keyword("functret"):
                 return self.parse_funct_ret()
+            case Keyword("intify"):
+                return self.parse_intify()
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
@@ -236,7 +238,6 @@ class Parser:
             case _:
                 return self.parse_simple()
     
-
 
     def parse_list_op(self,obj):
         self.lexer.match(Symbols("."))
@@ -430,14 +431,23 @@ class Parser:
         right = None
         if(self.lexer.peek_token()==Operator("-")):
             self.lexer.advance()
-            right = self.parse_atomic_expression()
-            return UnOp("-",right)
+            # right = self.parse_atomic_expression()
+            # return UnOp("-",right)
+            if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+                m = self.parse_atomic_expression()
+                right = UnOp("-",m)
+            else:
+                m = self.parse_expression()
+                right = UnOp("-",m)
         else:
-            right = self.parse_atomic_expression()
-            return right
+                if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+                    right = self.parse_atomic_expression()
+                else:
+                    right = self.parse_expression()
+
+        return right
 
 
-    
     def parse_mod(self):
         """
         Parse a mod expression.
@@ -452,7 +462,31 @@ class Parser:
                     left = BinOp(op, left, m)
                 case _:
                     break
-        return left
+        return left   
+    # def parse_mod(self):
+    #     """
+    #     Parse a mod expression.
+    #     For | a % b |, this will parse the entire expression.
+    #     """
+    #     if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+    #         left = self.parse_atomic_expression()
+    #     else:
+    #         left = self.parse_expression()
+
+    #     while True:
+    #         match self.lexer.peek_token():
+    #             case Operator(op) if op in "%":
+    #                 self.lexer.advance()
+    #                 if (isinstance( self.lexer.peek_token(),Identifier) or isinstance( self.lexer.peek_token(),Num) or isinstance( self.lexer.peek_token(),Bool)):
+    #                     m = self.parse_atomic_expression()
+    #                     left = BinOp(op, left, m)
+    #                 else:
+    #                     m = self.parse_expression()
+    #                     left = BinOp(op, left, m)
+
+    #             case _:
+    #                 break
+    #     return left
 
     def parse_simple(self):
         """
@@ -505,6 +539,7 @@ class Parser:
         self.lexer.match(Keyword("then"))
         e1 = self.parse_expression()
         if self.lexer.peek_token() != Keyword("else"):
+
             return If(cond, e1, None)
         self.lexer.match(Keyword("else"))
         e2 = self.parse_expression()
@@ -537,7 +572,6 @@ class Parser:
         task = self.parse_expression()
 
         self.lexer.match(Symbols(";"))
-
         return ForLoop(var, iter, task)
 
     def parse_range(self):
@@ -608,6 +642,7 @@ class Parser:
             li.append(var)
         self.lexer.match(Symbols("}"))
         return ASTSequence(li)
+    
     def parse_funct_def(self):
         li_3= []
         li = []
@@ -653,6 +688,13 @@ class Parser:
         self.lexer.match(Symbols(")"))
         self.lexer.match(Symbols(";"))
         return funct_ret(li)   
+
+    def parse_intify(self):
+        self.lexer.match(Keyword("intify"))
+        self.lexer.match(Symbols("("))
+        x = self.parse_expression()
+        self.lexer.match(Symbols(")"))
+        return Intify(x)
 
     def __iter__(self):
         return self
