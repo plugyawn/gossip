@@ -108,6 +108,13 @@ class Variable:
     type: Optional[NumType | BoolType | StringType | ListType] = None
 
 
+
+@dataclass
+class IndexAssign:
+    base_var: Variable
+    index: 'AST'
+    expr: 'AST'
+
 @dataclass
 class StringSlice:
     var: Variable

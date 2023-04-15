@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign
 from utils.datatypes import NumType,BoolType,StringType,ListType
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -116,6 +116,7 @@ class RuntimeEnvironment():
 
                 while scope >= 0:
                     if name in self.environments[scope]:
+                        # print(self.environments[scope][name]['value'])
                         return self.environments[scope][name]['value']
                     scope -= 1
 
@@ -127,13 +128,13 @@ class RuntimeEnvironment():
                 curent_scope = self.scope
                 while len(self.environments) < (curent_scope + 1):
                     curent_scope -= 1
-                # print(self.environments)
+                
                 if name in self.environments[curent_scope]:
                     raise VariableRedeclarationError(name)
 
                 if isinstance(value,ListObject):
                     elems = self.eval(value)
-                    #scp = self.scope
+                    
                     
                     self.environments[curent_scope][name] = {}
                     self.environments[curent_scope][name]['value'] = elems
@@ -192,7 +193,6 @@ class RuntimeEnvironment():
             
             case Assign(Variable(name), expression):
                 val = self.eval(expression)
-
                 var_type = None
                 scp = self.scope
 
@@ -225,6 +225,40 @@ class RuntimeEnvironment():
                         raise DeclarationError(name)    
                 
                 return val
+            
+
+            case IndexAssign(base_var,index,expr):
+                val = self.eval(expr)
+                val_type = type(val)
+                name = base_var.name
+                el_type = None
+
+                scp = self.scope
+                if len(self.environments) < (scp + 1):
+                    scp = len(self.environments) - 1 
+
+                while scp >= 0:
+                    if name in self.environments[scp]:
+                        if 'element_type' in self.environments[scp][name]:
+                            el_type = self.environments[scp][name]['element_type']
+                            break 
+
+                    scp -= 1
+                
+                if el_type is None:
+                    raise ListError("Variable being indexed is not a list.")
+                if val_type is not el_type:
+                    raise ListError("Invalid assignment- list elements need to be of the same type.")
+
+
+                list_m = self.eval(base_var)                
+                ind = int(self.eval(index))
+                l_dash = list_m
+                l_dash[ind] = val
+
+                self.environments[scp][name]['value'] = l_dash
+                return val
+
             
             case ASTSequence(seq):
                 """
@@ -545,21 +579,16 @@ class RuntimeEnvironment():
             
             case While(cond, sequence):
                 truth_value = self.eval(cond)
-
                 if type(truth_value) != bool:
                     raise InvalidConditionError(cond)
-                
                 final_value = None
 
                 while(truth_value):
-
                     self.scope += 1
                     scp = self.scope
-                    
                     current_scope_mappings={}
                     self.environments.append(current_scope_mappings)
                     final_value = self.eval(sequence)
-                    
                     truth_value= self.eval(cond)
                     self.environments.pop()
                     self.scope -= 1

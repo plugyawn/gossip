@@ -166,3 +166,8 @@ class InvalidFileExtensionError(Exception):
     """
     def __init__(self, ext):
         print(f"InvalidFileExtension: {ext} is not a valid file extension for gossip language.")
+
+
+class RuntimeError(Exception):
+    def __init__(self,msg):
+        print(f"Runtime Error-{msg}")

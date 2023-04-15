@@ -2,7 +2,7 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify, IndexAssign
 from core import RuntimeEnvironment
 
 
@@ -12,6 +12,7 @@ word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ' .".split()
 list_utils = "cons head tail empty".split()
+list_assign = False
 
 r = RuntimeEnvironment()
 
@@ -283,7 +284,7 @@ class Parser:
             ind2 = self.parse_expression()
             return StringSlice(obj,ind1,ind2)
         else:
-            return ListIndex(ind1,obj)
+            return ListIndex(index = ind1,base_list = obj)
 
     
 
@@ -322,7 +323,13 @@ class Parser:
         #     else:
         #         return ListOp(op_val,obj)
 
-        return x
+        if self.lexer.peek_token() == Operator("="):
+            var = x.base_list
+            ind = x.index
+
+            return IndexAssign(base_var = var, index = ind, expr = None)
+        else:
+            return x
 
 
 
@@ -555,8 +562,16 @@ class Parser:
         var = self.parse_atomic_expression()
         self.lexer.match(Operator("="))
         a = self.parse_expression()
+        # print(a)
         self.lexer.match(Symbols(";"))
-        return Assign(var, a)
+
+        # print(var)
+        if isinstance(var,IndexAssign):
+            var.expr = a
+            # print(var)
+            return var
+        else:
+            return Assign(var, a)
 
     def parse_for(self):
         """
