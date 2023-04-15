@@ -253,10 +253,13 @@ class RuntimeEnvironment():
 
                 list_m = self.eval(base_var)                
                 ind = int(self.eval(index))
-                l_dash = list_m
-                l_dash[ind] = val
+                new_list = []
+                for num in list_m:
+                    new_list.append(num)
+                new_list[ind] = val
+                
 
-                self.environments[scp][name]['value'] = l_dash
+                self.environments[scp][name]['value'] = new_list
                 return val
 
             
