@@ -433,13 +433,15 @@ class VM:
     allFrames: List[Frame]
     scp: int
     funct_sc : List[int]
-    def __init__(self,bytecode):
-        self.bytecode = bytecode
+    def __init__(self):
         self.ip = 0
         self.allFrames=[Frame()]
         self.scp=0
         self.funct_sc = []
         self.data = []
+    
+    def add_bytcode(self,bytcode):
+        self.bytecode = bytcode
 
 
 
@@ -472,6 +474,7 @@ class VM:
             return(self.funct_sc[-1])
 
     def execute(self) -> Value:
+        
         while True:
 
             print(self.data)
