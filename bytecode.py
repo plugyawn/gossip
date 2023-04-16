@@ -131,6 +131,12 @@ class I:
     @dataclass
     class POP_FRAME:
         pass
+    @dataclass
+    class LOAD_SCOPE:
+        name : str
+    @dataclass
+    class STORE_SCOPE:
+        name : str
 
 Instruction = (
       I.PUSH
@@ -162,6 +168,8 @@ Instruction = (
     | I.DECLARE
     | I.PUSH_FRAME
     | I.POP_FRAME
+    | I.STORE_SCOPE
+    | I.LOAD_SCOPE
 )
 
 
@@ -304,11 +312,15 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
             codegen_(cond)
             code.emit(I.JMP_IF_FALSE(F))
+            code.emit(I.PUSH_FRAME)
             codegen_(e1)
+            code.emit(I.POP_FRAME)
             code.emit(I.JMP(E))
 
             code.emit_label(F)
+            code.emit(I.PUSH_FRAME)
             codegen_(e2)
+            code.emit(I.POP_FRAME)
             code.emit_label(E)
 
 
@@ -324,7 +336,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.PUSH_FRAME)
             codegen_(body)
             code.emit(I.POP_FRAME)
-            code.emit(I.POP())
+            code.emit(I.POP()) ###IS THIS REQUIRED??
             #the frame is popped after the iteration is over, also the value after
             #evaluation of the iteration is popped- while returns a None value now.
 
@@ -359,30 +371,30 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
 
         #TODO change these
-        case LetFun(fv, params, _, body, expr):
+        case funct_def(Variable(name), arg_list, body):
             EXPRBEGIN = code.label()
             FBEGIN = code.label()
+            code.emit(I.STORE_SCOPE(name))
             code.emit(I.JMP(EXPRBEGIN))
             code.emit_label(FBEGIN)
-            for param in reversed(params):
-                match param:
-                    case TypeAssertion(Variable() as v, _):
-                        code.emit(I.STORE(v.localID))
-                    case _:
-                        raise BUG()
+            for param in reversed(arg_list):
+                code.emit(I.STORE(param.name))
             codegen_(body)
-            code.emit(I.RETURN())
             code.emit_label(EXPRBEGIN)
             code.emit(I.PUSHFN(FBEGIN))
-            code.emit(I.STORE(fv.localID))
-            codegen_(expr)
+            code.emit(I.STORE(name))
 
 
-        case FunCall(fn, args):
+        case funct_call(Variable(name), args):
             for arg in args:
                 codegen_(arg)
-            code.emit(I.LOAD(fn.localID))
+            code.emit(I.LOAD_SCOPE(name))
+            code.emit(I.LOAD(name))
             code.emit(I.CALL())
+        
+        case funct_ret(funct_val):
+            codegen_(funct_val)
+            code.emit(I.RETURN())
 
 
         # case TypeAssertion(expr, _):
@@ -405,18 +417,25 @@ class VM:
     data: List[Value]
     allFrames: List[Frame]
     scp: int
-
+    funct_sc : List[int]
     def __init__(self,bytecode):
         self.bytecode = bytecode
         self.ip = 0
         self.allFrames=[Frame()]
         self.scp=0
+        self.funct_sc = []
 
 
-    def add_frame(self):
-        new_frame = Frame()
-        self.allFrames.append(new_frame)
-    
+
+    def add_frame(self, index = None):
+
+        if(index == None):
+            new_frame = Frame()
+            self.allFrames.append(new_frame)
+        else:
+            new_frame = Frame()
+            self.allFrames.insert(index,new_frame)
+
     def end_frame(self):
         self.allFrames.pop()
 
@@ -430,6 +449,12 @@ class VM:
         self.allFrames=[Frame()]
         
 
+    def ret_scope(self):
+        if(len(self.funct_sc) == 0):
+            return(len(self.allFrames) - 1)
+        else:
+            return(self.funct_sc[-1])
+
     def execute(self) -> Value:
         while True:
 
@@ -442,20 +467,64 @@ class VM:
                     self.ip += 1
 
 
-                # case I.PUSHFN(Label(offset)):
-                #     self.data.append(CompiledFunction(offset))
-                #     self.ip += 1
-                # case I.CALL():
-                #     self.currentFrame = Frame (
-                #         retaddr=self.ip + 1,
-                #         dynamicLink=self.currentFrame
-                #     )
-                #     cf = self.data.pop()
-                #     self.ip = cf.entry
-                # case I.RETURN():
-                #     self.ip = self.currentFrame.retaddr
-                #     self.currentFrame = self.currentFrame.dynamicLink
+                case I.PUSHFN(Label(offset)):
+                    self.data.append(offset)
+                    self.ip += 1
 
+                case I.CALL():
+                    # self.currentFrame = Frame (
+                    #     retaddr=self.ip + 1
+                    # )
+                    # self.allFrames.append(self.currentFrame)
+                    cf = self.data.pop()
+                    cur_scope = self.data.pop()
+                    self.add_frame(cur_scope + 1)
+                    self.allFrames[cur_scope + 1].retaddr = self.ip + 1
+                    self.scp = cur_scope + 1
+                    self.funct_sc.append(self.scp)
+                    self.ip = cf
+
+                case I.RETURN():
+                    self.ip = self.allFrames[self.scp].retaddr
+                    # self.ip = self.currentFrame.retaddr
+                    self.allFrames.pop(self.scp)
+                    self.funct_sc.pop()
+                    self.scp = self.ret_scope()
+
+
+
+                case I.LOAD_SCOPE(name):
+                    scp = self.ret_scope()
+                    val = None
+                    
+                    while(scp>=0):
+                        if name in self.allFrames[scp].locals:
+                            val = self.allFrames[scp].locals[name]['scope']
+                        else:
+                            scp-=1
+                    
+                    if val is None:
+                        raise DeclarationError(name)
+                    else:
+                        self.data.append(val)
+                        self.ip += 1
+
+                case I.STORE_SCOPE(name):
+                    scp = self.ret_scope()
+        
+
+                    if name in self.allFrames[scp].locals:
+                        raise VariableRedeclarationError(name)
+                    
+                    v = -1
+                    tp = type(v)
+
+                    self.allFrames[scp].locals[name] = {}
+                    self.allFrames[scp].locals[name]['value'] = v
+                    self.allFrames[scp].locals[name]['type'] = tp
+                    self.allFrames[scp].locals[name]['scope'] = scp
+
+                    self.ip+=1
 
 
                 case I.UMINUS():
@@ -582,7 +651,7 @@ class VM:
                     self.ip += 1
 
                 case I.LOAD(name):
-                    scp = len(self.allFrames)-1
+                    scp = self.ret_scope()
                     val = None
                     
                     while(scp>=0):
@@ -603,7 +672,7 @@ class VM:
                     tp = type(v)
                     var_type = None
 
-                    scp = len(self.allFrames)-1
+                    scp = self.ret_scope()
                     while(scp>=0):
                         if name in self.allFrames[scp]:
                             var_type = type(self.allFrames[scp].locals[name]['type'])
@@ -624,7 +693,7 @@ class VM:
 
                 
                 case I.DECLARE(name):
-                    scp = len(self.allFrames)-1
+                    scp = self.ret_scope()
 
                     if name in self.allFrames[scp].locals:
                         raise VariableRedeclarationError(name)
