@@ -269,8 +269,8 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         "-": I.SUB(),
         "*": I.MUL(),
         "/": I.DIV(),
-        "quot": I.QUOT(),
-        "rem": I.REM(),
+        "//": I.QUOT(),
+        "%": I.REM(),
         "<": I.LT(),
         ">": I.GT(),
         "<=": I.LE(),
@@ -322,7 +322,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
             for ast in seq[:-1]:
                 codegen_(ast)
-                code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
+                # code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
                                    #return the evaluation of the last expression in the Sequence.
             codegen_(seq[-1])
 
@@ -333,15 +333,15 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
             codegen_(cond)
             code.emit(I.JMP_IF_FALSE(F))
-            code.emit(I.PUSH_FRAME)
+            code.emit(I.PUSH_FRAME())
             codegen_(e1)
-            code.emit(I.POP_FRAME)
+            code.emit(I.POP_FRAME())
             code.emit(I.JMP(E))
 
             code.emit_label(F)
-            code.emit(I.PUSH_FRAME)
+            code.emit(I.PUSH_FRAME())
             codegen_(e2)
-            code.emit(I.POP_FRAME)
+            code.emit(I.POP_FRAME())
             code.emit_label(E)
 
         case Range(left, right):
@@ -360,10 +360,10 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.JMP_IF_FALSE(E))
 
             #each iteration of the loop gets it's own frame
-            code.emit(I.PUSH_FRAME)
+            code.emit(I.PUSH_FRAME())
             codegen_(body)
-            code.emit(I.POP()) ###IS THIS REQUIRED??
-            code.emit(I.POP_FRAME)
+            # code.emit(I.POP()) 
+            code.emit(I.POP_FRAME())
             #the frame is popped after the iteration is over, also the value after
             #evaluation of the iteration is popped- while returns a None value now.
 
@@ -594,6 +594,7 @@ class VM:
                     v2 = self.data.pop()
                     for x in range(v2,v1,-1):
                         self.data.append(x)
+                    self.ip += 1
 
                 case I.UMINUS():
                     op = self.data.pop()
@@ -779,9 +780,11 @@ class VM:
 
                 case I.PUSH_FRAME():
                     self.add_frame()
+                    self.ip += 1
                 
                 case I.POP_FRAME():
                     self.end_frame()
+                    self.ip += 1
                 
                 case I.PRINT():
                     val = self.data.pop()
