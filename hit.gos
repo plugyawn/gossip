@@ -1,0 +1,31 @@
+declare n = 1;
+declare k = 100000;
+declare len = 1;
+declare i = 1;
+declare max = 0;
+declare num = -1;
+
+while i <= k do {
+    print(i);
+    assign n = i;
+    assign len = 1;
+    while n > 1 do {
+        if n % 2 == 0 then {
+            assign n = n / 2;
+        } else {
+            assign n = 3 * n + 1;
+            assign n = n / 2;
+            assign len = len + 1;
+        };
+    assign len = len + 1;
+    };
+
+
+    if len > max then {
+        assign max = len;
+        assign num = i;}
+
+    assign i = i + 1;
+};
+
+print(num);
