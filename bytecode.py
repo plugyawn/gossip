@@ -121,7 +121,7 @@ class I:
     @dataclass
     class DECLARE:
         name: str
-        localID: int
+        # localID: int
         pass
 
     @dataclass
@@ -137,6 +137,10 @@ class I:
     @dataclass
     class STORE_SCOPE:
         name : str
+    
+    @dataclass
+    class PRINT:
+        pass
 
 Instruction = (
       I.PUSH
@@ -170,6 +174,7 @@ Instruction = (
     | I.POP_FRAME
     | I.STORE_SCOPE
     | I.LOAD_SCOPE
+    | I.PRINT
 )
 
 
@@ -191,6 +196,9 @@ class ByteCode:
 
     def emit_label(self, label):
         label.target = len(self.insns)
+    
+    def pop(self):
+        self.insns.pop()
 
 
 
@@ -231,6 +239,7 @@ class Frame:
 
 def codegen(program: AST) -> ByteCode:
     code = ByteCode()
+    code.emit(I.PUSH("stack bottom"))
     do_codegen(program, code)
     code.emit(I.HALT())
     return code
@@ -397,6 +406,10 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case funct_ret(funct_val):
             codegen_(funct_val)
             code.emit(I.RETURN())
+        
+        case Print(expression):
+            codegen_(expression)
+            code.emit(I.PRINT())
 
 
         # case TypeAssertion(expr, _):
@@ -426,6 +439,7 @@ class VM:
         self.allFrames=[Frame()]
         self.scp=0
         self.funct_sc = []
+        self.data = []
 
 
 
@@ -459,6 +473,9 @@ class VM:
 
     def execute(self) -> Value:
         while True:
+
+            print(self.data)
+            print(self.allFrames[self.scp].locals)
 
             if not self.ip < len(self.bytecode.insns):
                 raise RuntimeError()
@@ -714,7 +731,15 @@ class VM:
                 
                 case I.POP_FRAME():
                     self.end_frame()
+                
+                case I.PRINT():
+                    val = self.data.pop()
+                    print(val)
+                    self.ip+=1
 
                 case I.HALT():
                     #automatically exits the execution loop.
                     return self.data.pop()
+
+
+

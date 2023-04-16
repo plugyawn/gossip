@@ -3,6 +3,8 @@ from fractions import Fraction
 from typing import Union, Mapping
 import os
 
+from bytecode import *
+
 from core import RuntimeEnvironment
 from utils.datatypes import (
     AST,
@@ -71,10 +73,21 @@ def interpret(feedback=False, visualize=False):
 
 def compile_gossip(lines):
     runtime = RuntimeEnvironment()
+    
     L = Lexer.from_stream(Stream.from_string(lines))
     S = Parser.from_lexer(L)
+    # print(len(S))
+    # print(type(S))
+    vm = VM()
+
     for s in S:
         # print(s)
-        r = runtime.eval(s)
+        # r = runtime.eval(s)
+
+        bytcode = codegen(s)
+        # bytcode.pop()
+        print(bytcode)
+        vm.execute()
+
         
             

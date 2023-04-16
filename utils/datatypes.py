@@ -105,8 +105,9 @@ class UnOp:
 @dataclass
 class Variable:
     name: str
+    # scope : Optional[int] = None
     type: Optional[NumType | BoolType | StringType | ListType] = None
-    scope : int
+    
 
 
 
