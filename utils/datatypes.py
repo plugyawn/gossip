@@ -109,6 +109,13 @@ class Variable:
     scope : int
 
 
+
+@dataclass
+class IndexAssign:
+    base_var: Variable
+    index: 'AST'
+    expr: 'AST'
+
 @dataclass
 class StringSlice:
     var: Variable
