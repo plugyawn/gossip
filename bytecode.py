@@ -144,6 +144,9 @@ class I:
     @dataclass
     class RANGE_GEN:
         pass
+    @dataclass
+    class STORE_FUN:
+        name : str
 
 Instruction = (
       I.PUSH
@@ -179,6 +182,7 @@ Instruction = (
     | I.LOAD_SCOPE
     | I.PRINT
     | I.RANGE_GEN
+    | I.STORE_FUN
 )
 
 
@@ -234,6 +238,7 @@ class Frame:
         self.locals = {}
         self.retaddr = retaddr
         # self.dynamicLink = dynamicLink
+
 
 
 
@@ -401,7 +406,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.JMP(EXPRBEGIN))
             code.emit_label(FBEGIN)
             for param in reversed(arg_list):
-                code.emit(I.STORE(param.name))
+                code.emit(I.STORE_FUN(param.name))
             codegen_(body)
             code.emit_label(EXPRBEGIN)
             code.emit(I.PUSHFN(FBEGIN))
@@ -488,15 +493,13 @@ class VM:
             return(self.funct_sc[-1])
 
     def execute(self) -> Value:
-        print(self.bytecode)
-        print(self.allFrames)
-        print(self.data)
+
         while True:
             # print(self.funct_sc)
             # print(self.bytecode)
             # print(self.ip)
             # print(self.data)
-            # print(self.allFrames[self.scp].locals)
+            #print(self.allFrames[self.scp].locals)
 
             if not self.ip < len(self.bytecode.insns):
                 # raise RuntimeError()
@@ -536,12 +539,13 @@ class VM:
 
                 case I.LOAD_SCOPE(name):
                     scp = self.ret_scope()
-                    print(scp)
+                    #print(scp)
                     val = None
                     
                     while(scp>=0):
                         if name in self.allFrames[scp].locals:
                             val = self.allFrames[scp].locals[name]['scope']
+                            break 
                         else:
                             scp-=1
                     
@@ -565,6 +569,21 @@ class VM:
                     self.allFrames[scp].locals[name]['value'] = v
                     self.allFrames[scp].locals[name]['type'] = tp
                     self.allFrames[scp].locals[name]['scope'] = scp
+
+                    self.ip+=1
+
+                case I.STORE_FUN(name):
+                    scp = self.ret_scope()
+
+                    if name in self.allFrames[scp].locals:
+                        raise VariableRedeclarationError(name)
+                    
+                    v = self.data.pop()
+                    tp = type(v)
+
+                    self.allFrames[scp].locals[name] = {}
+                    self.allFrames[scp].locals[name]['value'] = v
+                    self.allFrames[scp].locals[name]['type'] = tp
 
                     self.ip+=1
 

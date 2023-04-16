@@ -1,2 +1,6 @@
-deffunct g(s){print(s);};
+deffunct g(u){
+    print(u);
+};
+
 callfun g(9);
+print(8);
