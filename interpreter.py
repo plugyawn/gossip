@@ -85,7 +85,7 @@ def compile_gossip(lines):
         # r = runtime.eval(s)
 
         bytcode = codegen(s)
-        print(bytcode)
+        # print(bytcode)
 
         vm.add_bytcode(bytcode)
         vm.execute()

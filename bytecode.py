@@ -442,8 +442,7 @@ class VM:
     
     def add_bytcode(self,bytcode):
         self.bytecode = bytcode
-
-
+        self.ip = 0
 
     def add_frame(self, index = None):
 
@@ -457,9 +456,10 @@ class VM:
     def end_frame(self):
         self.allFrames.pop()
 
-    def load(self, bytecode):
-        self.bytecode = bytecode
-        self.restart()
+    # def load(self, bytecode):
+    #     self.bytecode = bytecode
+    #     self.restart()
+
 
     def restart(self):
         self.ip = 0
@@ -474,11 +474,11 @@ class VM:
             return(self.funct_sc[-1])
 
     def execute(self) -> Value:
-        
+        # print(self.bytecode)
         while True:
 
-            print(self.data)
-            print(self.allFrames[self.scp].locals)
+            # print(self.data)
+            # print(self.allFrames[self.scp].locals)
 
             if not self.ip < len(self.bytecode.insns):
                 raise RuntimeError()
@@ -674,11 +674,13 @@ class VM:
 
                 case I.LOAD(name):
                     scp = self.ret_scope()
+                    # print(scp)
                     val = None
                     
                     while(scp>=0):
                         if name in self.allFrames[scp].locals:
                             val = self.allFrames[scp].locals[name]['value']
+                            break
                         else:
                             scp-=1
                     
