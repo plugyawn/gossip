@@ -323,6 +323,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             for ast in seq[:-1]:
                 codegen_(ast)
                 # code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
+                # code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
                                    #return the evaluation of the last expression in the Sequence.
             codegen_(seq[-1])
 
@@ -362,7 +363,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             #each iteration of the loop gets it's own frame
             code.emit(I.PUSH_FRAME())
             codegen_(body)
-            # code.emit(I.POP()) 
+            # code.emit(I.POP()) ###IS THIS REQUIRED??
             code.emit(I.POP_FRAME())
             #the frame is popped after the iteration is over, also the value after
             #evaluation of the iteration is popped- while returns a None value now.
@@ -502,6 +503,8 @@ class VM:
     def execute(self) -> Value:
 
         while True:
+            # print(self.data)
+            # print(self.ip)
 
             if not self.ip < len(self.bytecode.insns):
                 # raise RuntimeError()
