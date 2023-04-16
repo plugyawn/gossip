@@ -1,0 +1,22 @@
+declare n = 1;
+declare k = 10;
+declare ans = 1;
+declare i = 1;
+declare max = 0;
+
+while i <= k do {
+    assign n = i;
+    assign ans = 1;
+    while n > 1 do {
+        if n % 2 == 0 then {
+            assign n = n / 2;
+        } else {
+            assign n = 3 * n + 1;
+        };
+    assign ans = ans + 1;
+    };
+    assign i = i + 1;
+    if ans > max then assign max = ans;
+};
+
+print(max);
