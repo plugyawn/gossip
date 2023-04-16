@@ -141,6 +141,9 @@ class I:
     @dataclass
     class PRINT:
         pass
+    @dataclass
+    class RANGE_GEN:
+        pass
 
 Instruction = (
       I.PUSH
@@ -175,6 +178,7 @@ Instruction = (
     | I.STORE_SCOPE
     | I.LOAD_SCOPE
     | I.PRINT
+    | I.RANGE_GEN
 )
 
 
@@ -332,7 +336,13 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.POP_FRAME)
             code.emit_label(E)
 
+        case Range(left, right):
+            codegen_(right)
+            codegen_(left)
+            code.emit(I.RANGE_GEN)
 
+        case ForLoop(Variable(name), sequence, body):
+            pass
 
         case While(cond, body):
             B = code.label()
@@ -377,7 +387,8 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
 
         case ForLoop(Variable(name), sequence, body):
-            codegen_(sequence)
+            pass
+
 
 
 
@@ -427,6 +438,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 #and the stack(data). VM also accesses a Frame for local variables(currentFrame)
 
 class VM:
+
     bytecode: ByteCode
     ip: int
     data: List[Value]
@@ -474,11 +486,12 @@ class VM:
             return(self.funct_sc[-1])
 
     def execute(self) -> Value:
-        # print(self.bytecode)
+        print(self.allFrames)
+        print(self.data)
         while True:
 
-            # print(self.data)
-            # print(self.allFrames[self.scp].locals)
+            print(self.data)
+            print(self.allFrames[self.scp].locals)
 
             if not self.ip < len(self.bytecode.insns):
                 raise RuntimeError()
@@ -548,6 +561,11 @@ class VM:
 
                     self.ip+=1
 
+                case I.RANGE_GEN():
+                    v1 = self.data.pop()
+                    v2 = self.data.pop()
+                    for x in range(v2,v1,-1):
+                        self.data.append(x)
 
                 case I.UMINUS():
                     op = self.data.pop()
