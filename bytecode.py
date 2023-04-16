@@ -237,11 +237,12 @@ class Frame:
 
 #converting the AST from the parser to the Bytecode list of instructions
 
-def codegen(program: AST) -> ByteCode:
+def codegen(program: AST, f) -> ByteCode:
     code = ByteCode()
-    code.emit(I.PUSH("stack bottom"))
+    if(f==1):
+        code.emit(I.PUSH("stack bottom"))
     do_codegen(program, code)
-    code.emit(I.HALT())
+    # code.emit(I.HALT())
     return code
 
 
@@ -432,6 +433,7 @@ class VM:
     scp: int
     funct_sc : List[int]
     def __init__(self):
+        self.bytecode = ByteCode()
         self.ip = 0
         self.allFrames=[Frame()]
         self.scp=0
@@ -439,8 +441,8 @@ class VM:
         self.data = []
     
     def add_bytcode(self,bytcode):
-        self.bytecode = bytcode
-        self.ip = 0
+        self.bytecode.insns.extend(bytcode.insns)
+        # self.ip = 0
 
     def add_frame(self, index = None):
 
@@ -472,14 +474,17 @@ class VM:
             return(self.funct_sc[-1])
 
     def execute(self) -> Value:
-        # print(self.bytecode)
+        print(self.bytecode)
         while True:
-
+            # print(self.funct_sc)
+            # print(self.bytecode)
+            # print(self.ip)
             # print(self.data)
             # print(self.allFrames[self.scp].locals)
 
             if not self.ip < len(self.bytecode.insns):
-                raise RuntimeError()
+                # raise RuntimeError()
+                return
 
             match self.bytecode.insns[self.ip]:
                 case I.PUSH(val):
@@ -515,6 +520,7 @@ class VM:
 
                 case I.LOAD_SCOPE(name):
                     scp = self.ret_scope()
+                    print(scp)
                     val = None
                     
                     while(scp>=0):
@@ -742,7 +748,8 @@ class VM:
 
                 case I.HALT():
                     #automatically exits the execution loop.
-                    return self.data.pop()
+                    # return self.data.pop()
+                    return
 
 
 
