@@ -1,0 +1,2 @@
+deffunct g(s){print(s);};
+callfun g(9);

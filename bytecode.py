@@ -696,8 +696,8 @@ class VM:
 
                     scp = self.ret_scope()
                     while(scp>=0):
-                        if name in self.allFrames[scp]:
-                            var_type = type(self.allFrames[scp].locals[name]['type'])
+                        if name in self.allFrames[scp].locals:
+                            var_type = self.allFrames[scp].locals[name]['type']
                             break
                         else:
                             scp-=1
