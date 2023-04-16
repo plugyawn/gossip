@@ -1,0 +1,10 @@
+declare i = 1;
+declare j = 1;
+
+while i<10 do{
+    print(i);
+    assign i = i+j;
+};
+
+print(i);
+print(j);

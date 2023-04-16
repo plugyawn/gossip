@@ -1,6 +1,6 @@
 declare x = 1;
 declare y = 2;
 
-assign x = x + y;
+assign x = x + y + y*2;
 print(x);
 print(y);
