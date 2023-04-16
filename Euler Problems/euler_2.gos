@@ -10,3 +10,13 @@ while j<=4000000 do {
     }; 
 
 print(sum);
+
+
+
+
+deffunct fibo(g){
+    if g<=1 then functret(0);
+    else {functret (callfun fibo(g-1);+callfun fibo(g-2););};
+};
+
+print(callfun fibo(4););
