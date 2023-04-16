@@ -253,13 +253,15 @@ class RuntimeEnvironment():
 
                 list_m = self.eval(base_var)                
                 ind = int(self.eval(index))
-                new_list = []
-                for num in list_m:
-                    new_list.append(num)
-                new_list[ind] = val
+                # new_list = []
+                # for num in list_m:
+                #     new_list.append(num)
+                # new_list[ind] = val
+
+                list_m[ind] = val
                 
 
-                self.environments[scp][name]['value'] = new_list
+                self.environments[scp][name]['value'] = list_m
                 return val
 
             

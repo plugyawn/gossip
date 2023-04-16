@@ -260,15 +260,13 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         "-": I.SUB(),
         "*": I.MUL(),
         "/": I.DIV(),
-        "quot": I.QUOT(),
-        "rem": I.REM(),
+        "%": I.REM(),
         "<": I.LT(),
         ">": I.GT(),
         "<=": I.LE(),
         ">=": I.GE(),
         "==": I.EQ(),
         "!=": I.NEQ(),
-        "not": I.NOT(),
         "**": I.EXP()
     }
     # print(code)
@@ -481,10 +479,13 @@ class VM:
         
 
     def execute(self) -> Value:
-        print(self.bytecode)
+        # print(self.bytecode)
         while True:
-            # print(self.data)
             # print(self.ip)
+            # print(self.data)            
+            # for frm in self.allFrames:
+            #     print(frm.locals)
+            
 
             if not self.ip < len(self.bytecode.insns):
                 # raise RuntimeError()

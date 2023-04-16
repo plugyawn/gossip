@@ -76,8 +76,6 @@ def compile_gossip(lines):
     
     L = Lexer.from_stream(Stream.from_string(lines))
     S = Parser.from_lexer(L)
-    # print(len(S))
-    # print(type(S))
     vm = VM()
     f = 1
 
@@ -85,11 +83,8 @@ def compile_gossip(lines):
         # r = runtime.eval(s)
         # print(s)
         # bytcode = codegen(s,f,vm.get_bytecode())
-
         codegen(s,f,vm.get_bytecode())
         f=0
-
-        # vm.add_bytcode(bytcode)
     
     vm.execute()
 
