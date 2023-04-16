@@ -367,6 +367,8 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.STORE(v.name))
 
 
+        case ForLoop(Variable(name), sequence, body):
+            codegen_(sequence)
 
 
 
