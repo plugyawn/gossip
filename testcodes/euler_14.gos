@@ -1,5 +1,5 @@
 declare n = 1;
-declare k = 1000;
+declare k = 100;
 declare len = 1;
 declare i = 1;
 declare max = 0;

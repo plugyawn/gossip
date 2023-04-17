@@ -538,7 +538,7 @@ class VM:
         
 
     def execute(self) -> Value:
-        print(self.bytecode)
+        # print(self.bytecode)
         while True:
             # print(self.ip)
             # print(self.data)            
@@ -837,7 +837,7 @@ class VM:
                 
                 case I.DS_INDEX():
                     obj = self.data.pop()
-                    ind = self.data.pop()
+                    ind = int(self.data.pop())
                     val = obj[ind]
                     self.data.append(val)
                     self.ip+=1
