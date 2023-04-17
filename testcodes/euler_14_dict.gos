@@ -1,5 +1,5 @@
 declare n = 1;
-declare k = 100000;
+declare k = 10000;
 declare len = 1;
 declare i = 1;
 declare max = 0;
@@ -20,13 +20,14 @@ while i <= k do {
         else {
 
             if n % 2 == 0 then {
-                assign n = n / 2;} 
+                assign n = n / 2;
+                assign len = len + 1;} 
             else {
                 assign n = 3 * n + 1;
                 assign n = n/2;
+                assign len = len + 2;
             };
-
-            assign len = len + 1;
+            
         };
     };
 
