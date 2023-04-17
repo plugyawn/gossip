@@ -83,6 +83,10 @@ class ListCons:
     # If I have an empty
 
 @dataclass
+class ListLen:
+    base_list: "AST"
+
+@dataclass
 class Intify:
     value: "AST"
 
@@ -244,6 +248,7 @@ AST = (
     | funct_call 
     | funct_ret
     | DictObject
+    | ListLen
 )
 
 

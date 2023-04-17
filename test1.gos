@@ -1,12 +1,37 @@
-declare n = 1000;
-declare s = 0;
-    
-declare i = 1;
-    
-while i<n do {
-    if i%3==0 || i%5==0 then 
-        {assign s = s + i;
-    }
-    assign i = i+1;
+deffunct g(n){
+    assign n = 2*n - 1;
+    if n % 3 == 0 then {
+        functret(n/3);}
+    else functret(-1);;
 };
-print(s);
+
+declare li = [-1,1];
+declare count = 1;
+declare n = 10;
+declare v = listlen(li);;
+while count<n do {
+    assign v = listlen(li);;
+    declare lii = [-1];
+    while v>1 do {
+        declare m = li[v-1];
+        declare t = callfun g(m);;
+        if 2*m <= n then {
+        assign count = count + 1;}
+        if count == n then {
+            print(2*m);
+        }
+        else {
+        declare ji = 2*m;
+        listadd(lii,ji);
+        if t > 0 then {
+        if t <= n then {
+        assign count = count + 1;
+        if count == n then {
+            print(t);
+        }}
+        listadd(lii,t);}  
+        assign v = v - 1 ; };};
+        assign li = lii;
+
+
+};

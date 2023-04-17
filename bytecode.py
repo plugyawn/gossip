@@ -162,6 +162,12 @@ class I:
     class STORE_FUN:
         name : str
 
+    @dataclass
+    class APPEND_LIST:
+        name : str
+    @dataclass
+    class LIST_LEN:
+        name : str
 Instruction = (
       I.PUSH
     | I.ADD
@@ -200,6 +206,8 @@ Instruction = (
     | I.DS_INDEX
     | I.INDEX_ASSIGN
     | I.CREATE_LIST
+    | I.APPEND_LIST
+    | I.LIST_LEN
 )
 
 
@@ -422,8 +430,12 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case ForLoop(Variable(name), sequence, body):
             pass
 
+        case ListCons(to_add,obj):
+            codegen_(to_add)
+            code.emit(I.APPEND_LIST(obj))
 
-
+        case ListLen(obj):
+            code.emit(I.LIST_LEN(obj))
 
         #TODO change these
         case funct_def(Variable(name), arg_list, body):
@@ -639,6 +651,43 @@ class VM:
                     for x in range(v2,v1,-1):
                         self.data.append(x)
                     self.ip += 1
+
+                case I.APPEND_LIST(Variable(name)):
+                    scp = self.ret_scope()
+                    val = self.data.pop()
+                    
+                    while(scp>=0):
+                        if name in self.allFrames[scp].locals:
+                            li = self.allFrames[scp].locals[name]['value']
+                            break 
+                        else:
+                            scp-=1
+                    
+                    if val is None:
+                        raise DeclarationError(name)
+                    else:
+                        li.append(val)
+                        self.allFrames[scp].locals[name]['value'] = li
+                        self.ip += 1
+                    
+                case I.LIST_LEN(Variable(name)):
+                    scp = self.ret_scope()
+                    li = None
+                    
+                    while(scp>=0):
+                        if name in self.allFrames[scp].locals:
+                            li = self.allFrames[scp].locals[name]['value']
+                            break 
+                        else:
+                            scp-=1
+                    
+                    if li is None:
+                        raise DeclarationError(name)
+                    else:
+                        length = Fraction(len(li))
+                        self.data.append(length)
+                        self.ip += 1
+                    
 
                 case I.UMINUS():
                     op = self.data.pop()

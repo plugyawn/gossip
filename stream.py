@@ -2,16 +2,16 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify, IndexAssign, DictObject
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListLen, ListOp, ListIndex, Intify, IndexAssign, DictObject
 from core import RuntimeEnvironment
 
 
-keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret dictn".split()
+keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret dictn listadd listlen".split()
 symbolic_operators = "+ - * ** / < > <= >= == != = % &  && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
 symbols = "; , ( ) { } [ ] ' .".split()
-list_utils = "cons head tail empty".split()
+list_utils = "cons head tail empty len".split()
 list_assign = False
 
 r = RuntimeEnvironment()
@@ -224,6 +224,10 @@ class Parser:
                 return self.parse_intify()
             case Keyword("dictn"):
                 return self.parse_dictn()
+            case Keyword("listadd"):
+                return self.parse_list_add()
+            case Keyword("listlen"):
+                return self.parse_list_len()
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
@@ -256,8 +260,25 @@ class Parser:
 
 
 
+    def parse_list_add(self):
+        self.lexer.match(Keyword("listadd"))
+        self.lexer.match(Symbols("("))
+        obj = self.parse_expression()
+        self.lexer.match(Symbols(","))
+        to_add = self.parse_expression()
+        self.lexer.match(Symbols(")"))
+        self.lexer.match(Symbols(";"))
+        return ListCons(to_add,obj)    
+    
+    def parse_list_len(self):
+        self.lexer.match(Keyword("listlen"))
+        self.lexer.match(Symbols("("))
+        obj = self.parse_expression()
 
-
+        self.lexer.match(Symbols(")"))
+        self.lexer.match(Symbols(";"))
+        return ListLen(obj)  
+     
     def parse_list_op(self,obj):
         self.lexer.match(Symbols("."))
         op_val_var = self.parse_atomic_expression()
@@ -372,7 +393,7 @@ class Parser:
 
 
         self.lexer.match(Symbols("]")) 
-        list_type = type(r.eval(list_elems[0]))
+        list_type = type(list_elems[0])
             
 
         return ListObject(list_elems,list_type)
