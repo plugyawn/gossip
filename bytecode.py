@@ -141,6 +141,26 @@ class I:
     @dataclass
     class PRINT:
         pass
+    
+    @dataclass
+    class DS_INDEX:
+        pass
+
+    @dataclass
+    class INDEX_ASSIGN:
+        pass
+
+    @dataclass
+    class CREATE_LIST:
+        lngth: int
+        pass
+
+    @dataclass
+    class RANGE_GEN:
+        pass
+    @dataclass
+    class STORE_FUN:
+        name : str
 
 Instruction = (
       I.PUSH
@@ -175,6 +195,11 @@ Instruction = (
     | I.STORE_SCOPE
     | I.LOAD_SCOPE
     | I.PRINT
+    | I.RANGE_GEN
+    | I.STORE_FUN
+    | I.DS_INDEX
+    | I.INDEX_ASSIGN
+    | I.CREATE_LIST
 )
 
 
@@ -235,6 +260,7 @@ class Frame:
 
 
 
+
 #converting the AST from the parser to the Bytecode list of instructions
 
 def codegen(program: AST, f, code_till_now) -> ByteCode:
@@ -260,15 +286,14 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         "-": I.SUB(),
         "*": I.MUL(),
         "/": I.DIV(),
-        "quot": I.QUOT(),
-        "rem": I.REM(),
+        "//": I.QUOT(),
+        "%": I.REM(),
         "<": I.LT(),
         ">": I.GT(),
         "<=": I.LE(),
         ">=": I.GE(),
         "==": I.EQ(),
         "!=": I.NEQ(),
-        "not": I.NOT(),
         "**": I.EXP()
     }
     # print(code)
@@ -279,6 +304,14 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
         # case UnitLiteral():
         #     code.emit(I.PUSH(None))
+
+        case ListObject(elements, element_type):
+            for el in elements:
+                codegen_(el)
+            
+            n = len(elements)
+            # code.emit(I.PUSH(elements))
+            code.emit(I.CREATE_LIST(lngth = n))
 
         case BinOp(operator, left, right) if operator in simple_ops:
             codegen_(left)
@@ -314,6 +347,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             for ast in seq[:-1]:
                 codegen_(ast)
                 # code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
+                # code.emit(I.POP()) #pops the value of each intermediate expression in the AST, so that we can
                                    #return the evaluation of the last expression in the Sequence.
             codegen_(seq[-1])
 
@@ -335,7 +369,13 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.POP_FRAME())
             code.emit_label(E)
 
+        case Range(left, right):
+            codegen_(right)
+            codegen_(left)
+            code.emit(I.RANGE_GEN)
 
+        case ForLoop(Variable(name), sequence, body):
+            pass
 
         case While(cond, body):
             B = code.label()
@@ -379,6 +419,9 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.STORE(v.name))
 
 
+        case ForLoop(Variable(name), sequence, body):
+            pass
+
 
 
 
@@ -390,7 +433,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             code.emit(I.JMP(EXPRBEGIN))
             code.emit_label(FBEGIN)
             for param in reversed(arg_list):
-                code.emit(I.STORE(param.name))
+                code.emit(I.STORE_FUN(param.name))
             codegen_(body)
             code.emit_label(EXPRBEGIN)
             code.emit(I.PUSHFN(FBEGIN))
@@ -411,6 +454,19 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case Print(expression):
             codegen_(expression)
             code.emit(I.PRINT())
+        
+        case ListIndex(index,base_list):
+            codegen_(index)
+            code.emit(I.LOAD(base_list.name))
+            code.emit(I.DS_INDEX())
+        
+        case IndexAssign(base_var,index,expr):
+            codegen_(expr)
+            codegen_(index)
+            code.emit(I.LOAD(base_var.name))
+            code.emit(I.INDEX_ASSIGN())
+
+
 
 
         # case TypeAssertion(expr, _):
@@ -428,6 +484,7 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 #and the stack(data). VM also accesses a Frame for local variables(currentFrame)
 
 class VM:
+
     bytecode: ByteCode
     ip: int
     data: List[Value]
@@ -481,10 +538,14 @@ class VM:
         
 
     def execute(self) -> Value:
-        print(self.bytecode)
+        # print(self.bytecode)
         while True:
-            # print(self.data)
             # print(self.ip)
+            # print(self.data)            
+            # for frm in self.allFrames:
+            #     print(frm.locals)
+            # print(self.allFrames[0].locals)
+            
 
             if not self.ip < len(self.bytecode.insns):
                 # raise RuntimeError()
@@ -530,6 +591,7 @@ class VM:
                     while(scp>=0):
                         if name in self.allFrames[scp].locals:
                             val = self.allFrames[scp].locals[name]['scope']
+                            break 
                         else:
                             scp-=1
                     
@@ -556,6 +618,27 @@ class VM:
 
                     self.ip+=1
 
+                case I.STORE_FUN(name):
+                    scp = self.ret_scope()
+
+                    if name in self.allFrames[scp].locals:
+                        raise VariableRedeclarationError(name)
+                    
+                    v = self.data.pop()
+                    tp = type(v)
+
+                    self.allFrames[scp].locals[name] = {}
+                    self.allFrames[scp].locals[name]['value'] = v
+                    self.allFrames[scp].locals[name]['type'] = tp
+
+                    self.ip+=1
+
+                case I.RANGE_GEN():
+                    v1 = self.data.pop()
+                    v2 = self.data.pop()
+                    for x in range(v2,v1,-1):
+                        self.data.append(x)
+                    self.ip += 1
 
                 case I.UMINUS():
                     op = self.data.pop()
@@ -741,16 +824,43 @@ class VM:
 
                 case I.PUSH_FRAME():
                     self.add_frame()
-                    self.ip+=1
+                    self.ip += 1
                 
                 case I.POP_FRAME():
                     self.end_frame()
-                    self.ip+=1
+                    self.ip += 1
                 
                 case I.PRINT():
                     val = self.data.pop()
                     print(val)
                     self.ip+=1
+                
+                case I.DS_INDEX():
+                    obj = self.data.pop()
+                    ind = int(self.data.pop())
+                    val = obj[ind]
+                    self.data.append(val)
+                    self.ip+=1
+                
+                case I.INDEX_ASSIGN():
+                    obj = self.data.pop()
+                    ind = int(self.data.pop())
+                    expr = self.data.pop()
+
+                    obj[ind] = expr
+                    self.ip+=1
+                
+                case I.CREATE_LIST(lngth):
+                    l=[]
+                    for _ in range(lngth):
+                        v = self.data.pop()
+                        l.append(v)
+                    
+                    # print(l)
+                    l.reverse()
+                    self.data.append(l)
+                    self.ip+=1
+
 
                 case I.HALT():
                     #automatically exits the execution loop.

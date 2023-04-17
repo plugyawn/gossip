@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign, DictObject
 from utils.datatypes import NumType,BoolType,StringType,ListType
+from collections import defaultdict
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
 
@@ -66,6 +67,12 @@ class RuntimeEnvironment():
                 
                 return elements
             
+            case DictObject(dictn,default):
+                val = self.eval(default)
+                dictn = defaultdict(lambda: val)
+
+                return dictn
+
 
             case ListCons(to_add, base_list):
                 to_add = self.eval(to_add)
@@ -228,10 +235,13 @@ class RuntimeEnvironment():
             
 
             case IndexAssign(base_var,index,expr):
+
+                #works for dict assignment too
                 val = self.eval(expr)
                 val_type = type(val)
                 name = base_var.name
                 el_type = None
+                var_type = None
 
                 scp = self.scope
                 if len(self.environments) < (scp + 1):
@@ -241,25 +251,31 @@ class RuntimeEnvironment():
                     if name in self.environments[scp]:
                         if 'element_type' in self.environments[scp][name]:
                             el_type = self.environments[scp][name]['element_type']
+                            var_type = self.environments[scp][name]['type']
                             break 
 
                     scp -= 1
                 
-                if el_type is None:
-                    raise ListError("Variable being indexed is not a list.")
-                if val_type is not el_type:
-                    raise ListError("Invalid assignment- list elements need to be of the same type.")
+                # if el_type is None:
+                #     raise ListError("Variable being indexed is not a list.")
+                # if val_type is not el_type:
+                #     raise ListError("Invalid assignment- list elements need to be of the same type.")
 
 
                 list_m = self.eval(base_var)                
                 ind = int(self.eval(index))
-                new_list = []
-                for num in list_m:
-                    new_list.append(num)
-                new_list[ind] = val
-                
+                # new_list = []
+                # for num in list_m:
+                #     new_list.append(num)
+                # new_list[ind] = val
 
-                self.environments[scp][name]['value'] = new_list
+                list_m[ind] = val
+                
+                # print("here")
+
+
+                #TODO- imp check this comment or not
+                # self.environments[scp][name]['value'] = list_m
                 return val
 
             
@@ -417,10 +433,18 @@ class RuntimeEnvironment():
                 base_list = self.eval(base_list)
                 ind = int(self.eval(index))
 
-                if(ind<0 or ind>=len(base_list)):
-                    raise ListError("Index out of range.")
-                else:
+                # print(type(base_list))
+
+                if type(base_list) is not list or str:
                     return base_list[ind]
+                else:
+                    if(ind<0 or ind>=len(base_list)):
+                        raise ListError("Index out of range.")
+                    else:
+                        return base_list[ind]
+
+
+                
                 
                 
 

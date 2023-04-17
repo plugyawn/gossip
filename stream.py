@@ -2,11 +2,11 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify, IndexAssign
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListOp, ListIndex, Intify, IndexAssign, DictObject
 from core import RuntimeEnvironment
 
 
-keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret".split()
+keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret dictn".split()
 symbolic_operators = "+ - * ** / < > <= >= == != = % &  && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
@@ -222,6 +222,8 @@ class Parser:
                 return self.parse_funct_ret()
             case Keyword("intify"):
                 return self.parse_intify()
+            case Keyword("dictn"):
+                return self.parse_dictn()
             case Symbols(";"):
                 return self.lexer.__next__()
             case Symbols("{"):
@@ -239,6 +241,22 @@ class Parser:
             case _:
                 return self.parse_simple()
     
+
+
+    def parse_dictn(self):
+        self.lexer.match(Keyword("dictn"))
+        self.lexer.match(Symbols("("))
+        
+        defaultt = self.parse_expression()
+        
+        self.lexer.match(Symbols(")"))
+        dictnn={}
+
+        return DictObject(dictn=dictnn, default=defaultt)
+
+
+
+
 
     def parse_list_op(self,obj):
         self.lexer.match(Symbols("."))

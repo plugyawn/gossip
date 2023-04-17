@@ -28,6 +28,10 @@ class ListType:
     pass
 
 @dataclass
+class DictType:
+    pass
+
+@dataclass
 class Funct_obj:
     pass 
 
@@ -62,6 +66,14 @@ class ListObject:
     elements: list()
     element_type: int | float | str | list | bool
     type: Optional[ListType] = ListType()
+
+@dataclass
+class DictObject:
+    dictn : dict()
+    default: 'AST'
+    # element_type: int | float | str | list | bool
+    type: Optional[DictType] = DictType()
+
 
 
 @dataclass
@@ -106,7 +118,7 @@ class UnOp:
 class Variable:
     name: str
     # scope : Optional[int] = None
-    type: Optional[NumType | BoolType | StringType | ListType] = None
+    type: Optional[NumType | BoolType | StringType | ListType | DictType] = None
     
 
 
@@ -231,10 +243,11 @@ AST = (
     | funct_def 
     | funct_call 
     | funct_ret
+    | DictObject
 )
 
 
-Value = Fraction | bool | str | list
+Value = Fraction | bool | str | list | dict
 
 
 """
