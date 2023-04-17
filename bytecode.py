@@ -3,6 +3,7 @@ from utils.datatypes import Value
 from typing import Union, Mapping, List, Optional
 from utils.errors import *
 from utils.datatypes import *
+from collections import defaultdict
 
 @dataclass
 class Label:
@@ -156,6 +157,10 @@ class I:
         pass
 
     @dataclass
+    class CREATE_DICT:
+        pass
+
+    @dataclass
     class RANGE_GEN:
         pass
     @dataclass
@@ -208,6 +213,7 @@ Instruction = (
     | I.CREATE_LIST
     | I.APPEND_LIST
     | I.LIST_LEN
+    | I.CREATE_DICT
 )
 
 
@@ -310,8 +316,6 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case NumLiteral(value) | BoolLiteral(value) | StringLiteral(value):
             code.emit(I.PUSH(value))
 
-        # case UnitLiteral():
-        #     code.emit(I.PUSH(None))
 
         case ListObject(elements, element_type):
             for el in elements:
@@ -320,6 +324,14 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             n = len(elements)
             # code.emit(I.PUSH(elements))
             code.emit(I.CREATE_LIST(lngth = n))
+        
+        # case DictObject(dictn,default):
+        #     codegen_(default)
+        #     code.emit(I.CREATE_DICT())
+
+        case DictObject(default):
+            codegen_(default)
+            code.emit(I.CREATE_DICT())
 
         case BinOp(operator, left, right) if operator in simple_ops:
             codegen_(left)
@@ -908,6 +920,13 @@ class VM:
                     # print(l)
                     l.reverse()
                     self.data.append(l)
+                    self.ip+=1
+                
+                case I.CREATE_DICT():
+                    default_val = self.data.pop()
+                    dictnry = defaultdict(lambda: default_val)
+
+                    self.data.append(dictnry)
                     self.ip+=1
 
 

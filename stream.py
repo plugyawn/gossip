@@ -254,9 +254,10 @@ class Parser:
         defaultt = self.parse_expression()
         
         self.lexer.match(Symbols(")"))
-        dictnn={}
+        # dictnn={}
 
-        return DictObject(dictn=dictnn, default=defaultt)
+        # return DictObject(dictn=dictnn, default=defaultt)
+        return DictObject(default=defaultt)
 
 
 
