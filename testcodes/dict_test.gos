@@ -1,0 +1,13 @@
+declare i = 1;
+declare d = dictn(2);
+print(d[100]);
+
+
+assign d[i] = i-2;
+print(d[100]);
+print(d[1]);
+
+
+assign d[i] = i-100;
+print(d[100]);
+print(d[1]);
