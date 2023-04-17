@@ -308,8 +308,6 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case NumLiteral(value) | BoolLiteral(value) | StringLiteral(value):
             code.emit(I.PUSH(value))
 
-        # case UnitLiteral():
-        #     code.emit(I.PUSH(None))
 
         case ListObject(elements, element_type):
             for el in elements:
@@ -319,7 +317,11 @@ def do_codegen (program: AST, code: ByteCode) -> None:
             # code.emit(I.PUSH(elements))
             code.emit(I.CREATE_LIST(lngth = n))
         
-        case DictObject(dictn,default):
+        # case DictObject(dictn,default):
+        #     codegen_(default)
+        #     code.emit(I.CREATE_DICT())
+
+        case DictObject(default):
             codegen_(default)
             code.emit(I.CREATE_DICT())
 

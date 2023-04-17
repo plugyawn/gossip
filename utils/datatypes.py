@@ -69,7 +69,7 @@ class ListObject:
 
 @dataclass
 class DictObject:
-    dictn : dict()
+    # dictn : dict()
     default: 'AST'
     # element_type: int | float | str | list | bool
     type: Optional[DictType] = DictType()

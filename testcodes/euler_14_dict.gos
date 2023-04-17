@@ -36,7 +36,7 @@ while i <= k do {
         assign max = len;
         assign num = i;}
 
-    assign i = i + 1;
+    assign i = i + 2;
 };
 
 print(k);
