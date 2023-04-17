@@ -1,5 +1,5 @@
 declare n = 1;
-declare k = 1000000;
+declare k = 100000;
 declare len = 1;
 declare i = 1;
 declare max = 0;
@@ -36,7 +36,7 @@ while i <= k do {
         assign max = len;
         assign num = i;}
 
-    assign i = i + 2;
+    assign i = i + 1;
 };
 
 print(k);
