@@ -76,16 +76,22 @@ def compile_gossip(lines):
     
     L = Lexer.from_stream(Stream.from_string(lines))
     S = Parser.from_lexer(L)
+
+    #for bytecode
     vm = VM()
     f = 1
 
     for s in S:
+
+        ##for eval
         # r = runtime.eval(s)
-        # print(s)
-        # bytcode = codegen(s,f,vm.get_bytecode())
+
+
+        #for bytecode
         codegen(s,f,vm.get_bytecode())
         f=0
     
+    #for bytecode
     vm.execute()
 
         

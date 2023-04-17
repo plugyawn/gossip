@@ -141,6 +141,20 @@ class I:
     @dataclass
     class PRINT:
         pass
+    
+    @dataclass
+    class DS_INDEX:
+        pass
+
+    @dataclass
+    class INDEX_ASSIGN:
+        pass
+
+    @dataclass
+    class CREATE_LIST:
+        lngth: int
+        pass
+
     @dataclass
     class RANGE_GEN:
         pass
@@ -183,6 +197,9 @@ Instruction = (
     | I.PRINT
     | I.RANGE_GEN
     | I.STORE_FUN
+    | I.DS_INDEX
+    | I.INDEX_ASSIGN
+    | I.CREATE_LIST
 )
 
 
@@ -287,6 +304,14 @@ def do_codegen (program: AST, code: ByteCode) -> None:
 
         # case UnitLiteral():
         #     code.emit(I.PUSH(None))
+
+        case ListObject(elements, element_type):
+            for el in elements:
+                codegen_(el)
+            
+            n = len(elements)
+            # code.emit(I.PUSH(elements))
+            code.emit(I.CREATE_LIST(lngth = n))
 
         case BinOp(operator, left, right) if operator in simple_ops:
             codegen_(left)
@@ -429,6 +454,19 @@ def do_codegen (program: AST, code: ByteCode) -> None:
         case Print(expression):
             codegen_(expression)
             code.emit(I.PRINT())
+        
+        case ListIndex(index,base_list):
+            codegen_(index)
+            code.emit(I.LOAD(base_list.name))
+            code.emit(I.DS_INDEX())
+        
+        case IndexAssign(base_var,index,expr):
+            codegen_(expr)
+            codegen_(index)
+            code.emit(I.LOAD(base_var.name))
+            code.emit(I.INDEX_ASSIGN())
+
+
 
 
         # case TypeAssertion(expr, _):
@@ -500,12 +538,13 @@ class VM:
         
 
     def execute(self) -> Value:
-        # print(self.bytecode)
+        print(self.bytecode)
         while True:
             # print(self.ip)
             # print(self.data)            
             # for frm in self.allFrames:
             #     print(frm.locals)
+            # print(self.allFrames[0].locals)
             
 
             if not self.ip < len(self.bytecode.insns):
@@ -795,6 +834,33 @@ class VM:
                     val = self.data.pop()
                     print(val)
                     self.ip+=1
+                
+                case I.DS_INDEX():
+                    obj = self.data.pop()
+                    ind = self.data.pop()
+                    val = obj[ind]
+                    self.data.append(val)
+                    self.ip+=1
+                
+                case I.INDEX_ASSIGN():
+                    obj = self.data.pop()
+                    ind = int(self.data.pop())
+                    expr = self.data.pop()
+
+                    obj[ind] = expr
+                    self.ip+=1
+                
+                case I.CREATE_LIST(lngth):
+                    l=[]
+                    for _ in range(lngth):
+                        v = self.data.pop()
+                        l.append(v)
+                    
+                    # print(l)
+                    l.reverse()
+                    self.data.append(l)
+                    self.ip+=1
+
 
                 case I.HALT():
                     #automatically exits the execution loop.

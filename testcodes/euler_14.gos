@@ -13,6 +13,7 @@ while i <= k do {
             assign n = n / 2;
         } else {
             assign n = 3 * n + 1;
+            assign n = n/2;
         };
     assign len = len + 1;
     };
