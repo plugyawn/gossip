@@ -263,6 +263,7 @@ class Parser:
 
     def parse_list_add(self):
         self.lexer.match(Keyword("listadd"))
+        print(self.lexer.peek_token())
         self.lexer.match(Symbols("("))
         obj = self.parse_expression()
         self.lexer.match(Symbols(","))

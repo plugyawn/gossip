@@ -1,0 +1,10 @@
+declare g = [-1];
+print(g);
+deffunct add(n){
+    listadd(g,n*n);
+    if n==1 then functret(0);
+    else functret(callfun add(n-1););;
+};
+
+callfun add(9);
+print(g);
