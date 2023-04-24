@@ -1,0 +1,29 @@
+declare number = 100;
+
+declare a = number;
+declare binary = [2];
+declare i = 0;
+declare temp = 0;
+
+while a > 0 do {
+    assign temp = a % 2;
+    listadd(binary, temp);
+    assign a = a - temp;
+    assign a = a / 2;
+    assign i = i + 1;
+};
+
+declare j = 0;
+
+assign j = listlen(binary);;
+assign j = j - 1;
+
+declare t = 0;
+
+while j >= 1 do {
+    assign t = binary[j] + t* 10;
+    assign j = j - 1;
+};
+declare m = 'bin';
+print(m);
+print(t);

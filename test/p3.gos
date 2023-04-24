@@ -1,0 +1,23 @@
+declare a = 75;
+declare b = 100;
+
+declare result = 0;
+
+if a == 0 then print(b);
+if b == 0 then print(a);
+if a == b then print(a);
+
+declare g = 0;
+declare temp = 0;
+
+while a != b do {
+    if a > b then {
+        assign temp = a;
+        assign a = b;
+        assign b = temp;
+    }
+
+    assign b = b - a;
+};
+print(a);
+

@@ -1,0 +1,22 @@
+declare li = [1,-1,-99,90,10,10,-1,8];
+declare x = listlen(li);;
+declare n = 5;
+declare count = 0;
+declare set = 1;
+declare sum = 0;
+
+while count<x-1  do {
+    declare co = count+1;
+    while co<x do {
+        declare g = count;
+        declare ssu = 0;
+        while g<=co do{
+            assign ssu = ssu + li[g];
+            assign g = g + 1;
+        };
+        if ssu>sum then assign sum = ssu;
+        assign co = co + 1;
+    };
+    assign count = count + 1;
+};
+print(sum);

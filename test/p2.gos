@@ -1,0 +1,24 @@
+declare x = 'aeiobuc';
+declare n = listlen(x);;
+
+declare i = 0;
+declare l = ['a','e','i','o','u'];
+
+declare count = 0;
+declare ind = 0;
+
+while i<n do{
+    assign ind = 0;
+
+    while ind<5 do{
+
+        if x[i]==l[ind] then{
+            assign count = count + 1;
+        }
+        assign ind = ind+1;
+    };
+
+    assign i = i+1;
+};
+
+print(count);

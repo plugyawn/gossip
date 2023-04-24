@@ -1,0 +1,30 @@
+declare li = [1,2,3,4,23,4,56,62,2];
+declare x = listlen(li);;
+declare sum = 1;
+declare count = 1;
+declare set = 0;
+declare curind = 0;
+declare ind = 0;
+declare prev = 0;
+declare store = 0;
+while count<x do {
+    if li[count]<li[count-1] then {
+        if store < sum then {
+            assign store = sum;
+            assign sum = 1;
+            assign ind = curind;
+            
+        }
+        assign curind = count;
+    }
+    else {
+        assign sum = sum + 1; 
+    };
+    assign count = count + 1;
+};
+
+while store>=1 do {
+    print(li[ind]);
+    assign ind = ind + 1;
+    assign store = store - 1;
+};

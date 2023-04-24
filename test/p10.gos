@@ -1,0 +1,5 @@
+declare num = 21;
+declare positive = 'yes';
+declare negative = 'no';
+
+if num%2==0 then{print(positive);} else{print(negative);};

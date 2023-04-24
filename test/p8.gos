@@ -1,0 +1,9 @@
+declare li = [1,2,3,4,23,4,56,62,2];
+declare x = listlen(li);;
+declare sum = 0;
+declare count = 0;
+while count<x do {
+    assign sum = sum + li[count];
+    assign count = count + 1;
+};
+print(sum);
