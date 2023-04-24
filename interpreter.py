@@ -84,11 +84,11 @@ def compile_gossip(lines):
     for s in S:
 
         ##for eval
-        # r = runtime.eval(s)
+        r = runtime.eval(s)
 
 
         #for bytecode
-        codegen(s,f,vm.get_bytecode())
+        # codegen(s,f,vm.get_bytecode())
         f=0
     
     #for bytecode
