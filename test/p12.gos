@@ -1,0 +1,58 @@
+deffunct pali(word){
+
+declare n = listlen(word);;
+declare i = 0;
+declare j = n-1;
+
+declare flag = 0;
+
+while i<j && flag!=1 do{
+
+    if word[i]!=word[j] then{
+        assign flag = 1;
+    }
+
+    assign i = i+1;
+    assign j = j-1;
+};
+
+functret(flag);
+};
+
+
+declare input = 'cbbd';
+declare n = listlen(input);;
+declare check = '';
+
+declare i = 0;
+declare j = 0;
+
+declare maxl = 0;
+declare curl = 0;
+declare w = -1;
+
+declare ans = '';
+
+while i<n do{
+    assign j = i+1;
+
+    while j<n do{
+        assign check = input[i,j];
+        assign w = callfun pali(check);;
+        assign curl = j-i+1;
+
+        if w==0 then{
+            if curl>maxl then{
+                assign maxl = curl;
+                assign ans = check;
+            }
+        }
+
+        assign j = j+1;       
+    };
+
+    assign i = i+1;
+};
+
+print(ans);
+

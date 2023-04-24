@@ -1,0 +1,21 @@
+declare li = [1,2,3,4,23,4,56,62,2];
+declare x = listlen(li);;
+declare n = 5;
+declare count = 0;
+declare set = 1;
+
+while count<x && set == 1 do {
+    declare co = 0;
+    while co<x && set==1 do {
+        if count != co then{
+            declare g = li[co] + li[count];
+            if g==n then {
+                print(li[co]);
+                print(li[count]);
+                assign set = 0;
+            }
+        }
+        assign co = co+ 1;
+    };
+    assign count = count + 1;
+};

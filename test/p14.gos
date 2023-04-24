@@ -1,0 +1,16 @@
+declare li = [1,2,3,4,23,4,56,62,2];
+declare x = listlen(li);;
+declare n = 5;
+declare count = 0;
+declare sum = 0; 
+
+while count<x-1 do {
+    declare co = count + 1;
+    while co<x do {
+        if li[co]<li[count] then assign sum = sum + 1;
+        assign co = co + 1;
+    };
+    assign count = count + 1;
+};
+
+print(sum);

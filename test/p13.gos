@@ -1,0 +1,15 @@
+declare li = [1,2,3,4,23,4,56,62,2,60];
+declare x = listlen(li);;
+declare prev = 0;
+declare cur = 0;
+declare count = 1;
+while count<x do {
+    if li[count] > li[cur] then assign cur = count;
+    assign count = count + 1; 
+};
+assign count = 1;
+while count<x do {
+    if li[count] > li[prev] && li[count] < li[cur] then assign prev = count;
+    assign count = count + 1;
+};
+print(prev);
