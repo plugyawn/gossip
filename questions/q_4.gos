@@ -1,0 +1,3 @@
+declare a = 'HelloéPunyHuman';
+declare b = stringify(a);
+print(b);
