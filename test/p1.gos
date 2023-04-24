@@ -3,14 +3,14 @@ declare r = n/2;
 declare count = 2;
 declare set = 0;
 
-while count<r && set == 0 do {
+declare one = 1;
+declare zero = 0;
+
+while count<=r && set == 0 do {
     if n%count == 0 then {
-        print(1);
         assign set = 1;
     }
     assign count = count + 1;
 };
 
-if set == 0 then {
-    print(1);
-    print(0);}
+print(set);
