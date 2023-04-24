@@ -78,21 +78,21 @@ def compile_gossip(lines):
     S = Parser.from_lexer(L)
 
     #for bytecode
-    vm = VM()
-    f = 1
+    # vm = VM()
+    # f = 1
 
     for s in S:
 
-        ##for eval
-        # r = runtime.eval(s)
+        ## for eval
+        r = runtime.eval(s)
 
 
         #for bytecode
-        codegen(s,f,vm.get_bytecode())
-        f=0
+        # codegen(s,f,vm.get_bytecode())
+        # f=0
     
     #for bytecode
-    vm.execute()
+    # vm.execute()
 
         
             

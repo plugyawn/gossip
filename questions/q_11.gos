@@ -1,0 +1,63 @@
+declare words = ['abcd','aaaa','defg'];
+
+declare n = listlen(words);;
+declare i = 0;
+declare j=0;
+
+declare worda= '';
+declare wordb = '';
+
+declare ansone = '';
+declare anstwo = '';
+
+declare maxd = 0;
+declare curd = 0;
+
+
+deffunct getdist(x,y){
+    declare n = listlen(x);;
+    declare c = 0;
+    
+    declare i = 0;
+
+    while i<n do{
+        if x[i]!=y[i] then{
+            assign c = c+1;
+        }
+        assign i = i+1;
+    };
+
+    functret(c);
+};
+
+
+
+
+
+
+
+while i<n do{
+
+    assign j = i+1;
+    while j<n do{
+        assign curd = 0;
+        assign worda = words[i];
+        assign wordb = words[j];
+
+        assign curd = callfun getdist(worda,wordb);;
+
+        if curd>maxd then {
+            assign maxd = curd;
+            assign ansone = worda;
+            assign anstwo = wordb;
+        }
+
+        assign j = j+1;
+    };
+
+    assign i = i+1;
+};
+
+
+print(ansone);
+print(anstwo);

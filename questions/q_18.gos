@@ -1,0 +1,44 @@
+declare l = [1,2,3,4,5];
+declare d = dictn(0);
+
+declare n = listlen(l);;
+declare a = 0;
+declare key = -1;
+
+while a<n do{
+    assign key = l[a];
+    assign d[key] = 1;
+    assign a = a+1;
+};
+
+declare i = 0;
+declare j = 0;
+
+declare tripone = -1;
+declare triptwo = -1;
+declare tripthree = -1;
+
+declare sum = -1;
+
+while i<n do{
+    assign j = i+1;
+
+    while j<n do{
+        assign sum = l[i]+l[j];
+
+        if d[sum]==1 then{
+            assign tripone = l[i];
+            assign triptwo = l[j];
+            assign tripthree = sum;
+        }
+
+        assign j = j+1;
+    };
+
+    assign i = i+1;
+};
+
+print(tripone);
+print(triptwo);
+print(tripthree);
+

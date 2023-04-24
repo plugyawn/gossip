@@ -1,0 +1,2 @@
+declare w ='ab c';
+print(w);

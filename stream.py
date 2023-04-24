@@ -263,7 +263,7 @@ class Parser:
 
     def parse_list_add(self):
         self.lexer.match(Keyword("listadd"))
-        print(self.lexer.peek_token())
+        # print(self.lexer.peek_token())
         self.lexer.match(Symbols("("))
         obj = self.parse_expression()
         self.lexer.match(Symbols(","))
@@ -410,13 +410,17 @@ class Parser:
         self.lexer.match(Symbols("'"))
         str_val_var = self.parse_atomic_expression()
 
-        if not isinstance(str_val_var,Variable):
-            raise StringError
+        # if not isinstance(str_val_var,Variable):
+        #     raise StringError
         
-        str_val = str_val_var.name
-        self.lexer.match(Symbols("'"))
-
-        return StringLiteral(value=str_val)
+        if str_val_var == None:
+            w = ''
+            self.lexer.match(Symbols("'"))
+            return StringLiteral(value=w)
+        else:
+            str_val = str_val_var.name
+            self.lexer.match(Symbols("'"))
+            return StringLiteral(value=str_val)
 
 
 

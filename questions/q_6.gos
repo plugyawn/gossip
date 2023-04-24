@@ -1,0 +1,22 @@
+declare word = 'abbaad';
+declare n = listlen(word);;
+
+declare positive = 'yes';
+declare negative = 'no';
+
+declare i = 0;
+declare j = n-1;
+
+declare flag = 0;
+
+while i<j && flag!=1 do{
+
+    if word[i]!=word[j] then{
+        assign flag = 1;
+    }
+
+    assign i = i+1;
+    assign j = j-1;
+};
+
+if flag==0 then {print(positive);} else {print(negative);};

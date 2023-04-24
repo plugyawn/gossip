@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
-from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign, DictObject
+from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign, DictObject, ListLen
 from utils.datatypes import NumType,BoolType,StringType,ListType
 from collections import defaultdict
 
@@ -61,8 +61,8 @@ class RuntimeEnvironment():
                 n = len(elements)
 
                 for i in range(n):
-                    if(type(self.eval(elements[i])) is not element_type):
-                        raise InvalidArgumentToList(element_type)
+                    # if(type(self.eval(elements[i])) is not element_type):
+                    #     raise InvalidArgumentToList(element_type)
                     elements[i] = self.eval(elements[i])
                 
                 return elements
@@ -72,7 +72,10 @@ class RuntimeEnvironment():
                 dictn = defaultdict(lambda: val)
 
                 return dictn
-
+            
+            case ListLen(base_list):
+                l = self.eval(base_list)
+                return len(l)
 
             case ListCons(to_add, base_list):
                 to_add = self.eval(to_add)
