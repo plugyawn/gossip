@@ -2,11 +2,11 @@ from fractions import Fraction
 from dataclasses import dataclass
 from typing import Optional, NewType
 from utils.errors import EndOfStream, EndOfTokens, TokenError, StringError, ListOpError
-from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListLen, ListOp, ListIndex, Intify, IndexAssign, DictObject
+from utils.datatypes import Num, Bool, Keyword, Symbols, ListUtils, Identifier, StringToken, ListToken, Operator, Whitespace, NumLiteral, BinOp, UnOp, Variable, Let, Assign, If, BoolLiteral, UnOp, ASTSequence, AST, Buffer, ForLoop, Range, Declare, While, DoWhile, Print, funct_call, funct_def, funct_ret, StringLiteral, StringSlice, ListObject, ListCons, ListLen, ListOp, ListIndex, Intify, IndexAssign, DictObject, Stringify
 from core import RuntimeEnvironment
 
 
-keywords = "let assign for while repeat print declare range do to if then else in deffunct callfun functret dictn listadd listlen".split()
+keywords = "let assign for while repeat print declare range do to intify stringify if then else in deffunct callfun functret dictn listadd listlen".split()
 symbolic_operators = "+ - * ** / < > <= >= == != = % &  && || | !".split()
 word_operators = "and or not ".split()
 whitespace = [" ", "\n"]
@@ -222,6 +222,8 @@ class Parser:
                 return self.parse_funct_ret()
             case Keyword("intify"):
                 return self.parse_intify()
+            case Keyword("stringify"):
+                return self.parse_stringify()
             case Keyword("dictn"):
                 return self.parse_dictn()
             case Keyword("listadd"):
@@ -755,6 +757,13 @@ class Parser:
         x = self.parse_expression()
         self.lexer.match(Symbols(")"))
         return Intify(x)
+    
+    def parse_stringify(self):
+        self.lexer.match(Keyword("stringify"))
+        self.lexer.match(Symbols("("))
+        x = self.parse_expression()
+        self.lexer.match(Symbols(")"))
+        return Stringify(x)
 
     def __iter__(self):
         return self
