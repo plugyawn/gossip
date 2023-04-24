@@ -91,6 +91,10 @@ class Intify:
     value: "AST"
 
 @dataclass
+class Stringify:
+    value: "AST"
+    
+@dataclass
 class ListOp:
     op: str
     base_list: "AST"

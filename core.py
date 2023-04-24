@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Union, Mapping
 from utils.datatypes import AST, NumLiteral, BinOp, Variable, Value, Let, If, BoolLiteral, UnOp, ASTSequence, Variable, Assign, ForLoop, Range, Print, Declare, Assign, While, DoWhile, StringLiteral, ListObject, StringSlice, ListCons, ListOp, funct_call, funct_def, funct_ret, ListIndex, Intify, IndexAssign, DictObject
-from utils.datatypes import NumType,BoolType,StringType,ListType
+from utils.datatypes import NumType,BoolType,StringType,ListType, Stringify
 from collections import defaultdict
 
 from utils.errors import DeclarationError, InvalidProgramError, InvalidConditionError, VariableRedeclarationError, AssignmentUsingNone, InvalidConcatenationError, IndexOutOfBoundsError, InvalidOperation, InvalidArgumentToList, ListError, ReferentialError, BadAssignment
@@ -707,6 +707,22 @@ class RuntimeEnvironment():
                     return (int(fraction) - 1)
                 else:
                     return (int(fraction))
+                
+            case Stringify(str):
+                x = self.eval(str)
+                print(x)
+                print((x.replace("é", " ")))
+                words = x.replace("é", " ").split()
+                print(words)
+                return len(words)
+            
+            # case Breakify(str):
+            #     x = self.eval(str)
+            #     print(x)
+            #     print("HELLO")
+            #     print((x.replace("é", " ")))
+            #     words = x.split()
+            #     return len(words)
         
                     
                 raise Exception("Function is not defined")               
