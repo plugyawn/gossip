@@ -46,5 +46,5 @@ Contributors
 </table>
 
 
-Problems on Treewalk Eval - 2,5,6,10,11,12,17
-Problems on Bytecode - 18
+Problems on Treewalk Eval - 2,5,6,10,11,12,17,4
+Problems on Bytecode - 18,1,7,8,9,13,14,20,19,3,15
