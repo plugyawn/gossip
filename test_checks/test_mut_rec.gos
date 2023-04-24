@@ -1,0 +1,13 @@
+deffunct odd(n){
+    if n==0 then functret(0);
+    if n==1 then functret(1);
+    else functret(callfun even(n-1););;
+};
+
+deffunct even(n){
+    if n==1 then functret(0);
+    if n==0 then functret(1);
+    else functret(callfun odd(n-1););;
+};
+
+print(callfun even(923847281););

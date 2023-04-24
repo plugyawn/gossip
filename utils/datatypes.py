@@ -69,7 +69,7 @@ class ListObject:
 
 @dataclass
 class DictObject:
-    dictn : dict()
+    # dictn : dict()
     default: 'AST'
     # element_type: int | float | str | list | bool
     type: Optional[DictType] = DictType()
@@ -81,6 +81,10 @@ class ListCons:
     to_add: "AST"
     base_list: "AST"
     # If I have an empty
+
+@dataclass
+class ListLen:
+    base_list: "AST"
 
 @dataclass
 class Intify:
@@ -244,6 +248,7 @@ AST = (
     | funct_call 
     | funct_ret
     | DictObject
+    | ListLen
 )
 
 

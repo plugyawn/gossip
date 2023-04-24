@@ -1,0 +1,24 @@
+deffunct check(a, b, c){
+    declare g = a*a + b*b;
+    assign c = c*c;
+    if c==g then functret(1);
+    else functret(0);;
+};
+
+declare count = 1;
+declare break = 1;
+declare n = 132;
+while break == 1 && count <= n-2 do {
+    declare co = n - count - 1;
+    while co >= 1 && break == 1 do{
+        declare po = n - co - count;
+        declare t = callfun check(count, co, po);;
+        if t == 1 then {
+            print(count*co*po);
+            assign break = 0;
+        }
+        assign co = co - 1;
+    };
+    assign count = count + 1;
+
+};
