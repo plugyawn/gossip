@@ -54,8 +54,9 @@ class ASTViz:
         self.depth = depth
         dot.clear(keep_attrs=False)
         dot.attr(label=code)
+        self.variables = {}
 
-    def treebuilder(self, node: AST, depth: int = 0):
+    def treebuilder(self, node: AST, depth: int = 0, is_declare = False, is_assign = False):
         """
         Takes an AST and returns a treebuilder for that AST.
         """
@@ -106,11 +107,23 @@ class ASTViz:
 
         if type(node) == Declare:
             dot.node(id, "Declare")
-            dot.edge(id, self.treebuilder(node.var, self.depth))
+            dot.edge(id, self.treebuilder(node.var, self.depth, is_declare = True))
             dot.edge(id, self.treebuilder(node.value, self.depth))
+
+        if type(node) == Assign:
+            dot.node(id, "Assign")
+            dot.edge(id, self.treebuilder(node.expression, self.depth, is_assign= True))
+            dot.edge(id, self.treebuilder(node.var, self.depth, is_assign = True))
 
         if type(node) == Variable:
             dot.node(id, node.name)
+            if node.name in self.variables and not is_declare:
+                if not is_assign and self.variables[node.name][1] < self.depth:
+                    dot.edge(id, self.variables[node.name][0], label = " is currently bound to ", color = "red")
+                else:
+                    self.variables[node.name] = [id, self.depth]
+            else:
+                self.variables[node.name] = [id, self.depth]
 
         if type(node) == NumLiteral:
             dot.node(id, str(node.value))

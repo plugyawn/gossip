@@ -121,7 +121,7 @@ class Let:
 
 @dataclass
 class Assign:
-    var: Variable
+    var: "AST"
     e1: "AST"
 
 
